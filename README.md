@@ -16,3 +16,13 @@ Tùy chọn:
 - Postman để kiểm tra API.
 
 Lưu ý: cấu hình phát triển mặc định kết nối PostgreSQL trên `localhost:5432`. Tài khoản/mật khẩu phải khớp với cấu hình trong `ppet/backend/src/main/resources/application-dev.yml`.
+
+Lệnh chạy server localhost:
+
+- Bật backend Spring Boot:
+cd "D:\visual studio\ppet\backend"
+mvnw spring-boot:run
+
+- Bật frontend Vite:
+cd "D:\visual studio\ppet\frontend"
+npm run dev
