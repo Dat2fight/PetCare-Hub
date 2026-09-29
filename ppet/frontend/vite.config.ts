@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 import path from 'path'
 
 export default defineConfig({
-  base: '/PetCare-Hub/', // <-- Thêm dòng này vào đây
+  base: '/PetCare-Hub/',
   plugins: [react()],
   resolve: {
     alias: {
