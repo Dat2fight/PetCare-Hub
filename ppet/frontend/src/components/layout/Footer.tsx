@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
               <span className="font-bold text-2xl text-gray-900 tracking-tight">PetCare Hub</span>
             </div>
             <p className="text-gray-500 mb-6">
-              N?n t?ng to�n di?n cham s�c v� cung c?p d?ch v? t?t nh?t cho th� cung c?a b?n. Better Care, Happier Pets.
+              Nền tảng toàn diện chăm sóc và cung cấp dịch vụ tốt nhất cho thú cưng của bạn. Better Care, Happier Pets.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-primary-600 transition-colors"><FaFacebook size={20} /></a>
@@ -29,44 +29,44 @@ const Footer: React.FC = () => {
 
           {/* Links 1 */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-6">Danh m?c</h3>
+            <h3 className="font-bold text-gray-900 mb-6">Danh mục</h3>
             <ul className="space-y-4">
-              <li><Link to="/pets" className="text-gray-500 hover:text-primary-600 transition-colors">T�m th� cung</Link></li>
-              <li><Link to="/products" className="text-gray-500 hover:text-primary-600 transition-colors">S?n ph?m</Link></li>
-              <li><Link to="/services/grooming" className="text-gray-500 hover:text-primary-600 transition-colors">D?ch v? Grooming</Link></li>
-              <li><Link to="/services/vet" className="text-gray-500 hover:text-primary-600 transition-colors">Kh�m Th� Y</Link></li>
+              <li><Link to="/pets" className="text-gray-500 hover:text-primary-600 transition-colors">Tìm thú cưng</Link></li>
+              <li><Link to="/products" className="text-gray-500 hover:text-primary-600 transition-colors">Sản phẩm</Link></li>
+              <li><Link to="/services/grooming" className="text-gray-500 hover:text-primary-600 transition-colors">Dịch vụ Grooming</Link></li>
+              <li><Link to="/services/vet" className="text-gray-500 hover:text-primary-600 transition-colors">Khám Thú Y</Link></li>
             </ul>
           </div>
 
           {/* Links 2 */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-6">H? tr? kh�ch h�ng</h3>
+            <h3 className="font-bold text-gray-900 mb-6">Hỗ trợ khách hàng</h3>
             <ul className="space-y-4">
-              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Ch�nh s�ch b?o h�nh</Link></li>
-              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Ch�nh s�ch d?i tr?</Link></li>
-              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Hu?ng d?n mua h�ng</Link></li>
-              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">C�u h?i thu?ng g?p (FAQ)</Link></li>
+              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Chính sách bảo hành</Link></li>
+              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Chính sách đổi trả</Link></li>
+              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Hướng dẫn mua hàng</Link></li>
+              <li><Link to="#" className="text-gray-500 hover:text-primary-600 transition-colors">Câu hỏi thường gặp (FAQ)</Link></li>
             </ul>
           </div>
 
           {/* Newsletter */}
           <div>
-            <h3 className="font-bold text-gray-900 mb-6">�ang k� nh?n tin</h3>
-            <p className="text-gray-500 mb-4">Nh?n th�ng tin uu d�i m?i nh?t t? PetCare Hub.</p>
+            <h3 className="font-bold text-gray-900 mb-6">Đăng ký nhận tin</h3>
+            <p className="text-gray-500 mb-4">Nhận thông tin ưu đãi mới nhất từ PetCare Hub.</p>
             <div className="flex">
-              <input type="email" placeholder="Email c?a b?n" className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-l-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3" />
+              <input type="email" placeholder="Email của bạn" className="bg-gray-50 border border-gray-200 text-gray-900 text-sm rounded-l-xl focus:ring-primary-500 focus:border-primary-500 block w-full p-3" />
               <button className="bg-primary-600 text-white px-4 rounded-r-xl font-medium hover:bg-primary-700 transition-colors">
-                G?i
+                Gửi
               </button>
             </div>
           </div>
         </div>
 
         <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-gray-400 text-sm mb-4 md:mb-0">� 2026 PetCare Hub. All rights reserved.</p>
+          <p className="text-gray-400 text-sm mb-4 md:mb-0">© 2026 PetCare Hub. All rights reserved.</p>
           <div className="flex space-x-6 text-sm text-gray-400">
-            <a href="#" className="hover:text-primary-600">�i?u kho?n s? d?ng</a>
-            <a href="#" className="hover:text-primary-600">Ch�nh s�ch b?o m?t</a>
+            <a href="#" className="hover:text-primary-600">Điều khoản sử dụng</a>
+            <a href="#" className="hover:text-primary-600">Chính sách bảo mật</a>
           </div>
         </div>
       </div>

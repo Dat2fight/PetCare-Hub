@@ -8,7 +8,7 @@ import toast from 'react-hot-toast';
 
 export const RegisterPage: React.FC = () => {
   const [formData, setFormData] = useState({
-    firstName: '', lastName: '',
+    firstName: '',
     lastName: '',
     email: '',
     password: '',
@@ -20,7 +20,7 @@ export const RegisterPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
-      toast.error('M?t kh?u kh�ng kh?p!');
+      toast.error('Mật khẩu không khớp!');
       return;
     }
     
@@ -33,10 +33,10 @@ export const RegisterPage: React.FC = () => {
         firstName: formData.firstName,
         lastName: formData.lastName
       });
-      toast.success('�ang k� th�nh c�ng!');
+      toast.success('Đăng ký thành công!');
       navigate('/login');
     } catch (err) {
-      toast.error('�ang k� th?t b?i. Vui l�ng th? l?i.');
+      toast.error('Đăng ký thất bại. Vui lòng thử lại.');
     } finally {
       setIsLoading(false);
     }
@@ -52,35 +52,34 @@ export const RegisterPage: React.FC = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-soft p-8 border border-gray-100">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">�ang k�</h2>
-            <p className="text-gray-500">T?o t�i kho?n PetCare Hub c?a b?n</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Đăng ký</h2>
+            <p className="text-gray-500">Tạo tài khoản PetCare Hub của bạn</p>
           </div>
           
           <div className="flex border-b border-gray-200 mb-8">
-            <Link to="/login" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">�ang nh?p</Link>
-            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">�ang k�</button>
+            <Link to="/login" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">Đăng nhập</Link>
+            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">Đăng ký</button>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
-              <Input label="H?" name="lastName" placeholder="Nguy?n" value={formData.lastName} onChange={handleChange} required />
-              <Input label="H?" type="text" placeholder="Nguy?n Van" value={formData.lastName} onChange={(e) => setFormData({...formData, lastName: e.target.value})} required />
-              <Input label="T�n" name="firstName" placeholder="Van A" value={formData.firstName} onChange={handleChange} required />
+              <Input label="Họ" name="lastName" placeholder="Nguyễn" value={formData.lastName} onChange={handleChange} required />
+              <Input label="Tên" name="firstName" placeholder="Văn A" value={formData.firstName} onChange={handleChange} required />
             </div>
             
             <Input type="email" label="Email" name="email" placeholder="example@gmail.com" value={formData.email} onChange={handleChange} required />
             
-            <Input type="password" label="M?t kh?u" name="password" placeholder="T?o m?t kh?u" value={formData.password} onChange={handleChange} required />
+            <Input type="password" label="Mật khẩu" name="password" placeholder="Tạo mật khẩu" value={formData.password} onChange={handleChange} required />
             
-            <Input type="password" label="X�c nh?n m?t kh?u" name="confirmPassword" placeholder="Nh?p l?i m?t kh?u" value={formData.confirmPassword} onChange={handleChange} required />
+            <Input type="password" label="Xác nhận mật khẩu" name="confirmPassword" placeholder="Nhập lại mật khẩu" value={formData.confirmPassword} onChange={handleChange} required />
 
             <Button type="submit" fullWidth isLoading={isLoading} className="mt-8">
-              T?o t�i kho?n
+              Tạo tài khoản
             </Button>
           </form>
           
           <p className="mt-8 text-center text-sm text-gray-500">
-            �� c� t�i kho?n? <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-500">�ang nh?p</Link>
+            Đã có tài khoản? <Link to="/login" className="font-semibold text-primary-600 hover:text-primary-500">Đăng nhập</Link>
           </p>
         </div>
       </div>
@@ -94,13 +93,10 @@ export const RegisterPage: React.FC = () => {
           className="absolute inset-0 w-full h-full object-cover opacity-90"
         />
         <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-gradient-to-t from-black/80 to-transparent text-white">
-          <h1 className="text-4xl font-bold mb-4">C?ng d?ng y�u th� cung</h1>
-          <p className="text-xl text-gray-200">H�y tham gia c�ng ch�ng t�i d? mang l?i cu?c s?ng t?t d?p nh?t cho nh?ng ngu?i b?n b?n ch�n.</p>
+          <h1 className="text-4xl font-bold mb-4">Cộng đồng yêu thú cưng</h1>
+          <p className="text-xl text-gray-200">Hãy tham gia cùng chúng tôi để mang lại cuộc sống tốt đẹp nhất cho những người bạn bốn chân.</p>
         </div>
       </div>
     </div>
   );
 };
-
-
-

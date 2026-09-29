@@ -27,7 +27,7 @@ export const LoginPage: React.FC = () => {
       await login(res.data.accessToken, res.data.user);
       navigate('/');
     } catch (err) {
-      setError('Invalid credentials');
+      setError('Thông tin đăng nhập không chính xác');
     } finally {
       setIsLoading(false);
     }
@@ -53,13 +53,13 @@ export const LoginPage: React.FC = () => {
       <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16">
         <div className="w-full max-w-md bg-white rounded-3xl shadow-soft p-8 border border-gray-100">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">�ang nh?p</h2>
-            <p className="text-gray-500">Ch�o m?ng b?n quay l?i PetCare Hub!</p>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Đăng nhập</h2>
+            <p className="text-gray-500">Chào mừng bạn quay lại PetCare Hub!</p>
           </div>
           
           <div className="flex border-b border-gray-200 mb-8">
-            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">�ang nh?p</button>
-            <Link to="/register" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">�ang k�</Link>
+            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">Đăng nhập</button>
+            <Link to="/register" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">Đăng ký</Link>
           </div>
 
           {error && (
@@ -70,8 +70,8 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
-              label="Email ho?c s? di?n tho?i"
-              placeholder="Nh?p email ho?c s? di?n tho?i"
+              label="Email hoặc số điện thoại"
+              placeholder="Nhập email hoặc số điện thoại"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
@@ -79,8 +79,8 @@ export const LoginPage: React.FC = () => {
             
             <Input
               type="password"
-              label="M?t kh?u"
-              placeholder="Nh?p m?t kh?u"
+              label="Mật khẩu"
+              placeholder="Nhập mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -89,18 +89,18 @@ export const LoginPage: React.FC = () => {
             <div className="flex items-center justify-between mt-2">
               <label className="flex items-center">
                 <input type="checkbox" className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-gray-300" />
-                <span className="ml-2 text-sm text-gray-600">Ghi nh? dang nh?p</span>
+                <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
               </label>
-              <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-500">Qu�n m?t kh?u?</a>
+              <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-500">Quên mật khẩu?</a>
             </div>
 
             <Button type="submit" fullWidth isLoading={isLoading} className="mt-8">
-              �ang nh?p
+              Đăng nhập
             </Button>
           </form>
 
           <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-center text-sm text-gray-500 mb-4">Ho?c dang nh?p b?ng</p>
+            <p className="text-center text-sm text-gray-500 mb-4">Hoặc đăng nhập bằng</p>
             <div className="grid grid-cols-2 gap-4">
               <button className="flex items-center justify-center py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 <FcGoogle size={20} className="mr-2" />
@@ -114,11 +114,10 @@ export const LoginPage: React.FC = () => {
           </div>
           
           <p className="mt-8 text-center text-sm text-gray-500">
-            B?n chua c� t�i kho?n? <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-500">�ang k� ngay</Link>
+            Bạn chưa có tài khoản? <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-500">Đăng ký ngay</Link>
           </p>
         </div>
       </div>
     </div>
   );
 };
-

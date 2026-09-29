@@ -17,8 +17,8 @@ export interface Product {
 export const mockProducts: Product[] = [
   {
     id: '1',
-    name: 'Th?c an Royal Canin Adult Cat 10kg',
-    category: 'Th?c an',
+    name: 'Thức ăn Royal Canin Adult Cat 10kg',
+    category: 'Thức ăn',
     price: 1300000,
     discount: 100000,
     rating: 4.8,
@@ -26,42 +26,43 @@ export const mockProducts: Product[] = [
     image: mockImages.foodRoyalCanin,
     images: [mockImages.foodRoyalCanin, mockImages.foodRoyalCanin],
     inStock: true,
-    description: 'Th?c an h?t kh� d�nh cho m�o tru?ng th�nh. Gi�p duy tr� v�c d�ng, l�m mu?t l�ng v� h? tr? ti�u h�a t?t.'
+    description: 'Thức ăn hạt khô dành cho mèo trưởng thành. Giúp duy trì vóc dáng, làm mượt lông và hỗ trợ tiêu hóa tốt.'
   },
   {
     id: '2',
-    name: 'V�ng c? cao c?p c� chu�ng',
-    category: 'Ph? ki?n',
+    name: 'Vòng cổ cao cấp có chuông',
+    category: 'Phụ kiện',
     price: 250000,
     rating: 4.5,
     reviewCount: 45,
-    image: mockImages.collar,
-    images: [mockImages.collar],
+    image: 'https://cutepetshop.vn/wp-content/uploads/2023/03/images-upload-woo2Fc695a0498dc5ce87244fbdfcbfe83bbb.jpg',
+    images: ['https://cutepetshop.vn/wp-content/uploads/2023/03/images-upload-woo2Fc695a0498dc5ce87244fbdfcbfe83bbb.jpg'],
     inStock: true,
-    description: 'V�ng c? ch?t li?u da th?t 100%, an to�n kh�ng g�y k�ch ?ng da c? th� cung, di k�m chu�ng nh? �m thanh thanh th�y.'
+    description: 'Vòng cổ chất liệu da thật 100%, an toàn không gây kích ứng da cổ thú cưng, đi kèm chuông nhỏ âm thanh thanh thúy.'
   },
   {
     id: '3',
-    name: '�? choi b�ng cao su nhai g?m',
-    category: '�? choi',
+    name: 'Đồ chơi bóng cao su nhai gặm',
+    category: 'Đồ chơi',
     price: 120000,
     rating: 4.9,
     reviewCount: 200,
-    image: mockImages.toyBall,
-    images: [mockImages.toyBall],
+    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSH0mY_Sb-w0y1CeulYqSqy97CJtEaIPV4T0hqIX4IJwA&s=10',
+    images: ['https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSH0mY_Sb-w0y1CeulYqSqy97CJtEaIPV4T0hqIX4IJwA&s=10'],
     inStock: true,
-    description: 'B�ng cao su thi�n nhi�n an to�n, gi�p c�n cung l�m s?ch rang mi?ng v� x? stress.'
+    description: 'Bóng cao su thiên nhiên an toàn, giúp cún cưng làm sạch răng miệng và xả stress.'
   },
   {
     id: '4',
-    name: 'L?ng v?n chuy?n h�ng kh�ng',
-    category: 'V? sinh & Kh�c',
+    name: 'Lồng vận chuyển hàng không',
+    category: 'Vệ sinh & Khác',
     price: 800000,
     rating: 4.7,
     reviewCount: 89,
-    image: mockImages.carrier,
-    images: [mockImages.carrier],
+    // Thay thế trực tiếp bằng link ảnh chiếc lồng ở đây:
+    image: 'https://thapxanh.com/images/thumbs/0013761.jpeg',
+    images: ['https://thapxanh.com/images/thumbs/0013761.jpeg'],
     inStock: false,
-    description: 'L?ng v?n chuy?n d?t ti�u chu?n h�ng kh�ng qu?c t?, ch?t li?u nh?a ABS c?ng c�p ch?ng va d?p.'
+    description: 'Lồng vận chuyển đạt tiêu chuẩn hàng không quốc tế, chất liệu nhựa ABS cứng cáp chống va đập.'
   }
 ];

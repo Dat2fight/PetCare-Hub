@@ -15,12 +15,12 @@ export const mockImages = {
   
   // Services
   grooming: "https://images.unsplash.com/photo-1516734212186-a967f81ad0d7?auto=format&fit=crop&q=80&w=800",
-  vet: "https://images.unsplash.com/photo-1628009368231-7bb7cbcb8127?auto=format&fit=crop&q=80&w=800",
+  vet: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR97c0WoLEBfSzOCqfAdU_-TmBwr_IGDSxRJE94bElEtA&s=10",
   
   // Users
   avatar1: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=200",
   avatar2: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
   
   // Placeholders
-  placeholder: "https://placehold.co/600x400/ecfdf5/047857?text=Image"
+  placeholder: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRzesBCvjSsTj3n-MCBjZ8GXvm3t7a9iChUsuoZLDZ1DQ&s=10"
 };

@@ -12,19 +12,19 @@ export const HomePage: React.FC = () => {
       <section className="relative bg-primary-50 py-20 lg:py-32 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="lg:w-1/2">
-            <span className="inline-block py-1 px-3 rounded-full bg-primary-100 text-primary-700 font-semibold text-sm mb-4">N?n t?ng cham s�c th� cung #1</span>
+            <span className="inline-block py-1 px-3 rounded-full bg-primary-100 text-primary-700 font-semibold text-sm mb-4">Nền tảng chăm sóc thú cưng #1</span>
             <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-              T�m ngu?i b?n b?n ch�n ph� h?p v?i b?n
+              Tìm người bạn bốn chân phù hợp với bạn
             </h1>
             <p className="text-lg text-gray-600 mb-8 max-w-lg">
-              PetCare Hub cung c?p gi?i ph�p to�n di?n t? t�m ki?m th� cung, mua s?m s?n ph?m d?n d?t l?ch d?ch v? cham s�c v� y t?.
+              PetCare Hub cung cấp giải pháp toàn diện từ tìm kiếm thú cưng, mua sắm sản phẩm đến đặt lịch dịch vụ chăm sóc và y tế.
             </p>
             <div className="flex flex-wrap gap-4">
               <Link to="/pets">
-                <Button size="lg">T�m Th� Cung</Button>
+                <Button size="lg">Tìm Thú Cưng</Button>
               </Link>
               <Link to="/products">
-                <Button variant="outline" size="lg">Kh�m ph� s?n ph?m</Button>
+                <Button variant="outline" size="lg">Khám phá sản phẩm</Button>
               </Link>
             </div>
           </div>
@@ -38,17 +38,17 @@ export const HomePage: React.FC = () => {
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Th� cung n?i b?t</h2>
-            <p className="text-gray-500">Nh?ng ngu?i b?n d�ng y�u dang ch? b?n</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Thú cưng nổi bật</h2>
+            <p className="text-gray-500">Những người bạn đáng yêu đang chờ bạn</p>
           </div>
-          <Link to="/pets" className="text-primary-600 font-medium hover:text-primary-700">Xem t?t c? ?</Link>
+          <Link to="/pets" className="text-primary-600 font-medium hover:text-primary-700">Xem tất cả →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { id: 1, name: "Corgi", price: "9.500.000d", image: mockImages.dogCorgi, breed: "Ch� Corgi", age: "2 th�ng" },
-            { id: 2, name: "Poodle", price: "6.000.000d", image: mockImages.dogPoodle, breed: "Ch� Poodle", age: "3 th�ng" },
-            { id: 3, name: "M�o Anh L�ng Ng?n", price: "5.500.000d", image: mockImages.catScottish, breed: "M�o ALN", age: "2.5 th�ng" },
-            { id: 4, name: "Golden Retriever", price: "12.000.000d", image: mockImages.dogGolden, breed: "Ch� Golden", age: "2 th�ng" },
+            { id: 1, name: "Corgi", price: "9.500.000d", image: mockImages.dogCorgi, breed: "Chó Corgi", age: "2 tháng" },
+            { id: 2, name: "Poodle", price: "6.000.000d", image: mockImages.dogPoodle, breed: "Chó Poodle", age: "3 tháng" },
+            { id: 3, name: "Mèo Anh Lông Ngắn", price: "5.500.000d", image: mockImages.catScottish, breed: "Mèo ALN", age: "2.5 tháng" },
+            { id: 4, name: "Golden Retriever", price: "12.000.000d", image: mockImages.dogGolden, breed: "Chó Golden", age: "2 tháng" },
           ].map(pet => (
             <Card key={pet.id} noPadding className="group cursor-pointer hover:shadow-lg transition-shadow">
               <div className="relative aspect-square overflow-hidden">
@@ -61,7 +61,7 @@ export const HomePage: React.FC = () => {
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-lg text-gray-900">{pet.name}</h3>
                 </div>
-                <p className="text-sm text-gray-500 mb-3">{pet.breed} � {pet.age}</p>
+                <p className="text-sm text-gray-500 mb-3">{pet.breed} • {pet.age}</p>
                 <div className="font-bold text-primary-600">{pet.price}</div>
               </div>
             </Card>
@@ -73,12 +73,12 @@ export const HomePage: React.FC = () => {
       <section className="py-12 bg-primary-600">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between">
           <div className="text-white mb-6 md:mb-0 md:w-2/3">
-            <h2 className="text-3xl font-bold mb-3">B?n chua bi?t ch?n th� cung n�o?</h2>
-            <p className="text-primary-100 text-lg">L�m b�i tr?c nghi?m ng?n d? ch�ng t�i g?i � ngu?i b?n b?n ch�n ph� h?p nh?t v?i phong c�ch s?ng c?a b?n.</p>
+            <h2 className="text-3xl font-bold mb-3">Bạn chưa biết chọn thú cưng nào?</h2>
+            <p className="text-primary-100 text-lg">Làm bài trắc nghiệm ngắn để chúng tôi gợi ý người bạn bốn chân phù hợp nhất với phong cách sống của bạn.</p>
           </div>
           <div>
             <Link to="/pet-matching">
-              <Button className="bg-white text-primary-600 hover:bg-primary-50" size="lg">L�m b�i test ngay</Button>
+              <Button className="bg-white text-primary-600 hover:bg-primary-50" size="lg">Làm bài test ngay</Button>
             </Link>
           </div>
         </div>
@@ -88,17 +88,17 @@ export const HomePage: React.FC = () => {
       <section className="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">S?n ph?m b�n ch?y</h2>
-            <p className="text-gray-500">�? d�ng, th?c an t?t nh?t cho th� cung</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Sản phẩm bán chạy</h2>
+            <p className="text-gray-500">Đồ dùng, thức ăn tốt nhất cho thú cưng</p>
           </div>
-          <Link to="/products" className="text-primary-600 font-medium hover:text-primary-700">Xem t?t c? ?</Link>
+          <Link to="/products" className="text-primary-600 font-medium hover:text-primary-700">Xem tất cả →</Link>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            { id: 1, name: "Th?c an Royal Canin Adult", price: "1.200.000d", image: mockImages.foodRoyalCanin, rating: 4.8 },
-            { id: 2, name: "V�ng c? cao c?p", price: "250.000d", image: mockImages.collar, rating: 4.5 },
-            { id: 3, name: "�? choi b�ng cao su", price: "120.000d", image: mockImages.toyBall, rating: 4.9 },
-            { id: 4, name: "L?ng v?n chuy?n", price: "800.000d", image: mockImages.carrier, rating: 4.7 },
+            { id: 1, name: "Thức ăn Royal Canin Adult", price: "1.200.000d", image: mockImages.foodRoyalCanin, rating: 4.8 },
+            { id: 2, name: "Vòng cổ cao cấp", price: "250.000d", image: mockImages.collar, rating: 4.5 },
+            { id: 3, name: "Đồ chơi bóng cao su", price: "120.000d", image: mockImages.toyBall, rating: 4.9 },
+            { id: 4, name: "Lồng vận chuyển", price: "800.000d", image: mockImages.carrier, rating: 4.7 },
           ].map(product => (
             <Card key={product.id} noPadding className="group cursor-pointer hover:shadow-lg transition-shadow">
               <div className="relative aspect-square overflow-hidden bg-gray-50 p-6 flex items-center justify-center">
@@ -112,7 +112,7 @@ export const HomePage: React.FC = () => {
                 <h3 className="font-medium text-gray-900 mb-2 line-clamp-2">{product.name}</h3>
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-primary-600">{product.price}</span>
-                  <button className="text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1 rounded-full hover:bg-primary-100 transition-colors">Th�m</button>
+                  <button className="text-sm font-medium text-primary-600 bg-primary-50 px-3 py-1 rounded-full hover:bg-primary-100 transition-colors">Thêm</button>
                 </div>
               </div>
             </Card>

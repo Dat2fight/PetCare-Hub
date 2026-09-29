@@ -28,10 +28,10 @@ const Header: React.FC = () => {
 
           {/* Center Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/pets" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Th� cung</Link>
-            <Link to="/products" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">S?n ph?m</Link>
-            <Link to="/services" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">D?ch v?</Link>
-            <Link to="/pet-matching" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">T�m th� cung ph� h?p</Link>
+            <Link to="/pets" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Thú cưng</Link>
+            <Link to="/products" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Sản phẩm</Link>
+            <Link to="/services" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Dịch vụ</Link>
+            <Link to="/pet-matching" className="text-primary-600 hover:text-primary-700 font-medium transition-colors">Tìm thú cưng phù hợp</Link>
           </nav>
 
           {/* Right Icons */}
@@ -61,19 +61,19 @@ const Header: React.FC = () => {
                       <p className="text-sm font-medium text-gray-900 truncate">{user.firstName} {user.lastName}</p>
                       <p className="text-xs text-gray-500 truncate">{user.email}</p>
                     </div>
-                    <Link to="/my-pets" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">Th� cung c?a t�i</Link>
-                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">�on h�ng</Link>
-                    <Link to="/loyalty" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">�i?m thu?ng</Link>
+                    <Link to="/my-pets" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">Thú cưng của tôi</Link>
+                    <Link to="/orders" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">Đơn hàng</Link>
+                    <Link to="/loyalty" className="block px-4 py-2 text-sm text-gray-700 hover:bg-primary-50 hover:text-primary-700">Điểm thưởng</Link>
                     <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                      <FiLogOut /> �ang xu?t
+                      <FiLogOut /> Đăng xuất
                     </button>
                   </div>
                 </div>
               </>
             ) : (
               <div className="flex items-center space-x-3 ml-2">
-                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium">�ang nh?p</Link>
-                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">�ang k�</Link>
+                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium">Đăng nhập</Link>
+                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">Đăng ký</Link>
               </div>
             )}
           </div>

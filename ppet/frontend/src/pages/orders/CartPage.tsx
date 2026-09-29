@@ -23,7 +23,7 @@ export const CartPage: React.FC = () => {
     <div className="bg-background min-h-screen py-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Gi? h�ng <span className="text-lg font-normal text-gray-500">({cartItems.length} s?n ph?m)</span></h1>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Giỏ hàng <span className="text-lg font-normal text-gray-500">({cartItems.length} sản phẩm)</span></h1>
 
         <div className="flex flex-col lg:flex-row gap-8">
           
@@ -36,7 +36,7 @@ export const CartPage: React.FC = () => {
                 </div>
                 
                 <div className="flex-1 text-center sm:text-left w-full">
-                  <Link to={/products/ + item.product.id}>
+                  <Link to={`/products/${item.product.id}`}>
                     <h3 className="font-semibold text-gray-900 hover:text-primary-600 transition-colors line-clamp-1">{item.product.name}</h3>
                   </Link>
                   <div className="font-bold text-primary-600 mt-2">{formatPrice(item.product.price)}</div>
@@ -57,37 +57,37 @@ export const CartPage: React.FC = () => {
             ))}
 
             <Link to="/products" className="inline-flex mt-4 text-primary-600 font-medium hover:text-primary-700 transition-colors items-center">
-              + Ti?p t?c mua s?m
+              + Tiếp tục mua sắm
             </Link>
           </div>
 
           {/* Summary */}
           <div className="lg:w-1/3">
             <div className="bg-white rounded-3xl p-6 shadow-card border border-gray-100 sticky top-28">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">T�m t?t don h�ng</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-6">Tóm tắt đơn hàng</h2>
               
               <div className="space-y-4 text-sm text-gray-600 mb-6">
                 <div className="flex justify-between">
-                  <span>T?m t�nh</span>
+                  <span>Tạm tính</span>
                   <span className="font-medium text-gray-900">{formatPrice(subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span>Gi?m gi�</span>
+                  <span>Giảm giá</span>
                   <span className="font-medium text-red-500">-{formatPrice(discount)}</span>
                 </div>
               </div>
               
               <div className="border-t border-gray-100 pt-4 mb-6">
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-gray-900">T?ng c?ng</span>
+                  <span className="font-bold text-gray-900">Tổng cộng</span>
                   <span className="font-bold text-2xl text-primary-600">{formatPrice(total)}</span>
                 </div>
-                <p className="text-xs text-gray-400 text-right mt-1">(�� bao g?m VAT)</p>
+                <p className="text-xs text-gray-400 text-right mt-1">(Đã bao gồm VAT)</p>
               </div>
 
               <Link to="/checkout" className="block w-full">
                 <Button fullWidth size="lg" className="py-4">
-                  Thanh to�n ngay <FiArrowRight className="ml-2" />
+                  Thanh toán ngay <FiArrowRight className="ml-2" />
                 </Button>
               </Link>
             </div>
