@@ -1,12 +1,14 @@
-﻿import React, { useState, useEffect } from 'react';
+﻿import codecs
+
+content = '''import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
-import { productService, Product } from '../../services/productService';
+import { productService, Product, ProductPage } from '../../services/productService';
 import { mockImages } from '../../data/mockImages';
 import { FiSearch, FiShoppingCart, FiStar } from 'react-icons/fi';
 import { FaBone, FaBath, FaTag } from 'react-icons/fa';
 import { MdToys } from 'react-icons/md';
-import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 
 export const ProductListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -83,7 +85,7 @@ export const ProductListPage: React.FC = () => {
               className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center border border-gray-100 hover:shadow-card hover:border-primary-100 transition-all cursor-pointer group"
             >
               <div
-                className={`${cat.color} w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}
+                className={\\ w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110}
               >
                 {cat.icon}
               </div>
@@ -104,9 +106,10 @@ export const ProductListPage: React.FC = () => {
             <p>Vui lòng thử lại với từ khóa khác</p>
           </div>
         ) : (
+          {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
-              <Link to={`/products/${product.id}`} key={product.id}>
+              <Link to={/products/\\} key={product.id}>
                 <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-transparent hover:border-primary-100">
                   <div className="relative aspect-square overflow-hidden bg-white p-6 flex items-center justify-center border-b border-gray-50">
                     <img
@@ -145,3 +148,12 @@ export const ProductListPage: React.FC = () => {
     </div>
   );
 };
+'''
+
+# We have to fix the \\$ manually in the template strings because of python parsing
+content = content.replace('\\\\$', '$')
+
+with codecs.open('src/pages/products/ProductListPage.tsx', 'w', 'utf-8') as f:
+    f.write(content)
+
+print("Done writing ProductListPage.")
