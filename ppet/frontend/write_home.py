@@ -1,9 +1,12 @@
-﻿import React from 'react';
+﻿import codecs
+
+home_content = '''import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
 import { mockImages } from '../data/mockImages';
 import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield, FiClock, FiTruck, FiUser } from 'react-icons/fi';
+import { Badge } from '../components/common/Badge';
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
@@ -33,26 +36,32 @@ export const HomePage: React.FC = () => {
                 <Button size="lg" className="px-8 rounded-full shadow-lg shadow-primary-500/30">Tìm thú cưng ngay</Button>
               </Link>
               <Link to="/products">
-                <Button variant="outline" size="lg" className="px-8 rounded-full bg-white text-primary-700 border-primary-100 hover:bg-primary-50">Khám phá sản phẩm →</Button>
+                <Button variant="outline" size="lg" className="px-8 rounded-full bg-white">Khám phá sản phẩm →</Button>
               </Link>
             </div>
           </div>
 
           <div className="lg:w-7/12 relative flex justify-center lg:justify-end z-10">
+            {/* Background Blob/Decoration */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"></div>
             
+            {/* Main Images */}
             <div className="relative w-full max-w-[600px] h-[500px]">
+              {/* Dog image */}
               <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800" alt="Happy Golden Retriever" className="absolute right-10 bottom-0 w-[400px] h-[480px] object-cover rounded-[100px] rounded-br-[200px] shadow-2xl z-10 border-8 border-white" />
               <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600" alt="Cute Cat" className="absolute left-10 bottom-10 w-[240px] h-[240px] object-cover rounded-full shadow-xl z-20 border-8 border-white" />
               
+              {/* Floating bubble right */}
               <div className="absolute top-10 right-0 bg-secondary-100 text-secondary-600 font-bold p-6 rounded-[2rem] rounded-tl-none shadow-lg z-30 max-w-[150px] transform rotate-3">
                 <p className="text-center text-sm">Nơi khởi đầu cho những hành trình hạnh phúc!</p>
               </div>
 
+              {/* Decorative text */}
               <div className="absolute top-4 left-1/4 -rotate-12 z-30 font-serif text-2xl text-primary-600 opacity-80 italic">
                 Happy <br/> Together <FiHeart className="inline text-coral-500" />
               </div>
               
+              {/* Paw icons */}
               <MdPets className="absolute bottom-1/4 -left-12 text-primary-200 text-5xl -rotate-45" />
               <MdPets className="absolute top-1/3 right-1/4 text-primary-300 text-4xl rotate-12" />
             </div>
@@ -62,7 +71,7 @@ export const HomePage: React.FC = () => {
 
       {/* 2. TRUST / BENEFIT STRIP */}
       <section className="relative -mt-10 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="bg-white rounded-3xl shadow-sm p-4 flex flex-col md:flex-row justify-between items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 border border-gray-100">
+        <div className="bg-white rounded-3xl shadow-soft p-4 flex flex-col md:flex-row justify-between items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 border border-gray-100">
           {[
             { icon: <FiTruck />, title: "Giao hàng toàn quốc", desc: "Nhanh chóng & an toàn" },
             { icon: <FiShield />, title: "Thú cưng khỏe mạnh", desc: "Được kiểm tra sức khỏe" },
@@ -112,7 +121,7 @@ export const HomePage: React.FC = () => {
                   <FiHeart size={16} />
                 </button>
                 <div className="absolute bottom-4 left-4">
-                  <span className={`${pet.bg} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm`}>{pet.status}</span>
+                  <span className={\ text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm}>{pet.status}</span>
                 </div>
               </div>
               <div className="p-4 flex flex-col flex-grow">
@@ -185,7 +194,7 @@ export const HomePage: React.FC = () => {
             { name: "Sức khỏe", count: "100+ sản phẩm", icon: "💊", bg: "bg-emerald-50", hover: "hover:bg-emerald-100", text: "text-emerald-600" },
             { name: "Khác", count: "50+ sản phẩm", icon: "✨", bg: "bg-secondary-50", hover: "hover:bg-secondary-100", text: "text-secondary-600" },
           ].map((cat, idx) => (
-            <Link to="/products" key={idx} className={`${cat.bg} ${cat.hover} rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-sm cursor-pointer`}>
+            <Link to="/products" key={idx} className={\ \ rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-sm cursor-pointer}>
               <div className="text-4xl mb-3 drop-shadow-sm">{cat.icon}</div>
               <h4 className="font-bold text-gray-900 text-sm mb-1">{cat.name}</h4>
               <p className="text-[10px] font-medium text-gray-500">{cat.count}</p>
@@ -252,6 +261,7 @@ export const HomePage: React.FC = () => {
               </Link>
             </div>
             
+            {/* Decorative Leaves */}
             <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute bottom-4 left-4 text-primary-300 opacity-50"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
           </div>
         </div>
@@ -341,6 +351,7 @@ export const HomePage: React.FC = () => {
       <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 md:p-12 flex flex-col lg:flex-row gap-12 items-center">
           
+          {/* Rating Summary */}
           <div className="lg:w-1/3 flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-12 h-12 bg-secondary-100 text-secondary-500 rounded-2xl flex items-center justify-center text-2xl">
@@ -363,6 +374,7 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
 
+          {/* Review Card */}
           <div className="lg:w-2/3 relative w-full">
             <div className="absolute top-1/2 -left-6 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-primary-600 cursor-pointer z-10 border border-gray-100">
               <FiChevronLeft size={24} />
@@ -372,6 +384,7 @@ export const HomePage: React.FC = () => {
             </div>
 
             <Card className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden">
+              {/* Quote marks background */}
               <div className="absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none">"</div>
               
               <div className="flex items-start gap-4 mb-4 relative z-10">
@@ -398,3 +411,9 @@ export const HomePage: React.FC = () => {
 };
 
 export default HomePage;
+'''
+
+with codecs.open('src/pages/HomePage.tsx', 'w', 'utf-8') as f:
+    f.write(home_content)
+
+print("Done writing HomePage.")

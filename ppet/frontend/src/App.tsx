@@ -24,8 +24,7 @@ import { LoyaltyPage } from './pages/customer/LoyaltyPage';
 import { MembershipPage } from './pages/customer/MembershipPage';
 import { NotificationsPage } from './pages/customer/NotificationsPage';
 import { PetMatchingPage } from './pages/pets/PetMatchingPage';
-// Placeholder for HomePage
-const HomePage = () => <div className="p-8 text-center"><h1 className="text-3xl font-bold">Homepage Coming Soon</h1></div>;
+import { HomePage } from './pages/HomePage';
 
 function App() {
   return (
@@ -66,6 +65,7 @@ function App() {
 }
 
 export default App;
+
 
 
 
