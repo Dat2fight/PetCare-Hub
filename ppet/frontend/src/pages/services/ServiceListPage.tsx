@@ -1,38 +1,41 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { mockImages } from '../../data/mockImages';
 import { FiScissors, FiActivity, FiCalendar, FiClock } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
+import { serviceService, Service } from '../../services/serviceService';
+import toast from 'react-hot-toast';
 
 export const ServiceListPage: React.FC = () => {
-  const services = [
-    {
-      id: 'grooming',
-      title: 'Tắm & Grooming',
-      description: 'Dịch vụ làm đẹp toàn diện, cắt tỉa lông chuẩn form, vệ sinh tai móng, mang lại vẻ ngoài hoàn hảo cho thú cưng.',
-      icon: <FiScissors className="text-primary-600" size={32} />,
-      image: mockImages.grooming,
-      link: '/services/grooming/booking'
-    },
-    {
-      id: 'vet',
-      title: 'Khám Thú Y',
-      description: 'Đội ngũ bác sĩ thú y giàu kinh nghiệm, trang thiết bị hiện đại, chuẩn đoán và điều trị chính xác.',
-      icon: <FiActivity className="text-blue-500" size={32} />,
-      image: mockImages.vet,
-      link: '/services/vet/booking'
-    },
-    {
-      id: 'hotel',
-      title: 'Khách Sạn Thú Cưng',
-      description: 'Không gian lưu trú an toàn, sạch sẽ, có chế độ dinh dưỡng và vận động riêng biệt cho từng bé.',
-      icon: <MdPets className="text-orange-500" size={32} />,
-      image: mockImages.placeholder,
-      link: '/services'
-    }
-  ];
+  const [services, setServices] = useState<Service[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchServices = async () => {
+      try {
+        const data = await serviceService.getAllServices();
+        setServices(data.filter(s => s.active));
+      } catch (error) {
+        console.error('Error fetching services:', error);
+        toast.error('Không thể tải danh sách dịch vụ');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchServices();
+  }, []);
+
+  const getServiceIcon = (type: string) => {
+    if (type === 'VETERINARY') return <FiActivity className="text-blue-500" size={32} />;
+    return <FiScissors className="text-primary-600" size={32} />;
+  };
+
+  const getServiceImage = (type: string, id: number) => {
+    if (type === 'VETERINARY') return mockImages.vet;
+    return id % 2 === 0 ? mockImages.grooming : mockImages.placeholder;
+  };
 
   return (
     <div className="bg-background min-h-screen py-10">
@@ -43,28 +46,37 @@ export const ServiceListPage: React.FC = () => {
           <p className="text-gray-600">Chúng tôi cung cấp các dịch vụ chất lượng cao nhất để đảm bảo thú cưng của bạn luôn khỏe mạnh và hạnh phúc.</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {services.map((service, idx) => (
-            <Card key={idx} noPadding className="flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="h-48 overflow-hidden relative">
-                <img src={service.image} alt={service.title} className="w-full h-full object-cover" />
-                <div className="absolute -bottom-6 right-6 w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center">
-                  {service.icon}
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {services.map((service, idx) => (
+              <Card key={service.id} noPadding className="flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+                <div className="h-48 overflow-hidden relative">
+                  <img src={getServiceImage(service.serviceType, service.id)} alt={service.name} className="w-full h-full object-cover" />
+                  <div className="absolute -bottom-6 right-6 w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center">
+                    {getServiceIcon(service.serviceType)}
+                  </div>
                 </div>
-              </div>
-              <div className="p-6 pt-8 flex-1 flex flex-col">
-                <h3 className="text-xl font-bold text-gray-900 mb-3">{service.title}</h3>
-                <p className="text-gray-600 mb-6 flex-1">{service.description}</p>
-                
-                <Link to={service.link}>
-                  <Button fullWidth variant={idx === 0 ? 'primary' : 'outline'}>
-                    Đặt lịch ngay
-                  </Button>
-                </Link>
-              </div>
-            </Card>
-          ))}
-        </div>
+                <div className="p-6 pt-8 flex-1 flex flex-col">
+                  <div className="flex justify-between items-start mb-2">
+                    <h3 className="text-xl font-bold text-gray-900">{service.name}</h3>
+                  </div>
+                  <p className="text-primary-600 font-bold mb-3">{service.price.toLocaleString('vi-VN')} đ <span className="text-sm text-gray-500 font-normal">/ {service.durationMinutes} phút</span></p>
+                  <p className="text-gray-600 mb-6 flex-1">{service.description}</p>
+                  
+                  <Link to={`/services/booking?serviceId=${service.id}`}>
+                    <Button fullWidth variant={idx === 0 ? 'primary' : 'outline'}>
+                      Đặt lịch ngay
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
 
         {/* Benefits section */}
         <div className="mt-20 bg-white rounded-3xl p-10 border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-10">

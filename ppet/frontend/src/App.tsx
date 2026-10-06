@@ -15,8 +15,7 @@ import { CartPage } from './pages/orders/CartPage';
 import { CheckoutPage } from './pages/orders/CheckoutPage';
 import { OrderTrackingPage } from './pages/orders/OrderTrackingPage';
 import { ServiceListPage } from './pages/services/ServiceListPage';
-import { GroomingBookingPage } from './pages/services/GroomingBookingPage';
-import { VetBookingPage } from './pages/services/VetBookingPage';
+import { BookingPage } from './pages/services/BookingPage';
 import { MyPetsPage } from './pages/pets/MyPetsPage';
 import { PetHealthHistoryPage } from './pages/pets/PetHealthHistoryPage';
 import { PetVaccinationPage } from './pages/pets/PetVaccinationPage';
@@ -25,6 +24,7 @@ import { MembershipPage } from './pages/customer/MembershipPage';
 import { NotificationsPage } from './pages/customer/NotificationsPage';
 import { PetMatchingPage } from './pages/pets/PetMatchingPage';
 import { HomePage } from './pages/HomePage';
+import { ProfilePage } from './pages/customer/ProfilePage';
 
 function App() {
   return (
@@ -45,8 +45,7 @@ function App() {
               <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/orders/tracking" element={<OrderTrackingPage />} />
               <Route path="/services" element={<ServiceListPage />} />
-              <Route path="/services/grooming/booking" element={<GroomingBookingPage />} />
-              <Route path="/services/vet/booking" element={<VetBookingPage />} />
+              <Route path="/services/booking" element={<BookingPage />} />
               <Route path="/my-pets" element={<MyPetsPage />} />
               <Route path="/my-pets/:id/health" element={<PetHealthHistoryPage />} />
               <Route path="/my-pets/:id/vaccinations" element={<PetVaccinationPage />} />
@@ -54,6 +53,7 @@ function App() {
               <Route path="/membership" element={<MembershipPage />} />
               <Route path="/notifications" element={<NotificationsPage />} />
               <Route path="/pet-matching" element={<PetMatchingPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
             </Routes>
           </main>
           <Footer />

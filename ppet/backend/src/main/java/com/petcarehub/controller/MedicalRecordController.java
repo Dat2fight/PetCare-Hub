@@ -19,7 +19,7 @@ public class MedicalRecordController {
     private final MedicalRecordService medicalRecordService;
 
     @PostMapping
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<MedicalRecordDTO> createMedicalRecord(@RequestBody MedicalRecordCreateRequest request) {
         return new ResponseEntity<>(medicalRecordService.createMedicalRecord(request), HttpStatus.CREATED);
     }
@@ -35,13 +35,13 @@ public class MedicalRecordController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<MedicalRecordDTO> updateMedicalRecord(@PathVariable Long id, @RequestBody MedicalRecordCreateRequest request) {
         return ResponseEntity.ok(medicalRecordService.updateMedicalRecord(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<Void> deleteMedicalRecord(@PathVariable Long id) {
         medicalRecordService.deleteMedicalRecord(id);
         return ResponseEntity.noContent().build();

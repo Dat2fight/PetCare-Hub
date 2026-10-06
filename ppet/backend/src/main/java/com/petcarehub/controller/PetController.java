@@ -35,6 +35,13 @@ public class PetController {
         return ResponseEntity.ok(petService.getPetById(id));
     }
 
+    @GetMapping("/my-pets")
+    public ResponseEntity<java.util.List<PetDTO>> getMyPets() {
+        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        com.petcarehub.security.UserDetailsImpl userDetails = (com.petcarehub.security.UserDetailsImpl) authentication.getPrincipal();
+        return ResponseEntity.ok(petService.getPetsByOwner(userDetails.getId()));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
     public ResponseEntity<PetDTO> createPet(@Valid @RequestBody PetCreateRequest request) {

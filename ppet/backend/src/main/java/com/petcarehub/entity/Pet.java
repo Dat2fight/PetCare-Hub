@@ -54,4 +54,8 @@ public class Pet extends BaseEntity {
     @Column(name = "availability_status", nullable = false, length = 50)
     @Builder.Default
     private AvailabilityStatus availabilityStatus = AvailabilityStatus.AVAILABLE;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id")
+    private User owner;
 }
