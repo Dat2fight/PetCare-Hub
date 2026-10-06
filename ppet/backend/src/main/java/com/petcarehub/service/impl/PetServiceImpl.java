@@ -30,6 +30,7 @@ public class PetServiceImpl implements PetService {
     private final PetRepository petRepository;
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
+    private final com.petcarehub.repository.UserRepository userRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -83,6 +84,8 @@ public class PetServiceImpl implements PetService {
         pet.setAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.valueOf(request.getAvailabilityStatus()));
         pet.setDescription(request.getDescription());
         pet.setImageUrl(request.getImageUrl());
+        pet.setPrice(request.getPrice() != null ? request.getPrice() : java.math.BigDecimal.ZERO);
+        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElse(null));
         pet.setCreatedAt(LocalDateTime.now());
         pet.setUpdatedAt(LocalDateTime.now());
 
@@ -113,6 +116,8 @@ public class PetServiceImpl implements PetService {
         pet.setAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.valueOf(request.getAvailabilityStatus()));
         pet.setDescription(request.getDescription());
         pet.setImageUrl(request.getImageUrl());
+        pet.setPrice(request.getPrice() != null ? request.getPrice() : java.math.BigDecimal.ZERO);
+        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElse(null));
         pet.setUpdatedAt(LocalDateTime.now());
 
         Pet updatedPet = petRepository.save(pet);
@@ -127,6 +132,14 @@ public class PetServiceImpl implements PetService {
         petRepository.delete(pet);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<PetDTO> getPetsByOwner(Long ownerId) {
+        return petRepository.findByOwnerId(ownerId).stream()
+                .map(this::mapToDTO)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
     private PetDTO mapToDTO(Pet pet) {
         return new PetDTO(
                 pet.getId(),
@@ -138,6 +151,7 @@ public class PetServiceImpl implements PetService {
                 null,
                 pet.getHealthStatus().name(),
                 pet.getAvailabilityStatus().name(),
+                pet.getOwner() != null ? pet.getOwner().getId() : null,
                 pet.getDescription(),
                 pet.getImageUrl(),
                 pet.getCreatedAt(),

@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 public interface PetService {
     Page<PetDTO> getPets(String healthStatus, String availabilityStatus, Long speciesId, Long breedId, Pageable pageable);
     PetDTO getPetById(Long id);
+    java.util.List<PetDTO> getPetsByOwner(Long ownerId);
     PetDTO createPet(PetCreateRequest request);
     PetDTO updatePet(Long id, PetUpdateRequest request);
     void deletePet(Long id);

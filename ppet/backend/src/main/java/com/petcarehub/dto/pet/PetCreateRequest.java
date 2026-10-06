@@ -26,7 +26,11 @@ public class PetCreateRequest {
     @NotBlank
     private String availabilityStatus;
 
+    private Long ownerId;
+
     private String description;
     
     private String imageUrl;
+    
+    private java.math.BigDecimal price;
 }

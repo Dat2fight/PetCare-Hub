@@ -16,4 +16,6 @@ public class ProductCreateRequest {
     private Integer stockQuantity;
     private Long categoryId;
     private Boolean active;
+    private String sku;
+    private String imageUrl;
 }

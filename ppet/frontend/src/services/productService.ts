@@ -1,18 +1,27 @@
-﻿import apiClient from '../api/client';
+import apiClient from '../api/client';
 
 export interface Product {
     id: number;
     name: string;
     description: string;
     price: number;
-    stockQuantity: number;
+    imageUrl?: string;
     categoryId?: number;
+    categoryName?: string;
+    sku?: string;
     active: boolean;
+    stockQuantity?: number;
     createdAt?: string;
     updatedAt?: string;
-    // Frontend specific
-    imageUrl?: string;
+    // Frontend-only display fields
     rating?: number;
+}
+
+export interface ProductCategory {
+    id: number;
+    name: string;
+    description?: string;
+    parentId?: number;
 }
 
 export interface ProductPage {
@@ -37,6 +46,11 @@ export const productService = {
 
     getProductById: async (id: number): Promise<Product> => {
         const response = await apiClient.get<Product>(`/products/${id}`);
+        return response.data;
+    },
+
+    getAllCategories: async (): Promise<ProductCategory[]> => {
+        const response = await apiClient.get<ProductCategory[]>('/categories');
         return response.data;
     },
 };

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { productService, Product } from '../../services/productService';
 import { mockImages } from '../../data/mockImages';
@@ -38,7 +38,7 @@ export const ProductDetailPage: React.FC = () => {
         }
       } catch (err) {
         console.error('Error fetching product:', err);
-        setError('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
+        setError('Kh�ng th? t?i th�ng tin s?n ph?m. Vui l�ng th? l?i sau.');
       } finally {
         setLoading(false);
       }
@@ -62,9 +62,9 @@ export const ProductDetailPage: React.FC = () => {
   if (error || !product) {
     return (
       <div className="bg-background min-h-screen py-20 flex flex-col items-center justify-center">
-        <p className="text-xl text-gray-500 mb-4">{error || 'Không tìm thấy sản phẩm'}</p>
+        <p className="text-xl text-gray-500 mb-4">{error || 'Kh�ng t�m th?y s?n ph?m'}</p>
         <Link to="/products">
-          <Button variant="outline">Quay lại cửa hàng</Button>
+          <Button variant="outline">Quay l?i c?a h�ng</Button>
         </Link>
       </div>
     );
@@ -76,11 +76,11 @@ export const ProductDetailPage: React.FC = () => {
 
         {/* Breadcrumb */}
         <nav className="flex text-sm text-gray-500 mb-8">
-          <Link to="/" className="hover:text-primary-600 transition-colors">Trang chủ</Link>
+          <Link to="/" className="hover:text-primary-600 transition-colors">Trang ch?</Link>
           <span className="mx-2">/</span>
-          <Link to="/products" className="hover:text-primary-600 transition-colors">Sản phẩm</Link>
+          <Link to="/products" className="hover:text-primary-600 transition-colors">S?n ph?m</Link>
           <span className="mx-2">/</span>
-          <span className="text-gray-900 font-medium">Chi tiết</span>
+          <span className="text-gray-900 font-medium">Chi ti?t</span>
         </nav>
 
         <div className="bg-white rounded-3xl shadow-soft border border-gray-100 overflow-hidden mb-12">
@@ -114,7 +114,7 @@ export const ProductDetailPage: React.FC = () => {
                 <FiStar fill="currentColor" />
                 <FiStar fill="currentColor" />
                 <FiStar fill="currentColor" className="text-gray-200" />
-                <span className="text-gray-600 ml-2 font-medium">{product.rating} (124 đánh giá)</span>
+                <span className="text-gray-600 ml-2 font-medium">{product.rating} (124 d�nh gi�)</span>
               </div>
 
               <h1 className="text-3xl font-bold text-gray-900 mb-4">{product.name}</h1>
@@ -124,20 +124,20 @@ export const ProductDetailPage: React.FC = () => {
               </div>
 
               <div className="mb-8">
-                <h3 className="font-semibold text-gray-900 mb-2">Đặc điểm nổi bật:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">�?c di?m n?i b?t:</h3>
                 <ul className="space-y-2 text-gray-600">
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Thích hợp cho mọi giống chó/mèo</li>
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Thành phần tự nhiên 100%</li>
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Đóng gói cẩn thận, bảo quản dễ dàng</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Th�ch h?p cho m?i gi?ng ch�/m�o</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Th�nh ph?n t? nhi�n 100%</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> ��ng g�i c?n th?n, b?o qu?n d? d�ng</li>
                 </ul>
                 <div className="mt-4 pt-4 border-t border-gray-50">
-                  <h3 className="font-semibold text-gray-900 mb-2">Mô tả:</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">M� t?:</h3>
                   <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
                 </div>
               </div>
 
               <div className="flex items-center mb-8">
-                <span className="font-semibold text-gray-900 w-24">Số lượng:</span>
+                <span className="font-semibold text-gray-900 w-24">S? lu?ng:</span>
                 <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -159,14 +159,14 @@ export const ProductDetailPage: React.FC = () => {
                   </button>
                 </div>
                 <span className="ml-4 text-sm text-gray-500">
-                  {product.stockQuantity > 0 ? `Còn hàng (${product.stockQuantity})` : 'Hết hàng'}
+                  {(product.stockQuantity || 0) > 0 ? `C�n h�ng (${product.stockQuantity})` : 'H?t h�ng'}
                 </span>
               </div>
 
               {/* Action Buttons */}
               <div className="flex space-x-4 mt-auto">
-                <Button size="lg" className="flex-1 py-4 text-lg" disabled={product.stockQuantity <= 0}>
-                  <FiShoppingCart className="mr-2" /> Thêm vào giỏ hàng
+                <Button size="lg" className="flex-1 py-4 text-lg" disabled={(product.stockQuantity || 0) <= 0}>
+                  <FiShoppingCart className="mr-2" /> Th�m v�o gi? h�ng
                 </Button>
                 <button className="p-4 rounded-2xl border-2 border-gray-200 text-gray-400 hover:text-coral-500 hover:border-coral-500 transition-colors bg-white shadow-sm">
                   <FiHeart size={24} />

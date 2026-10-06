@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { FiSearch, FiBell, FiShoppingCart, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
@@ -31,11 +31,11 @@ const Header: React.FC = () => {
 
           {/* Center Navigation */}
           <nav className="hidden md:flex space-x-8">
-            <Link to="/" className="text-gray-900 font-semibold hover:text-primary-600 transition-colors">Trang chủ</Link>
-            <Link to="/pets" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Thú cưng</Link>
-            <Link to="/products" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Sản phẩm</Link>
-            <Link to="/services" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Dịch vụ</Link>
-            <Link to="/pet-matching" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Tìm thú cưng phù hợp</Link>
+            <Link to="/" className="text-gray-900 font-semibold hover:text-primary-600 transition-colors">Trang chá»§</Link>
+            <Link to="/pets" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">ThÃº cÆ°ng</Link>
+            <Link to="/products" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Sáº£n pháº©m</Link>
+            <Link to="/services" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">Dá»‹ch vá»¥</Link>
+            <Link to="/pet-matching" className="text-gray-600 hover:text-primary-600 font-medium transition-colors">TÃ¬m thÃº cÆ°ng phÃ¹ há»£p</Link>
           </nav>
 
           {/* Right Icons */}
@@ -67,20 +67,21 @@ const Header: React.FC = () => {
                       <p className="text-sm font-bold text-gray-900 truncate">{user.firstName} {user.lastName}</p>
                       <p className="text-xs text-gray-500 truncate mt-0.5">{user.email}</p>
                     </div>
-                    <Link to="/my-pets" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Thú cưng của tôi</Link>
-                    <Link to="/orders" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Đơn hàng</Link>
-                    <Link to="/loyalty" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Điểm thưởng</Link>
+                    <Link to="/profile" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Hồ sơ cá nhân</Link>
+                    <Link to="/my-pets" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">ThÃº cÆ°ng cá»§a tÃ´i</Link>
+                    <Link to="/orders" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">ÄÆ¡n hÃ ng</Link>
+                    <Link to="/loyalty" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Äiá»ƒm thÆ°á»Ÿng</Link>
                     <div className="border-t border-gray-50 my-2"></div>
                     <button onClick={handleLogout} className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                      <FiLogOut /> Đăng xuất
+                      <FiLogOut /> ÄÄƒng xuáº¥t
                     </button>
                   </div>
                 </div>
               </>
             ) : (
               <div className="flex items-center space-x-3 ml-2">
-                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium px-2">Đăng nhập</Link>
-                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">Đăng ký</Link>
+                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium px-2">ÄÄƒng nháº­p</Link>
+                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">ÄÄƒng kÃ½</Link>
               </div>
             )}
           </div>

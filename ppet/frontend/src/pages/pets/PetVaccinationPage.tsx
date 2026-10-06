@@ -1,65 +1,107 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
-import { mockPets } from '../../data/mockPets';
-import { Button } from '../../components/common/Button';
+import { petManagementService, PetDTO, VaccinationDTO } from '../../services/petManagementService';
 
 export const PetVaccinationPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const myPet = mockPets.find(p => p.id === id) || mockPets[0];
+  const [pet, setPet] = useState<PetDTO | null>(null);
+  const [vaccinations, setVaccinations] = useState<VaccinationDTO[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const petData = await petManagementService.getPetById(Number(id));
+        setPet(petData);
+        
+        const vaxData = await petManagementService.getVaccinations(Number(id));
+        setVaccinations(vaxData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (id) loadData();
+  }, [id]);
+
+  if (loading) {
+    return <div className="min-h-screen py-20 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
+  }
+
+  if (!pet) return <div>Không tìm thấy thú cưng</div>;
 
   return (
     <div className="bg-background min-h-screen py-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-4">
-          <img src={myPet.image} alt={myPet.name} className="w-12 h-12 rounded-full object-cover" />
-          Lịch tiêm phòng - {myPet.name}
+          <img src={pet.imageUrl || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'} alt={pet.name} className="w-12 h-12 rounded-full object-cover" />
+          Lịch sử tiêm phòng - {pet.name}
         </h1>
 
         <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-2xl bg-green-50 border-green-100">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-xl">✓</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Vaccine mũi 1 (5 bệnh)</h4>
-                  <p className="text-sm text-gray-500">15/02/2026</p>
-                </div>
-              </div>
-              <span className="font-semibold text-green-600">Đã tiêm</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 border rounded-2xl bg-orange-50 border-orange-100">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-orange-100 text-orange-600 flex items-center justify-center text-xl">!</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Vaccine mũi 2 (5 bệnh)</h4>
-                  <p className="text-sm text-gray-500">Dự kiến: 15/03/2026</p>
-                </div>
-              </div>
-              <span className="font-semibold text-orange-600">Sắp đến hạn</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 border rounded-2xl border-gray-200">
-              <div className="flex items-center gap-4">
-                <div className="w-10 h-10 rounded-full bg-gray-100 text-gray-400 flex items-center justify-center text-xl">-</div>
-                <div>
-                  <h4 className="font-bold text-gray-900">Vaccine dại</h4>
-                  <p className="text-sm text-gray-500">Dự kiến: 15/06/2026</p>
-                </div>
-              </div>
-              <span className="font-semibold text-gray-400">Chưa đến hạn</span>
-            </div>
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-xl font-bold text-gray-900">Danh sách vaccine đã tiêm</h2>
           </div>
           
-          <div className="mt-8 text-right">
-            <Link to="/services/vet/booking">
-              <Button>Đặt lịch tiêm phòng</Button>
-            </Link>
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 rounded-t-xl">
+                <tr>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider rounded-tl-xl">
+                    Tên Vaccine
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Lô sản xuất
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Bác sĩ
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    Ngày tiêm
+                  </th>
+                  <th scope="col" className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider rounded-tr-xl">
+                    Tiêm nhắc lại
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {vaccinations.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
+                      Chưa có lịch sử tiêm phòng nào.
+                    </td>
+                  </tr>
+                ) : (
+                  vaccinations.map(vax => (
+                    <tr key={vax.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="font-medium text-gray-900">{vax.vaccineName}</div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vax.vaccineBatchNumber || '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {vax.veterinarianName}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
+                        {new Date(vax.dateAdministered).toLocaleDateString('vi-VN')}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {vax.nextDueDate ? (
+                          <span className="inline-block px-2.5 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">
+                            {new Date(vax.nextDueDate).toLocaleDateString('vi-VN')}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">-</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
-        </div>
-        
-        <div className="text-center">
-          <Link to="/my-pets" className="text-primary-600 font-medium hover:underline">← Quay lại hồ sơ chung</Link>
         </div>
       </div>
     </div>

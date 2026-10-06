@@ -19,7 +19,7 @@ public class VaccinationController {
     private final VaccinationService vaccinationService;
 
     @PostMapping
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<VaccinationDTO> createVaccination(@RequestBody VaccinationCreateRequest request) {
         return new ResponseEntity<>(vaccinationService.createVaccination(request), HttpStatus.CREATED);
     }
@@ -29,19 +29,19 @@ public class VaccinationController {
         return ResponseEntity.ok(vaccinationService.getVaccinationById(id));
     }
 
-    @GetMapping("/record/{recordId}")
-    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByMedicalRecordId(@PathVariable Long recordId) {
-        return ResponseEntity.ok(vaccinationService.getVaccinationsByMedicalRecordId(recordId));
+    @GetMapping("/pet/{petId}")
+    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByPetId(@PathVariable Long petId) {
+        return ResponseEntity.ok(vaccinationService.getVaccinationsByPetId(petId));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<VaccinationDTO> updateVaccination(@PathVariable Long id, @RequestBody VaccinationCreateRequest request) {
         return ResponseEntity.ok(vaccinationService.updateVaccination(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<Void> deleteVaccination(@PathVariable Long id) {
         vaccinationService.deleteVaccination(id);
         return ResponseEntity.noContent().build();

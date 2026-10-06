@@ -19,6 +19,7 @@ public class PetDTO {
     private Integer age;
     private String healthStatus;
     private String availabilityStatus;
+    private Long ownerId;
     private String description;
     private String imageUrl;
     private LocalDateTime createdAt;
