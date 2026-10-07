@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.OrderStatus;
 import com.petcarehub.enums.PaymentStatus;
 import jakarta.persistence.*;
@@ -12,6 +17,7 @@ import java.util.List;
 @Table(name = "orders")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"customer", "items"})
+@Data
 public class Order extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

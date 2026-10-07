@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,6 +12,7 @@ import lombok.*;
 @Table(name = "pet_matching_results")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"quiz", "pet"})
+@Data
 public class PetMatchingResult {
 
     @Id

@@ -27,6 +27,10 @@ public class PetUpdateRequest {
     private String availabilityStatus;
 
     private String description;
-
+    
     private String imageUrl;
+    
+    private java.math.BigDecimal price;
+    
+    private Long ownerId;
 }

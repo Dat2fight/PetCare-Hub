@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.RoleType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -7,6 +12,7 @@ import lombok.*;
 @Entity
 @Table(name = "roles")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
+@Data
 public class Role {
 
     @Id

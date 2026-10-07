@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -7,6 +12,7 @@ import lombok.*;
 @Table(name = "breeds")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"species"})
+@Data
 public class Breed {
 
     @Id

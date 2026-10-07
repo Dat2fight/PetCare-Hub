@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +17,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @EntityListeners(AuditingEntityListener.class)
 @ToString(exclude = {"inventory", "performedBy"})
+@Data
 public class InventoryTransaction {
 
     @Id

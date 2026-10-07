@@ -42,3 +42,4 @@ frontend/test-results/
 
 # ===== Docs build =====
 docs/_build/
+node_modules/

@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.AppointmentStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,6 +15,7 @@ import java.time.LocalTime;
 @Table(name = "appointments")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"customer", "pet", "service", "staff"})
+@Data
 public class Appointment extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)

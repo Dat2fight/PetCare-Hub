@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.LoyaltySourceType;
 import com.petcarehub.enums.LoyaltyTransactionType;
 import jakarta.persistence.*;
@@ -13,6 +18,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @EntityListeners(AuditingEntityListener.class)
 @ToString(exclude = {"loyaltyAccount"})
+@Data
 public class LoyaltyTransaction {
 
     @Id

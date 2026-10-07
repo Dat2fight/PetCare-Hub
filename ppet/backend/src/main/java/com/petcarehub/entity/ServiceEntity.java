@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.ServiceType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +17,7 @@ import java.time.LocalDateTime;
 @Table(name = "services")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @EntityListeners(AuditingEntityListener.class)
+@Data
 public class ServiceEntity {
 
     @Id

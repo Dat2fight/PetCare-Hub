@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
@@ -9,6 +14,7 @@ import java.util.List;
 @Table(name = "product_categories")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"parentCategory", "subCategories", "products"})
+@Data
 public class ProductCategory {
 
     @Id

@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.SubscriptionStatus;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,6 +18,7 @@ import java.time.LocalDateTime;
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @EntityListeners(AuditingEntityListener.class)
 @ToString(exclude = {"customer", "pet", "carePackage"})
+@Data
 public class CarePackageSubscription {
 
     @Id

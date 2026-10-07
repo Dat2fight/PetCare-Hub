@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.HashSet;
@@ -9,6 +14,7 @@ import java.util.Set;
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"roles"})
+@Data
 public class User extends BaseEntity {
 
     @Column(nullable = false, unique = true, length = 50)

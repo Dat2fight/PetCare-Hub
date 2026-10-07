@@ -1,5 +1,10 @@
 package com.petcarehub.event;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.entity.Notification;
 import com.petcarehub.enums.NotificationType;
 import com.petcarehub.repository.NotificationRepository;
@@ -13,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Component
 @RequiredArgsConstructor
+
 public class NotificationEventListener {
 
     private final NotificationRepository notificationRepository;

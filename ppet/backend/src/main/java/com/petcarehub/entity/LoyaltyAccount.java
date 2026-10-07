@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.MembershipLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,6 +13,7 @@ import lombok.*;
 @Table(name = "loyalty_accounts")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"customer"})
+@Data
 public class LoyaltyAccount extends BaseEntity {
 
     @OneToOne(fetch = FetchType.LAZY)

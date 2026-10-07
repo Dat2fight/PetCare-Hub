@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.OrderItemType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,6 +14,7 @@ import java.math.BigDecimal;
 @Table(name = "order_items")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"order", "pet", "product"})
+@Data
 public class OrderItem {
 
     @Id

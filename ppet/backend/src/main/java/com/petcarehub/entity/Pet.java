@@ -1,5 +1,10 @@
 package com.petcarehub.entity;
 
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import com.petcarehub.enums.AvailabilityStatus;
 import com.petcarehub.enums.HealthStatus;
 import jakarta.persistence.*;
@@ -11,6 +16,7 @@ import java.time.LocalDate;
 @Table(name = "pets")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 @ToString(exclude = {"species", "breed"})
+@Data
 public class Pet extends BaseEntity {
 
     @Column(length = 100)
