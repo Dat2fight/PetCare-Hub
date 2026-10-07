@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # PetCare-Hub
 java project
 
@@ -39,3 +40,6 @@ Update:
 Login:
 TK: admin
 MK: admin123
+=======
+# WebPet
+>>>>>>> ce1700c5d839baefe3b3eff925ed6fc6f8d786f4
