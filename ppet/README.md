@@ -8,7 +8,7 @@ A professional pet shop management platform that transforms traditional pet sale
 |-------|-----------|
 | **Backend** | Java 17+, Spring Boot 3.3, Spring MVC, Spring Data JPA, Spring Security, WebSocket |
 | **Frontend** | React 18, TypeScript, Tailwind CSS, Vite |
-| **Database** | PostgreSQL 15+ |
+| **Database** | SQL Server (MSSQL) |
 | **Testing** | JUnit 5, Mockito, Playwright |
 
 ## Project Structure
@@ -43,15 +43,19 @@ ppet/
 - Java 17 or higher
 - Maven 3.9+
 - Node.js 18+ and npm
-- PostgreSQL 15+
+- SQL Server 2016+ (or SQL Server Express)
 
 ## Getting Started
 
 ### Database Setup
 
-```sql
-CREATE DATABASE petcarehub;
-```
+1. Open SQL Server Management Studio (SSMS) or Azure Data Studio.
+2. Connect to your SQL Server instance (ensure TCP/IP is enabled on port 1433).
+3. Create a new database named `petcarehub`:
+   ```sql
+   CREATE DATABASE petcarehub;
+   ```
+4. Open `backend/src/main/resources/application.yml` and `application-dev.yml`. Update the `password` field for the `sa` user to match your actual SQL Server `sa` password.
 
 ### Backend
 

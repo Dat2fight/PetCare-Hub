@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/petcarehub
-    username: ${DB_USERNAME:postgres}
-    password: ${DB_PASSWORD:Datblc123}
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:sqlserver://localhost:1433;databaseName=petcarehub;encrypt=true;trustServerCertificate=true
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:yourStrong(!)Password}
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
   jpa:
     hibernate:
       ddl-auto: update
@@ -11,7 +11,7 @@ spring:
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.SQLServer2016Dialect
   jackson:
     serialization:
       write-dates-as-timestamps: false
