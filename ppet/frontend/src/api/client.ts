@@ -28,7 +28,8 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('refreshToken')
-      window.location.href = '/login'
+      const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
+      window.location.href = `${basePath}/login`
     }
     return Promise.reject(error)
   }

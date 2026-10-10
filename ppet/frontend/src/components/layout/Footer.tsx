@@ -7,7 +7,7 @@ const Footer: React.FC = () => {
   return (
     <footer className="bg-white pt-16 pb-8 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-12 mb-12">
           
           {/* Brand Col */}
           <div className="lg:col-span-2">
@@ -21,7 +21,7 @@ const Footer: React.FC = () => {
               <span className="text-[10px] text-gray-400 font-medium ml-10 -mt-1 tracking-wider uppercase">Better Care, Happier Pets</span>
             </div>
             <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-sm">
-              Chúng tôi cam kết mang đến những sản phẩm và dịch vụ tốt nhất, để mỗi thú cưng đều được yêu thương và chăm sóc đúng cách.
+              Chúng tôi cam kết mang đến những sản phẩm và dịch vụ tốt nhất, để mọi thú cưng đều được yêu thương và chăm sóc đúng cách.
             </p>
             <div className="flex space-x-4">
               <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-primary-50 hover:text-primary-600 transition-colors">
@@ -48,18 +48,6 @@ const Footer: React.FC = () => {
               <li><Link to="/products" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Sản phẩm</Link></li>
               <li><Link to="/services" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Dịch vụ</Link></li>
               <li><Link to="/pet-matching" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Tìm thú cưng phù hợp</Link></li>
-            </ul>
-          </div>
-
-          {/* Support Col */}
-          <div>
-            <h3 className="font-bold text-gray-900 mb-6">Chăm sóc khách hàng</h3>
-            <ul className="space-y-4">
-              <li><a href="#" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Hotline: 1900 1234</a></li>
-              <li><a href="#" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Email: support@petcarehub.vn</a></li>
-              <li><a href="#" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Hướng dẫn mua hàng</a></li>
-              <li><a href="#" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Chính sách giao hàng</a></li>
-              <li><a href="#" className="text-gray-500 hover:text-primary-600 transition-colors text-sm">Câu hỏi thường gặp</a></li>
             </ul>
           </div>
 

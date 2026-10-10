@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
+import { Badge } from '../../components/common/Badge';
 import { FiBox, FiCheckCircle, FiTruck, FiHome } from 'react-icons/fi';
 import { mockProducts } from '../../data/mockProducts';
 
@@ -95,10 +96,4 @@ export const OrderTrackingPage: React.FC = () => {
     </div>
   );
 };
-
-// Temp badge since it's not exported in the context of this single file script execution environment easily without full imports
-const Badge: React.FC<{ children: React.ReactNode; variant?: string }> = ({ children }) => (
-  <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-800 border border-primary-200">
-    {children}
-  </span>
-);
+

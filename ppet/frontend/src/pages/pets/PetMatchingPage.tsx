@@ -4,8 +4,8 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { mockImages } from '../../data/mockImages';
 import { mockPets } from '../../data/mockPets';
-import { FiHome, FiCheck } from 'react-icons/fi';
-import { FaCity, FaTree } from 'react-icons/fa';
+import { FiHome, FiCheck, FiClock, FiCoffee, FiBriefcase } from 'react-icons/fi';
+import { FaCity, FaTree, FaDog, FaCat, FaHeart } from 'react-icons/fa';
 
 export const PetMatchingPage: React.FC = () => {
   const [step, setStep] = useState(1);
@@ -25,7 +25,14 @@ export const PetMatchingPage: React.FC = () => {
     }, 400);
   };
 
-  const getMatchedPet = () => mockPets[1]; // Return Poodle as a demo match
+  const getMatchedPet = () => {
+    if (answers.personality === 'active') return mockPets[3]; // Golden Retriever
+    if (answers.personality === 'calm') return mockPets[2]; // Mèo ALN
+    if (answers.personality === 'cuddly') return mockPets[1]; // Poodle
+    if (answers.home === 'yard') return mockPets[3];
+    if (answers.home === 'apt') return mockPets[2];
+    return mockPets[0]; // Corgi fallback
+  };
 
   return (
     <div className="bg-background min-h-screen py-12">
@@ -79,7 +86,63 @@ export const PetMatchingPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Step 2 & 3 would go here similarly - skipping to calculation for brevity */}
+          {/* Step 2 */}
+          <div
+            className={`transition-all duration-500 absolute w-full ${
+              step === 2 ? 'opacity-100 translate-x-0 z-10' : step < 2 ? 'opacity-0 translate-x-full pointer-events-none' : 'opacity-0 -translate-x-full pointer-events-none'
+            }`}
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">2. Bạn dành bao nhiêu thời gian mỗi ngày cho thú cưng?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { id: 'low', label: 'Dưới 1 giờ (Rất bận)', icon: <FiBriefcase size={40} /> },
+                { id: 'medium', label: '1 - 3 giờ (Bình thường)', icon: <FiCoffee size={40} /> },
+                { id: 'high', label: 'Hơn 3 giờ (Rất rảnh)', icon: <FiClock size={40} /> },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelect('time', opt.id)}
+                  className={`flex flex-col items-center p-8 rounded-3xl border-2 transition-all ${
+                    answers.time === opt.id
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-100 bg-white text-gray-600 hover:border-primary-200 hover:shadow-md'
+                  }`}
+                >
+                  <div className="mb-4">{opt.icon}</div>
+                  <span className="font-bold">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Step 3 */}
+          <div
+            className={`transition-all duration-500 absolute w-full ${
+              step === 3 ? 'opacity-100 translate-x-0 z-10' : step < 3 ? 'opacity-0 translate-x-full pointer-events-none' : 'opacity-0 -translate-x-full pointer-events-none'
+            }`}
+          >
+            <h2 className="text-2xl font-bold text-gray-900 mb-8 text-center">3. Bạn thích thú cưng có tính cách như thế nào?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { id: 'active', label: 'Năng động, thích chạy nhảy', icon: <FaDog size={40} /> },
+                { id: 'calm', label: 'Hiền lành, độc lập', icon: <FaCat size={40} /> },
+                { id: 'cuddly', label: 'Tình cảm, thích quấn chủ', icon: <FaHeart size={40} /> },
+              ].map(opt => (
+                <button
+                  key={opt.id}
+                  onClick={() => handleSelect('personality', opt.id)}
+                  className={`flex flex-col items-center p-8 rounded-3xl border-2 transition-all ${
+                    answers.personality === opt.id
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-gray-100 bg-white text-gray-600 hover:border-primary-200 hover:shadow-md'
+                  }`}
+                >
+                  <div className="mb-4">{opt.icon}</div>
+                  <span className="font-bold">{opt.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
           <div
             className={`transition-all duration-500 absolute w-full flex flex-col items-center justify-center h-full ${
               isCalculating && step < 4 ? 'opacity-100 z-10' : 'opacity-0 pointer-events-none'

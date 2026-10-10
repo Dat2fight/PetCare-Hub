@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
 import { productService, Product } from '../../services/productService';
@@ -10,6 +10,7 @@ import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export const ProductListPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -45,7 +46,13 @@ export const ProductListPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory 
+      ? (p.categoryName === selectedCategory || p.name.toLowerCase().includes(selectedCategory.toLowerCase()))
+      : true;
+    return matchesSearch && matchesCategory;
+  });
 
   const categories = [
     { name: 'Thức ăn', icon: <FaBone size={24} />, color: 'bg-orange-100 text-orange-600' },
@@ -80,7 +87,12 @@ export const ProductListPage: React.FC = () => {
           {categories.map((cat, idx) => (
             <button
               key={idx}
-              className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center border border-gray-100 hover:shadow-card hover:border-primary-100 transition-all cursor-pointer group"
+              onClick={() => setSelectedCategory(selectedCategory === cat.name ? null : cat.name)}
+              className={`bg-white rounded-2xl p-6 flex flex-col items-center justify-center border transition-all cursor-pointer group ${
+                selectedCategory === cat.name
+                  ? 'border-primary-500 shadow-md ring-2 ring-primary-100'
+                  : 'border-gray-100 hover:shadow-card hover:border-primary-100'
+              }`}
             >
               <div
                 className={`${cat.color} w-16 h-16 rounded-full flex items-center justify-center mb-4 transition-transform group-hover:scale-110`}

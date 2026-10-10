@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../../components/common/Button';
 import { mockProducts } from '../../data/mockProducts';
@@ -9,11 +9,31 @@ export const CartPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
-  const cartItems = [
+  const [cartItems, setCartItems] = useState([
     { product: mockProducts[0], quantity: 1 },
     { product: mockProducts[1], quantity: 2 },
     { product: mockProducts[2], quantity: 1 }
-  ];
+  ]);
+
+  const handleIncrease = (index: number) => {
+    const newItems = [...cartItems];
+    newItems[index].quantity += 1;
+    setCartItems(newItems);
+  };
+
+  const handleDecrease = (index: number) => {
+    const newItems = [...cartItems];
+    if (newItems[index].quantity > 1) {
+      newItems[index].quantity -= 1;
+      setCartItems(newItems);
+    }
+  };
+
+  const handleRemove = (index: number) => {
+    const newItems = [...cartItems];
+    newItems.splice(index, 1);
+    setCartItems(newItems);
+  };
 
   const subtotal = cartItems.reduce((acc, item) => acc + (item.product.price * item.quantity), 0);
   const discount = 100000;
@@ -44,12 +64,12 @@ export const CartPage: React.FC = () => {
 
                 <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-end">
                   <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50">
-                    <button className="p-2 text-gray-500 hover:text-primary-600 transition-colors"><FiMinus size={16}/></button>
+                    <button onClick={() => handleDecrease(idx)} className="p-2 text-gray-500 hover:text-primary-600 transition-colors"><FiMinus size={16}/></button>
                     <span className="w-8 text-center font-semibold text-gray-900">{item.quantity}</span>
-                    <button className="p-2 text-gray-500 hover:text-primary-600 transition-colors"><FiPlus size={16}/></button>
+                    <button onClick={() => handleIncrease(idx)} className="p-2 text-gray-500 hover:text-primary-600 transition-colors"><FiPlus size={16}/></button>
                   </div>
                   
-                  <button className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-lg">
+                  <button onClick={() => handleRemove(idx)} className="p-2 text-gray-400 hover:text-red-500 transition-colors bg-white rounded-lg">
                     <FiTrash2 size={20} />
                   </button>
                 </div>

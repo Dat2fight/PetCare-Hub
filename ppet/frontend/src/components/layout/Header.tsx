@@ -140,15 +140,15 @@ const Header: React.FC = () => {
 
                     <Link to="/my-pets" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Thú cưng của tôi</Link>
 
-                    <Link to="/orders" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">ÄÆ¡n hàng</Link>
+                    <Link to="/orders" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Đơn hàng</Link>
 
-                    <Link to="/loyalty" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Äiá»ƒm thưởng</Link>
+                    <Link to="/loyalty" className="block px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-primary-50 hover:text-primary-700">Điểm thưởng</Link>
 
                     <div className="border-t border-gray-50 my-2"></div>
 
                     <button onClick={handleLogout} className="block w-full text-left px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
 
-                      <FiLogOut /> ÄÄƒng xuất
+                      <FiLogOut /> Đăng xuất
 
                     </button>
 
@@ -162,9 +162,9 @@ const Header: React.FC = () => {
 
               <div className="flex items-center space-x-3 ml-2">
 
-                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium px-2">ÄÄƒng nhập</Link>
+                <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium px-2">Đăng nhập</Link>
 
-                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">ÄÄƒng ký</Link>
+                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">Đăng ký</Link>
 
               </div>
 

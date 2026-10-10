@@ -105,7 +105,8 @@ export const HomePage: React.FC = () => {
             { id: 4, name: "Poodle", breed: "Poodle", age: "4 tháng", gender: "Cái", weight: "5kg", price: "9.500.000đ", image: mockImages.dogPoodle, status: "Đã tiêm phòng", bg: "bg-primary-500" },
             { id: 5, name: "Mèo Munchkin", breed: "Munchkin", age: "3 tháng", gender: "Cái", weight: "3kg", price: "7.500.000đ", image: mockImages.catPersian, status: "Sức khỏe tốt", bg: "bg-blue-500" },
           ].map(pet => (
-            <Card key={pet.id} noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-gray-100 hover:border-primary-200">
+            <Link to={`/pets/${pet.id}`} key={pet.id} className="block h-full">
+              <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-gray-100 hover:border-primary-200">
               <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 rounded-t-2xl p-2">
                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
                 <button className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-coral-500 transition-colors shadow-sm">
@@ -125,6 +126,7 @@ export const HomePage: React.FC = () => {
                 <div className="mt-auto font-extrabold text-primary-600 text-lg">{pet.price}</div>
               </div>
             </Card>
+            </Link>
           ))}
         </div>
       </section>
@@ -275,13 +277,14 @@ export const HomePage: React.FC = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
           {[
             { name: "Thức ăn Royal Canin", desc: "1.2kg | Cho chó trưởng thành", price: "220.000đ", oldPrice: "260.000đ", image: mockImages.foodRoyalCanin, rating: 4.8, sale: "-15%" },
-            { name: "Thức ăn Whiskas", desc: "1.2kg | Cho mèo trưởng thành", price: "180.000đ", oldPrice: "220.000đ", image: "https://images.unsplash.com/photo-1589924691995-400dc9ecc119?auto=format&fit=crop&q=80&w=400", rating: 4.7, sale: "-15%" },
+            { name: "Thức ăn Whiskas", desc: "1.2kg | Cho mèo trưởng thành", price: "180.000đ", oldPrice: "220.000đ", image: mockImages.foodWhiskas, rating: 4.7, sale: "-15%" },
             { name: "Đồ chơi bóng cao su", desc: "An toàn, bền bỉ", price: "45.000đ", image: mockImages.toyBall, rating: 4.9 },
             { name: "Dây dắt cho chó", desc: "Size M | Chất liệu cao cấp", price: "250.000đ", image: mockImages.collar, rating: 4.8 },
-            { name: "Cát vệ sinh cho mèo", desc: "Khử mùi tốt, an toàn", price: "120.000đ", image: "https://images.unsplash.com/photo-1598134493206-89b533318991?auto=format&fit=crop&q=80&w=400", rating: 4.6 },
-            { name: "Bàn chải lông", desc: "Phù hợp mọi giống chó mèo", price: "85.000đ", image: mockImages.carrier, rating: 4.7 },
+            { name: "Cát vệ sinh cho mèo", desc: "Khử mùi tốt, an toàn", price: "120.000đ", image: mockImages.catLitter, rating: 4.6 },
+            { name: "Bàn chải lông", desc: "Phù hợp mọi giống chó mèo", price: "85.000đ", image: mockImages.brush, rating: 4.7 },
           ].map((prod, idx) => (
-            <Card key={idx} noPadding className="group h-full flex flex-col border-gray-100 hover:border-primary-200 transition-all rounded-3xl">
+            <Link to={`/products/${idx + 1}`} key={idx} className="block h-full">
+              <Card noPadding className="group h-full flex flex-col border-gray-100 hover:border-primary-200 transition-all rounded-3xl">
               <div className="relative aspect-square p-4 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center">
                 {prod.sale && (
                   <div className="absolute top-3 left-3 bg-coral-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm z-10">
@@ -312,30 +315,12 @@ export const HomePage: React.FC = () => {
                 </div>
               </div>
             </Card>
+            </Link>
           ))}
         </div>
       </section>
 
-      {/* 8. PROMOTIONAL BRAND SECTION */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-primary-100 rounded-[32px] overflow-hidden flex flex-col md:flex-row items-center border border-primary-200/50">
-          <div className="md:w-1/2 relative h-64 md:h-[300px] w-full">
-            <img src={mockImages.dogHero} alt="Happy pets" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-primary-100"></div>
-          </div>
-          <div className="md:w-1/2 p-8 md:p-12 z-10">
-            <h2 className="text-3xl font-extrabold text-primary-900 mb-4 leading-tight">
-              Cùng PetCare Hub <br/> kiến tạo một thế giới tốt đẹp hơn cho thú cưng!
-            </h2>
-            <p className="text-primary-800/80 mb-8 max-w-md">
-              Chúng tôi cam kết mang đến những sản phẩm và dịch vụ tốt nhất, để mỗi thú cưng đều được yêu thương và chăm sóc đúng cách.
-            </p>
-            <Link to="/about">
-              <Button className="rounded-full shadow-md px-8 shadow-primary-500/20">Khám phá ngay →</Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+      
 
       {/* 9. CUSTOMER REVIEWS */}
       <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -371,23 +356,31 @@ export const HomePage: React.FC = () => {
               <FiChevronRight size={24} />
             </div>
 
-            <Card className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden">
-              <div className="absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none">"</div>
-              
-              <div className="flex items-start gap-4 mb-4 relative z-10">
-                <img src={mockImages.avatar1} alt="Customer" className="w-12 h-12 rounded-full object-cover shadow-sm" />
-                <div>
-                  <h4 className="font-bold text-gray-900">Nguyễn Thị Mai</h4>
-                  <div className="flex text-secondary-400 text-sm mt-0.5">
-                    <FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" />
+            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 hide-scrollbar">
+              {[
+                { name: "Nguyễn Thị Mai", date: "12/04/2025", text: "\"Dịch vụ grooming rất chuyên nghiệp, bé nhà mình về rất sạch và thơm. Nhân viên thân thiện, nhiệt tình! Chắc chắn sẽ quay lại ủng hộ PetCare Hub thường xuyên.\"", avatar: mockImages.avatar1 },
+                { name: "Trần Văn Hùng", date: "05/04/2025", text: "\"Mình mua thức ăn cho cún ở đây suốt 1 năm nay, giá cả hợp lý, giao hàng nhanh chóng. Rất hài lòng với chất lượng sản phẩm.\"", avatar: mockImages.avatar2 },
+                { name: "Lê Minh Tuấn", date: "28/03/2025", text: "\"Tính năng tìm kiếm thú cưng phù hợp rất tuyệt vời. Mình đã tìm được một bé Corgi rất ngoan và khỏe mạnh thông qua gợi ý của PetCare Hub.\"", avatar: mockImages.placeholder }
+              ].map((review, idx) => (
+                <Card key={idx} className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center flex-shrink-0">
+                  <div className="absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none">"</div>
+                  
+                  <div className="flex items-start gap-4 mb-4 relative z-10">
+                    <img src={review.avatar} alt="Customer" className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                    <div>
+                      <h4 className="font-bold text-gray-900">{review.name}</h4>
+                      <div className="flex text-secondary-400 text-sm mt-0.5">
+                        <FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" />
+                      </div>
+                    </div>
+                    <span className="ml-auto text-xs text-gray-400 font-medium">{review.date}</span>
                   </div>
-                </div>
-                <span className="ml-auto text-xs text-gray-400 font-medium">12/04/2025</span>
-              </div>
-              <p className="text-gray-600 relative z-10 leading-relaxed">
-                "Dịch vụ grooming rất chuyên nghiệp, bé nhà mình về rất sạch và thơm. Nhân viên thân thiện, nhiệt tình! Chắc chắn sẽ quay lại ủng hộ PetCare Hub thường xuyên."
-              </p>
-            </Card>
+                  <p className="text-gray-600 relative z-10 leading-relaxed">
+                    {review.text}
+                  </p>
+                </Card>
+              ))}
+            </div>
           </div>
 
         </div>
