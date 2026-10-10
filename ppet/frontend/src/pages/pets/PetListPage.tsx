@@ -87,43 +87,7 @@ export const PetListPage: React.FC = () => {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8">
-          {/* Sidebar Filter (Desktop) */}
-          <div className="hidden lg:block w-64 flex-shrink-0">
-            <div className="bg-white rounded-2xl p-6 shadow-card border border-gray-100 sticky top-28">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="font-bold text-lg text-gray-900">Bộ lọc</h2>
-                <button className="text-sm text-primary-600 font-medium">Xóa lọc</button>
-              </div>
 
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-semibold text-gray-900 mb-3">Giới tính</h3>
-                  <div className="space-y-2">
-                    <label className="flex items-center text-gray-600"><input type="checkbox" className="mr-3 rounded text-primary-600 focus:ring-primary-500" /> Đực</label>
-                    <label className="flex items-center text-gray-600"><input type="checkbox" className="mr-3 rounded text-primary-600 focus:ring-primary-500" /> Cái</label>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Mức giá</h3>
-                  <div className="space-y-2">
-                    <label className="flex items-center text-gray-600"><input type="radio" name="price" className="mr-3 text-primary-600 focus:ring-primary-500" /> Dưới 5 triệu</label>
-                    <label className="flex items-center text-gray-600"><input type="radio" name="price" className="mr-3 text-primary-600 focus:ring-primary-500" /> 5 - 10 triệu</label>
-                    <label className="flex items-center text-gray-600"><input type="radio" name="price" className="mr-3 text-primary-600 focus:ring-primary-500" /> Trên 10 triệu</label>
-                  </div>
-                </div>
-
-                <div className="border-t border-gray-100 pt-4">
-                  <h3 className="font-semibold text-gray-900 mb-3">Độ tuổi</h3>
-                  <div className="space-y-2">
-                    <label className="flex items-center text-gray-600"><input type="checkbox" className="mr-3 rounded text-primary-600 focus:ring-primary-500" /> Dưới 3 tháng</label>
-                    <label className="flex items-center text-gray-600"><input type="checkbox" className="mr-3 rounded text-primary-600 focus:ring-primary-500" /> 3 - 6 tháng</label>
-                    <label className="flex items-center text-gray-600"><input type="checkbox" className="mr-3 rounded text-primary-600 focus:ring-primary-500" /> Trên 6 tháng</label>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
 
           {/* Product Grid */}
           <div className="flex-1">
