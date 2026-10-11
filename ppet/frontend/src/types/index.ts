@@ -83,7 +83,7 @@ export interface ProductCategory {
   id: number
   name: string
   description?: string
-  parentCategoryId?: number
+  parentCategoryIdễ: number
 }
 
 // ===== Order Types =====
@@ -105,8 +105,8 @@ export interface Order {
 export interface OrderItem {
   id: number
   itemType: 'PET' | 'PRODUCT'
-  petId?: number
-  productId?: number
+  petIdễ: number
+  productIdễ: number
   quantity: number
   unitPrice: number
   subtotal: number

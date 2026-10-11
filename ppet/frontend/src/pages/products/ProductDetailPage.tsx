@@ -78,7 +78,7 @@ export const ProductDetailPage: React.FC = () => {
 
         console.error('Error fetching product:', err);
 
-        setError('Kh�ng th? t?i th�ng tin s?n ph?m. Vui l�ng th? l?i sau.');
+        setError('Không thể tải thông tin sản phẩm. Vui lòng thử lại sau.');
 
       } finally {
 
@@ -126,11 +126,11 @@ export const ProductDetailPage: React.FC = () => {
 
       <div className="bg-background min-h-screen py-20 flex flex-col items-center justify-center">
 
-        <p className="text-xl text-gray-500 mb-4">{error || 'Kh�ng t�m th?y s?n ph?m'}</p>
+        <p className="text-xl text-gray-500 mb-4">{error || 'Không tìm thấy sản phẩm'}</p>
 
         <Link to="/products">
 
-          <Button variant="outline">Quay l?i c?a h�ng</Button>
+          <Button variant="outline">Quay lại cửa hàng</Button>
 
         </Link>
 
@@ -154,15 +154,15 @@ export const ProductDetailPage: React.FC = () => {
 
         <nav className="flex text-sm text-gray-500 mb-8">
 
-          <Link to="/" className="hover:text-primary-600 transition-colors">Trang ch?</Link>
+          <Link to="/" className="hover:text-primary-600 transition-colors">Trang chủ</Link>
 
           <span className="mx-2">/</span>
 
-          <Link to="/products" className="hover:text-primary-600 transition-colors">S?n ph?m</Link>
+          <Link to="/products" className="hover:text-primary-600 transition-colors">Sản phẩm</Link>
 
           <span className="mx-2">/</span>
 
-          <span className="text-gray-900 font-medium">Chi ti?t</span>
+          <span className="text-gray-900 font-medium">Chi tiết</span>
 
         </nav>
 
@@ -230,7 +230,7 @@ export const ProductDetailPage: React.FC = () => {
 
                 <FiStar fill="currentColor" className="text-gray-200" />
 
-                <span className="text-gray-600 ml-2 font-medium">{product.rating} (124 d�nh gi�)</span>
+                <span className="text-gray-600 ml-2 font-medium">{product.rating} (124 đánh giá)</span>
 
               </div>
 
@@ -250,21 +250,21 @@ export const ProductDetailPage: React.FC = () => {
 
               <div className="mb-8">
 
-                <h3 className="font-semibold text-gray-900 mb-2">�?c di?m n?i b?t:</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">Đặc điểm nổi bật:</h3>
 
                 <ul className="space-y-2 text-gray-600">
 
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Th�ch h?p cho m?i gi?ng ch�/m�o</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Thích hợp cho mọi giống chó/mèo</li>
 
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Th�nh ph?n t? nhi�n 100%</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Thành phần tự nhiên 100%</li>
 
-                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> ��ng g�i c?n th?n, b?o qu?n d? d�ng</li>
+                  <li className="flex items-start"><FiCheck className="text-primary-500 mt-1 mr-2" /> Đóng gói cẩn thận, bảo quản dễ dàng</li>
 
                 </ul>
 
                 <div className="mt-4 pt-4 border-t border-gray-50">
 
-                  <h3 className="font-semibold text-gray-900 mb-2">M� t?:</h3>
+                  <h3 className="font-semibold text-gray-900 mb-2">Mô tả:</h3>
 
                   <p className="text-sm text-gray-600 leading-relaxed">{product.description}</p>
 
@@ -276,7 +276,7 @@ export const ProductDetailPage: React.FC = () => {
 
               <div className="flex items-center mb-8">
 
-                <span className="font-semibold text-gray-900 w-24">S? lu?ng:</span>
+                <span className="font-semibold text-gray-900 w-24">Số lượng:</span>
 
                 <div className="flex items-center border border-gray-200 rounded-xl bg-gray-50">
 
@@ -320,7 +320,7 @@ export const ProductDetailPage: React.FC = () => {
 
                 <span className="ml-4 text-sm text-gray-500">
 
-                  {(product.stockQuantity || 0) > 0 ? `C�n h�ng (${product.stockQuantity})` : 'H?t h�ng'}
+                  {(product.stockQuantity || 0) > 0 ? `Còn hàng (${product.stockQuantity})` : 'Hết hàng'}
 
                 </span>
 
@@ -334,7 +334,7 @@ export const ProductDetailPage: React.FC = () => {
 
                 <Button size="lg" className="flex-1 py-4 text-lg" disabled={(product.stockQuantity || 0) <= 0}>
 
-                  <FiShoppingCart className="mr-2" /> Th�m v�o gi? h�ng
+                  <FiShoppingCart className="mr-2" /> Thêm vào giỏ hàng
 
                 </Button>
 
