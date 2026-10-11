@@ -99,6 +99,10 @@ public class ProductServiceImpl implements ProductService {
             product.setPrice(request.getPrice());
         if (request.getActive() != null)
             product.setActive(request.getActive());
+        if (request.getImageUrl() != null)
+            product.setImageUrl(request.getImageUrl());
+        if (request.getSku() != null)
+            product.setSku(request.getSku());
 
         return toDTO(productRepository.save(product));
     }

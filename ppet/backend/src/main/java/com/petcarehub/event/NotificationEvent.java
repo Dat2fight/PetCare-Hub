@@ -10,9 +10,6 @@ import lombok.Getter;
 import org.springframework.context.ApplicationEvent;
 
 @Getter
-@Data
-@AllArgsConstructor
-@Builder
 public class NotificationEvent extends ApplicationEvent {
     private final Review review;
 

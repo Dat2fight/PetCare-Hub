@@ -3,13 +3,19 @@ package com.petcarehub.service.impl;
 import com.petcarehub.dto.admin.DashboardSummaryDTO;
 import com.petcarehub.dto.admin.RevenueReportDTO;
 import com.petcarehub.entity.Order;
+import com.petcarehub.entity.Role;
 import com.petcarehub.entity.User;
+import com.petcarehub.enums.RoleType;
+import com.petcarehub.exception.BadRequestException;
+import com.petcarehub.exception.ResourceNotFoundException;
 import com.petcarehub.repository.OrderRepository;
 import com.petcarehub.repository.PetRepository;
+import com.petcarehub.repository.RoleRepository;
 import com.petcarehub.repository.UserRepository;
 import com.petcarehub.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,6 +28,7 @@ public class AdminServiceImpl implements AdminService {
     private final UserRepository userRepository;
     private final OrderRepository orderRepository;
     private final PetRepository petRepository;
+    private final RoleRepository roleRepository;
 
     @Override
     public DashboardSummaryDTO getDashboardSummary() {
@@ -64,14 +71,31 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @Transactional
     public User updateUserRole(Long userId, String role) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        
-        // Assuming user has setRole method taking String or Enum.
-        // We will just set it as String or parse to Enum if needed.
-        // For POC, assuming setRole(String) exists.
-        com.petcarehub.entity.Role roleEntity = new com.petcarehub.entity.Role(); roleEntity.setName(com.petcarehub.enums.RoleType.valueOf(role)); user.getRoles().clear(); user.getRoles().add(roleEntity);
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại với id: " + userId));
+
+        if (role == null || role.isBlank()) {
+            throw new BadRequestException("Tên role không được để trống");
+        }
+
+        RoleType roleType;
+        try {
+            String roleName = role.trim().toUpperCase();
+            if (roleName.startsWith("ROLE_")) {
+                roleName = roleName.substring(5);
+            }
+            roleType = RoleType.valueOf(roleName);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Role không hợp lệ: " + role);
+        }
+
+        Role roleEntity = roleRepository.findByName(roleType)
+                .orElseThrow(() -> new ResourceNotFoundException("Role không tồn tại: " + role));
+
+        user.getRoles().clear();
+        user.getRoles().add(roleEntity);
         return userRepository.save(user);
     }
 }
