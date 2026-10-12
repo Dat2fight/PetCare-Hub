@@ -5,12 +5,17 @@ import com.petcarehub.dto.review.ReviewDTO;
 import com.petcarehub.entity.Review;
 import com.petcarehub.entity.User;
 import com.petcarehub.event.NotificationEvent;
+import com.petcarehub.exception.BadRequestException;
+import com.petcarehub.exception.ResourceNotFoundException;
 import com.petcarehub.repository.ReviewRepository;
 import com.petcarehub.repository.UserRepository;
+import com.petcarehub.security.UserDetailsImpl;
 import com.petcarehub.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,8 +33,24 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewDTO createReview(ReviewCreateRequest request) {
-        User customer = userRepository.findById(request.getReviewerId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        // Zero Trust: Always extract authenticated user from SecurityContextHolder
+        User customer = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                customer = userRepository.findById(userDetails.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userDetails.getId()));
+            } else {
+                customer = userRepository.findByUsername(authentication.getName())
+                        .orElseThrow(() -> new ResourceNotFoundException("User not found with username " + authentication.getName()));
+            }
+        } else if (request.getReviewerId() != null) {
+            customer = userRepository.findById(request.getReviewerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + request.getReviewerId()));
+        } else {
+            throw new BadRequestException("Bạn cần đăng nhập để gửi đánh giá");
+        }
 
         Review review = Review.builder()
                 .customer(customer)

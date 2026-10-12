@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
 import { productService, Product } from '../../services/productService';
 import { mockImages } from '../../data/mockImages';
-import { FiSearch, FiShoppingCart, FiStar } from 'react-icons/fi';
+import { FiSearch, FiShoppingCart, FiStar, FiLoader } from 'react-icons/fi';
 import { FaBone, FaBath, FaTag } from 'react-icons/fa';
 import { MdToys } from 'react-icons/md';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
+import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 export const ProductListPage: React.FC = () => {
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [addingProductId, setAddingProductId] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -44,6 +49,40 @@ export const ProductListPage: React.FC = () => {
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  };
+
+  const handleAddToCart = async (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (product.stockQuantity !== undefined && product.stockQuantity <= 0) {
+      toast.error(`Sản phẩm "${product.name}" hiện đã hết hàng!`);
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng.');
+      navigate('/login');
+      return;
+    }
+
+    if (addingProductId === product.id) {
+      return;
+    }
+
+    try {
+      setAddingProductId(product.id);
+      await productService.addToCart(product.id, 1);
+      toast.success(`Đã thêm "${product.name}" vào giỏ hàng!`);
+    } catch (err: any) {
+      console.error('Error adding product to cart:', err);
+      const errorMessage =
+        err?.response?.data?.message ||
+        'Không thể thêm sản phẩm vào giỏ hàng. Vui lòng thử lại sau.';
+      toast.error(errorMessage);
+    } finally {
+      setAddingProductId(null);
+    }
   };
 
   const filteredProducts = products.filter(p => {
@@ -127,10 +166,24 @@ export const ProductListPage: React.FC = () => {
                       className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
                     />
                     <button
-                      className="absolute bottom-3 right-3 p-3 bg-primary-600 text-white rounded-xl shadow-md hover:bg-primary-700 transition-colors z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100"
-                      onClick={(e) => { e.preventDefault(); /* add to cart */ }}
+                      type="button"
+                      aria-label="Thêm vào giỏ hàng"
+                      title={product.stockQuantity !== undefined && product.stockQuantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
+                      disabled={addingProductId === product.id || (product.stockQuantity !== undefined && product.stockQuantity <= 0)}
+                      className={`absolute bottom-3 right-3 p-3 text-white rounded-xl shadow-md transition-colors z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 ${
+                        product.stockQuantity !== undefined && product.stockQuantity <= 0
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : addingProductId === product.id
+                          ? 'bg-primary-400 cursor-wait'
+                          : 'bg-primary-600 hover:bg-primary-700'
+                      }`}
+                      onClick={(e) => handleAddToCart(e, product)}
                     >
-                      <FiShoppingCart size={18} />
+                      {addingProductId === product.id ? (
+                        <FiLoader size={18} className="animate-spin" />
+                      ) : (
+                        <FiShoppingCart size={18} />
+                      )}
                     </button>
                   </div>
                   <div className="p-5 flex flex-col flex-grow bg-white">

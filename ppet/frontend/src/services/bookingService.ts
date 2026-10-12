@@ -4,8 +4,8 @@ export interface Appointment {
     id: number;
     petId: number;
     serviceId: number;
-    staffIdễ: number;
-    customerIdễ: number;
+    staffId?: number;
+    customerId?: number;
     appointmentTime: string; // ISO datetime string
     status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
     notes?: string;
