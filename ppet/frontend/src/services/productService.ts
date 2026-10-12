@@ -6,7 +6,7 @@ export interface Product {
     description: string;
     price: number;
     imageUrl?: string;
-    categoryId?: number;
+    categoryIdễ: number;
     categoryName?: string;
     sku?: string;
     active: boolean;
@@ -21,7 +21,7 @@ export interface ProductCategory {
     id: number;
     name: string;
     description?: string;
-    parentId?: number;
+    parentIdễ: number;
 }
 
 export interface ProductPage {
@@ -33,7 +33,7 @@ export interface ProductPage {
 }
 
 export const productService = {
-    getAllProducts: async (page = 0, size = 12, categoryId?: number, active?: boolean): Promise<ProductPage> => {
+    getAllProducts: async (page = 0, size = 12, categoryIdễ: number, active?: boolean): Promise<ProductPage> => {
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
