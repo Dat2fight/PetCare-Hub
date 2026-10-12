@@ -26,7 +26,7 @@ export const ProductListPage: React.FC = () => {
         // Assign random/mock image and rating since they aren't in backend yet
         const displayProducts = data.content.map(p => ({
           ...p,
-          imageUrl: mockImages.foodRoyalCanin, 
+          imageUrl: p.imageUrl || mockImages.foodRoyalCanin, 
           rating: 4.5 + Math.random() * 0.5 
         }));
         

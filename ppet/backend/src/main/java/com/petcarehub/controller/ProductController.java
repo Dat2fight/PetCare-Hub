@@ -5,12 +5,14 @@ import com.petcarehub.dto.product.ProductDTO;
 import com.petcarehub.dto.product.ProductUpdateRequest;
 import com.petcarehub.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/products")
 @RequiredArgsConstructor
@@ -23,11 +25,13 @@ public class ProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Boolean active,
             Pageable pageable) {
+        log.info("Fetching products - categoryId: {}, active: {}, pageable: {}", categoryId, active, pageable);
         return ResponseEntity.ok(productService.getAllProducts(categoryId, active, pageable));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDTO> getProductById(@PathVariable Long id) {
+        log.info("Fetching product by id: {}", id);
         return ResponseEntity.ok(productService.getProductById(id));
     }
 

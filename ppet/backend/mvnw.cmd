@@ -82,10 +82,14 @@ if exist %WRAPPER_JAR% goto executeWrapper
 echo ERROR: Could not download Maven Wrapper jar. Please install Maven manually.
 goto error
 
+set "BASE_DIR=%~dp0"
+if "%BASE_DIR:~-1%"=="\" set "BASE_DIR=%BASE_DIR:~0,-1%"
+
 :executeWrapper
 @REM Download Maven distribution if needed and run
 "%JAVA_EXE%" ^
   -classpath %WRAPPER_JAR% ^
+  "-Dmaven.multiModuleProjectDirectory=%BASE_DIR%" ^
   %WRAPPER_LAUNCHER% %*
 
 if ERRORLEVEL 1 goto error

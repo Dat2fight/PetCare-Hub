@@ -24,7 +24,8 @@ export const LoginPage: React.FC = () => {
     
     try {
       const res = await apiClient.post('/auth/login', { username, password });
-      await login(res.data.accessToken, res.data.user);
+      const token = res.data.accessToken || res.data.token;
+      await login(token, res.data.user);
       navigate('/');
     } catch (err) {
       setError('Thông tin đăng nhập không chính xác');
