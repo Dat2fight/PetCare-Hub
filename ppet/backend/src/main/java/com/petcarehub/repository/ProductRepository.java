@@ -11,6 +11,7 @@ import java.util.Optional;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
     Optional<Product> findBySku(String sku);
+    Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
     Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);
     Page<Product> findByActiveTrue(Pageable pageable);
 }

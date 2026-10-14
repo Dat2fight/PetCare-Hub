@@ -62,9 +62,10 @@ ppet/
 ```bash
 cd backend
 ./mvnw spring-boot:run
+# hoặc trên Windows: .\mvnw.cmd spring-boot:run
 ```
 
-The API will be available at `http://localhost:8080`.
+The API will be available at `http://localhost:8081` (Swagger UI at `http://localhost:8081/swagger-ui.html`).
 
 ### Frontend
 
@@ -74,7 +75,8 @@ npm install
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173`.
+The app will be available at `http://localhost:5173/PetCare-Hub/`.
+
 
 ## Documentation
 

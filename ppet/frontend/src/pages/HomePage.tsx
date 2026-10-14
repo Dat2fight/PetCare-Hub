@@ -1,12 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import { Card } from '../components/common/Card';
+import { productService, Product, ProductCategory } from '../services/productService';
+import LoadingSpinner from '../components/common/LoadingSpinner';
+import { ProductImage } from '../components/common/ProductImage';
 import { mockImages } from '../data/mockImages';
 import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield, FiClock, FiTruck, FiUser } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<ProductCategory[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [productsError, setProductsError] = useState<string | null>(null);
+  const [categoriesError, setCategoriesError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    productService.getAllProducts(0, 6)
+      .then(data => { if (!cancelled) setProducts(data.content); })
+      .catch(() => { if (!cancelled) setProductsError('Không thể tải sản phẩm. Vui lòng thử lại sau.'); })
+      .finally(() => { if (!cancelled) setLoadingProducts(false); });
+    productService.getAllCategories()
+      .then(data => { if (!cancelled) setCategories(data); })
+      .catch(() => { if (!cancelled) setCategoriesError('Không thể tải danh mục sản phẩm.'); });
+    return () => { cancelled = true; };
+  }, []);
+
+  const categoryCards = [
+    { name: 'Chó', icon: '🐶', bg: 'bg-orange-50', to: '/pets' },
+    { name: 'Mèo', icon: '🐱', bg: 'bg-blue-50', to: '/pets' },
+    ...categories.map((category, index) => ({
+      name: category.name,
+      icon: ['🥩', '🎾', '🎽', '🧴'][index % 4],
+      bg: ['bg-red-50', 'bg-primary-50', 'bg-purple-50', 'bg-cyan-50'][index % 4],
+      to: `/products?categoryId=${category.id}`,
+    })),
+    { name: 'Sức khỏe', icon: '💊', bg: 'bg-emerald-50', to: '/services' },
+    { name: 'Khác', icon: '✨', bg: 'bg-secondary-50', to: '/products' },
+  ];
   return (
     <div className="bg-background min-h-screen">
       
@@ -177,23 +210,14 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {[
-            { name: "Chó", count: "120+ giống", icon: "🐶", bg: "bg-orange-50", hover: "hover:bg-orange-100", text: "text-orange-600" },
-            { name: "Mèo", count: "100+ giống", icon: "🐱", bg: "bg-blue-50", hover: "hover:bg-blue-100", text: "text-blue-600" },
-            { name: "Thức ăn", count: "200+ sản phẩm", icon: "🥩", bg: "bg-red-50", hover: "hover:bg-red-100", text: "text-red-600" },
-            { name: "Đồ chơi", count: "150+ sản phẩm", icon: "🎾", bg: "bg-primary-50", hover: "hover:bg-primary-100", text: "text-primary-600" },
-            { name: "Phụ kiện", count: "180+ sản phẩm", icon: "🎽", bg: "bg-purple-50", hover: "hover:bg-purple-100", text: "text-purple-600" },
-            { name: "Chăm sóc", count: "120+ sản phẩm", icon: "🧴", bg: "bg-cyan-50", hover: "hover:bg-cyan-100", text: "text-cyan-600" },
-            { name: "Sức khỏe", count: "100+ sản phẩm", icon: "💊", bg: "bg-emerald-50", hover: "hover:bg-emerald-100", text: "text-emerald-600" },
-            { name: "Khác", count: "50+ sản phẩm", icon: "✨", bg: "bg-secondary-50", hover: "hover:bg-secondary-100", text: "text-secondary-600" },
-          ].map((cat, idx) => (
-            <Link to="/products" key={idx} className={`${cat.bg} ${cat.hover} rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-sm cursor-pointer`}>
+          {categoryCards.map(cat => (
+            <Link to={cat.to} key={cat.to + cat.name} className={`${cat.bg} hover:brightness-95 rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-sm cursor-pointer`}>
               <div className="text-4xl mb-3 drop-shadow-sm">{cat.icon}</div>
               <h4 className="font-bold text-gray-900 text-sm mb-1">{cat.name}</h4>
-              <p className="text-[10px] font-medium text-gray-500">{cat.count}</p>
             </Link>
           ))}
         </div>
+        {categoriesError && <p role="alert" className="mt-4 text-red-500">{categoriesError}</p>}
       </section>
 
       {/* 6. PET CARE SERVICES */}
@@ -274,50 +298,32 @@ export const HomePage: React.FC = () => {
           <Link to="/products" className="text-primary-600 font-medium hover:text-primary-700 hidden sm:block text-sm">Xem tất cả →</Link>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-          {[
-            { name: "Thức ăn Royal Canin", desc: "1.2kg | Cho chó trưởng thành", price: "220.000đ", oldPrice: "260.000đ", image: mockImages.foodRoyalCanin, rating: 4.8, sale: "-15%" },
-            { name: "Thức ăn Whiskas", desc: "1.2kg | Cho mèo trưởng thành", price: "180.000đ", oldPrice: "220.000đ", image: mockImages.foodWhiskas, rating: 4.7, sale: "-15%" },
-            { name: "Đồ chơi bóng cao su", desc: "An toàn, bền bỉ", price: "45.000đ", image: mockImages.toyBall, rating: 4.9 },
-            { name: "Dây dắt cho chó", desc: "Size M | Chất liệu cao cấp", price: "250.000đ", image: mockImages.collar, rating: 4.8 },
-            { name: "Cát vệ sinh cho mèo", desc: "Khử mùi tốt, an toàn", price: "120.000đ", image: mockImages.catLitter, rating: 4.6 },
-            { name: "Bàn chải lông", desc: "Phù hợp mọi giống chó mèo", price: "85.000đ", image: mockImages.brush, rating: 4.7 },
-          ].map((prod, idx) => (
-            <Link to={`/products/${idx + 1}`} key={idx} className="block h-full">
-              <Card noPadding className="group h-full flex flex-col border-gray-100 hover:border-primary-200 transition-all rounded-3xl">
-              <div className="relative aspect-square p-4 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center">
-                {prod.sale && (
-                  <div className="absolute top-3 left-3 bg-coral-500 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow-sm z-10">
-                    {prod.sale}
+        {loadingProducts ? (
+          <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
+        ) : productsError ? (
+          <p role="alert" className="text-center py-12 text-red-500">{productsError}</p>
+        ) : products.length === 0 ? (
+          <p className="text-center py-12 text-gray-500">Chưa có sản phẩm nào.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+            {products.map(product => (
+              <Link to={`/products/${product.id}`} key={product.id} className="block h-full">
+                <Card noPadding className="group h-full flex flex-col border-gray-100 hover:border-primary-200 transition-all rounded-3xl">
+                  <div className="relative aspect-square p-4 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center">
+                    <ProductImage src={product.imageUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                )}
-                <button className="absolute top-3 right-3 text-gray-300 hover:text-coral-500 transition-colors z-10">
-                  <FiHeart size={18} />
-                </button>
-                <img src={prod.image} alt={prod.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
-              </div>
-              <div className="p-4 bg-gray-50/50 flex flex-col flex-grow rounded-b-3xl border-t border-gray-100">
-                <h3 className="font-bold text-[13px] text-gray-900 mb-1 line-clamp-2">{prod.name}</h3>
-                <p className="text-[11px] text-gray-500 mb-2">{prod.desc}</p>
-                <div className="mt-auto">
-                  <div className="flex items-end gap-2 mb-2">
-                    <span className="font-extrabold text-primary-600 text-sm">{prod.price}</span>
-                    {prod.oldPrice && <span className="text-[10px] text-gray-400 line-through mb-0.5">{prod.oldPrice}</span>}
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-1 text-[11px] font-medium text-gray-600">
-                      <FiStar className="text-secondary-500 fill-secondary-500" /> {prod.rating} (120)
+                  <div className="p-4 bg-gray-50/50 flex flex-col flex-grow rounded-b-3xl border-t border-gray-100">
+                    <h3 className="font-bold text-[13px] text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
+                    <p className="text-[11px] text-gray-500 mb-2 line-clamp-2">{product.description}</p>
+                    <div className="mt-auto font-extrabold text-primary-600 text-sm">
+                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
                     </div>
-                    <button className="w-7 h-7 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center hover:bg-primary-600 hover:text-white transition-colors shadow-sm">
-                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-                    </button>
                   </div>
-                </div>
-              </div>
-            </Card>
-            </Link>
-          ))}
-        </div>
+                </Card>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       

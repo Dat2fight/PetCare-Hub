@@ -53,4 +53,8 @@ export const productService = {
         const response = await apiClient.get<ProductCategory[]>('/categories');
         return response.data;
     },
+
+    addToCart: async (productId: number, quantity: number): Promise<void> => {
+        await apiClient.post('/cart/items', { productId, quantity });
+    },
 };

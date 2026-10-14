@@ -5,10 +5,13 @@ import com.petcarehub.dto.product.ProductDTO;
 import com.petcarehub.dto.product.ProductUpdateRequest;
 import com.petcarehub.entity.Product;
 import com.petcarehub.entity.ProductCategory;
+import com.petcarehub.entity.Inventory;
+import com.petcarehub.repository.InventoryRepository;
 import com.petcarehub.repository.ProductCategoryRepository;
 import com.petcarehub.repository.ProductRepository;
 import com.petcarehub.service.ProductService;
 import jakarta.persistence.EntityNotFoundException;
+import com.petcarehub.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +24,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
+    private final InventoryRepository inventoryRepository;
 
     private ProductDTO toDTO(Product p) {
         return ProductDTO.builder()
@@ -28,6 +32,8 @@ public class ProductServiceImpl implements ProductService {
                 .name(p.getName())
                 .description(p.getDescription())
                 .price(p.getPrice())
+                .stockQuantity(inventoryRepository.findByProductId(p.getId())
+                        .map(Inventory::getQuantity).orElse(0))
                 .imageUrl(p.getImageUrl())
                 .categoryId(p.getCategory() != null ? p.getCategory().getId() : null)
                 .categoryName(p.getCategory() != null ? p.getCategory().getName() : null)
@@ -46,6 +52,8 @@ public class ProductServiceImpl implements ProductService {
             products = productRepository.findByCategoryIdAndActiveTrue(categoryId, pageable);
         } else if (active != null && active) {
             products = productRepository.findByActiveTrue(pageable);
+        } else if (categoryId != null) {
+            products = productRepository.findByCategoryId(categoryId, pageable);
         } else {
             products = productRepository.findAll(pageable);
         }
@@ -56,7 +64,7 @@ public class ProductServiceImpl implements ProductService {
     @Transactional(readOnly = true)
     public ProductDTO getProductById(Long id) {
         Product product = productRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
         return toDTO(product);
     }
 
