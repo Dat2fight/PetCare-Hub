@@ -18,4 +18,9 @@ public class AuthResponse {
     public String getAccessToken() {
         return token;
     }
+
+    @JsonProperty("accessToken")
+    public void setAccessToken(String accessToken) {
+        this.token = accessToken;
+    }
 }

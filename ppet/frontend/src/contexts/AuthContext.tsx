@@ -18,7 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const token = localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
       if (token) {
         try {
           const response = await apiClient.get('/auth/me')
@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         } catch (error) {
           console.error("Failed to restore session", error)
           localStorage.removeItem('accessToken')
+          localStorage.removeItem('token')
         }
       }
       setIsLoading(false)
@@ -38,11 +39,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const login = (token: string, userData: User) => {
     localStorage.setItem('accessToken', token)
+    localStorage.setItem('token', token)
     setUser(userData)
   }
 
   const logout = () => {
     localStorage.removeItem('accessToken')
+    localStorage.removeItem('token')
     localStorage.removeItem('refreshToken')
     setUser(null)
   }

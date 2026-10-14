@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 
 @Data
 public class ReviewCreateRequest {
-    @NotNull(message = "Reviewer ID is required")
     private Long reviewerId;
     
     @NotNull(message = "Rating is required")

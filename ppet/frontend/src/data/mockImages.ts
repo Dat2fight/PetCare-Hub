@@ -1,6 +1,6 @@
 export const mockImages = {
   // Pets
-  dogGolden: "https://images.unsplash.com/photo-1552053831-71594a27632dễauto=format&fit=crop&q=80&w=800",
+  dogGolden: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=800",
   catScottish: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=800",
   dogPoodle: "/PetCare-Hub/images/poodle.png",
   dogCorgi: "/PetCare-Hub/images/corgi.png",

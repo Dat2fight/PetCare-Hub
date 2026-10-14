@@ -56,15 +56,17 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/pets/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/services/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/product-categories/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/categories/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/species/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/breeds/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/pets/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/care-packages/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/promotions/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         .anyRequest().authenticated());
 

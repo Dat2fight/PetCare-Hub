@@ -12,7 +12,7 @@ const apiClient = axios.create({
 // Request interceptor to add JWT token
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken')
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
     }
@@ -27,6 +27,7 @@ apiClient.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       localStorage.removeItem('accessToken')
+      localStorage.removeItem('token')
       localStorage.removeItem('refreshToken')
       const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
       window.location.href = `${basePath}/login`

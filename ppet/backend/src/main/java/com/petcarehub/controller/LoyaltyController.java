@@ -4,6 +4,7 @@ import com.petcarehub.dto.loyalty.LoyaltyAccountDTO;
 import com.petcarehub.dto.loyalty.LoyaltyTransactionDTO;
 import com.petcarehub.service.LoyaltyService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import lombok.RequiredArgsConstructor;
 
@@ -22,6 +23,7 @@ public class LoyaltyController {
     }
 
     @PostMapping("/account/{userId}/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LoyaltyAccountDTO> addPoints(
             @PathVariable Long userId,
             @RequestParam Integer points,

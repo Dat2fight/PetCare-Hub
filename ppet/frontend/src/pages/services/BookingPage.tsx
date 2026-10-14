@@ -4,6 +4,7 @@ import { Button } from '../../components/common/Button';
 import { FiCalendar, FiClock } from 'react-icons/fi';
 import { serviceService, Service } from '../../services/serviceService';
 import { bookingService } from '../../services/bookingService';
+import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
 // TODO: fetch user's pets from API when Pet Service is integrated
@@ -22,6 +23,7 @@ export const BookingPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -67,12 +69,17 @@ export const BookingPage: React.FC = () => {
 
   const handleBooking = async () => {
     if (!service) return;
+    if (!isAuthenticated) {
+      toast.error('Vui lòng đăng nhập để đặt lịch hẹn');
+      navigate('/login');
+      return;
+    }
     setSubmitting(true);
     try {
       const dateTimeString = `${selectedDate}T${selectedTime}:00`;
       
       await bookingService.bookAppointment({
-        petId: 1, // hardcode to 1 for now until Pet API is integrated
+        petId: selectedPet ? Number(selectedPet.id) : 1,
         serviceId: service.id,
         appointmentTime: dateTimeString,
         notes: notes

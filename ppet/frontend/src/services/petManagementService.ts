@@ -3,14 +3,14 @@ import apiClient from '../api/client';
 export interface PetDTO {
     id: number;
     name: string;
-    speciesIdễ: number;
+    speciesId?: number;
     speciesName?: string;
-    breedIdễ: number;
+    breedId?: number;
     breedName?: string;
     age?: number;
     healthStatus: string;
     availabilityStatus: string;
-    ownerIdễ: number;
+    ownerId?: number;
     description?: string;
     imageUrl?: string;
 }
@@ -20,7 +20,7 @@ export interface MedicalRecordDTO {
     petId: number;
     veterinarianId: number;
     veterinarianName: string;
-    appointmentIdễ: number;
+    appointmentId?: number;
     examinationDate: string;
     findings: string;
     diagnosis?: string;

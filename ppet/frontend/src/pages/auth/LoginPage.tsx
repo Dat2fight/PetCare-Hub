@@ -24,7 +24,7 @@ export const LoginPage: React.FC = () => {
     
     try {
       const res = await apiClient.post('/auth/login', { username, password });
-      const token = res.data.accessToken || res.data.token;
+      const token = res.data.token || res.data.accessToken;
       await login(token, res.data.user);
       navigate('/');
     } catch (err) {

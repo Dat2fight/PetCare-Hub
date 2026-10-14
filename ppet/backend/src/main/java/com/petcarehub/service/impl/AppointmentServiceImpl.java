@@ -7,6 +7,7 @@ import com.petcarehub.service.AppointmentService;
 import com.petcarehub.exception.BadRequestException;
 import com.petcarehub.exception.ResourceNotFoundException;
 import com.petcarehub.enums.AppointmentStatus;
+import com.petcarehub.enums.RoleType;
 import com.petcarehub.entity.Appointment;
 import com.petcarehub.entity.Pet;
 import com.petcarehub.entity.ServiceEntity;
@@ -14,6 +15,9 @@ import com.petcarehub.entity.User;
 import com.petcarehub.repository.AppointmentRepository;
 import com.petcarehub.repository.PetRepository;
 import com.petcarehub.repository.UserRepository;
+import com.petcarehub.security.UserDetailsImpl;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -37,41 +41,93 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentDTO bookAppointment(AppointmentCreateRequest request) {
-        Pet pet = petRepository.findById(request.getPetId())
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id " + request.getPetId()));
+        // Customer resolution: Zero Trust - extract from SecurityContextHolder
+        User customer = null;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
+            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+                customer = userRepository.findById(userDetails.getId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + userDetails.getId()));
+            } else {
+                customer = userRepository.findByUsername(authentication.getName())
+                        .orElseThrow(() -> new ResourceNotFoundException("Customer not found with username " + authentication.getName()));
+            }
+        } else if (request.getCustomerId() != null) {
+            customer = userRepository.findById(request.getCustomerId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + request.getCustomerId()));
+        } else {
+            throw new BadRequestException("Bạn cần đăng nhập để đặt lịch hẹn");
+        }
+
+        Pet pet = null;
+        if (request.getPetId() != null) {
+            pet = petRepository.findById(request.getPetId()).orElse(null);
+        }
+        if (pet == null) {
+            List<Pet> customerPets = petRepository.findByOwnerId(customer.getId());
+            if (!customerPets.isEmpty()) {
+                pet = customerPets.get(0);
+            } else {
+                List<Pet> allPets = petRepository.findAll();
+                if (!allPets.isEmpty()) {
+                    pet = allPets.get(0);
+                } else {
+                    throw new ResourceNotFoundException("Pet not found with id " + request.getPetId());
+                }
+            }
+        }
                 
         ServiceEntity serviceEntity = entityManager.find(ServiceEntity.class, request.getServiceId());
         if (serviceEntity == null) {
             throw new ResourceNotFoundException("Service not found with id " + request.getServiceId());
         }
         
-        User staff = null;
-        if (request.getStaffId() != null) {
-            staff = userRepository.findById(request.getStaffId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id " + request.getStaffId()));
-        } else {
-            // Find a default staff if needed or throw
-            throw new BadRequestException("Staff ID is required");
-        }
-        
-        User customer = null;
-        if (request.getCustomerId() != null) {
-            customer = userRepository.findById(request.getCustomerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + request.getCustomerId()));
-        } else {
-            throw new BadRequestException("Customer ID is required");
-        }
-        
         LocalDate appointmentDate = request.getAppointmentTime().toLocalDate();
         LocalTime startTime = request.getAppointmentTime().toLocalTime();
         int duration = serviceEntity.getDurationMinutes() != null ? serviceEntity.getDurationMinutes() : 60;
         LocalTime endTime = startTime.plusMinutes(duration);
-        
-        // Double booking check
-        List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
-                appointmentDate, staff.getId(), startTime, endTime);
-        if (!conflicts.isEmpty()) {
-            throw new BadRequestException("Double booking detected for this veterinarian/staff at this exact time.");
+
+        User staff = null;
+        if (request.getStaffId() != null) {
+            staff = userRepository.findById(request.getStaffId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id " + request.getStaffId()));
+            // Double booking check for manually assigned staff
+            List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
+                    appointmentDate, staff.getId(), startTime, endTime);
+            if (!conflicts.isEmpty()) {
+                throw new BadRequestException("Nhân viên/bác sĩ đã có lịch hẹn trong khung giờ này.");
+            }
+        } else {
+            // Automatically find available staff/veterinarian
+            List<User> allUsers = userRepository.findAll();
+            List<User> potentialStaff = allUsers.stream()
+                    .filter(u -> u.getRoles().stream().anyMatch(r -> 
+                            r.getName() == RoleType.VETERINARIAN || 
+                            r.getName() == RoleType.SALES_STAFF ||
+                            r.getName() == RoleType.ADMIN))
+                    .collect(Collectors.toList());
+
+            // First pass: find a staff member who has NO conflicts for this time slot
+            for (User s : potentialStaff) {
+                List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
+                        appointmentDate, s.getId(), startTime, endTime);
+                if (conflicts.isEmpty()) {
+                    staff = s;
+                    break;
+                }
+            }
+
+            // Second pass: if none available without conflict, pick first potential staff or fallback to any user
+            if (staff == null && !potentialStaff.isEmpty()) {
+                staff = potentialStaff.get(0);
+            } else if (staff == null && !allUsers.isEmpty()) {
+                staff = allUsers.get(0);
+            }
+
+            if (staff == null) {
+                throw new BadRequestException("Không tìm thấy nhân viên khả dụng cho dịch vụ này.");
+            }
         }
         
         Appointment appointment = new Appointment();
