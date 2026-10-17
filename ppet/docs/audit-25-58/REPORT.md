@@ -51,3 +51,10 @@ Seed: đặt ba biến môi trường rồi chạy `node seed_pets.js` từ ppet
 - #46: ba trang pet list/detail/quiz dùng API thật, không fallback pet đầu tiên hoặc điểm 98%; có loading/error/empty. Các thông tin mẫu không có nguồn API đã bỏ khỏi trang.
 - Tests: PetAuditTest (state machine, breed/owner, giữ giá, mapper/tuổi/quyền riêng tư, cả ba matching strategy). Backend/TypeScript/build PASS; lint lỗi baseline.
 - NEEDS DECISION: age là năm tròn, ngày sinh suy ra chỉ là ước lượng; có thể thay bằng từ chối age và bắt buộc birthDate. Chưa xác minh E2E bằng trình duyệt.
+
+## Đợt E
+- #37: target tồn tại, giao dịch DELIVERED hoặc lịch COMPLETED của principal; khóa user chống gửi trùng, mỗi target một review; mặc định pending; public list chỉ approved; detail pending chỉ chủ/admin; thêm endpoint duyệt ADMIN.
+- #45: hai báo cáo dùng chung SUM/COUNT tại SQL; payment COMPLETED, loại CANCELLED, lọc from/to (mặc định tháng hiện tại). Không có dữ liệu partial refund/paidAt nên dùng createdAt; NEEDS DECISION.
+- #44/#48 backend: thông báo trả Page, ownership, read/read-all/unread-count; pageable toàn hệ thống mặc định 20, max 100. Lịch hẹn/hồ sơ/loyalty giữ response list nhưng nhận page/size thật để tương thích.
+- Tests: ReviewAuditTest và RevenueRepositoryTest (H2, các trạng thái thanh toán/hủy/khoảng thời gian); toàn bộ backend PASS. tsc/build PASS; lint lỗi baseline.
+- Quét ngoài phạm vi: findAll còn ở danh mục, species, services, promotions, admin users; matching vẫn đánh giá toàn bộ pet available. Chưa có GROUP BY theo kỳ vì DTO báo cáo hiện chỉ tổng; cần bổ sung nếu muốn breakdown theo ngày/tháng.

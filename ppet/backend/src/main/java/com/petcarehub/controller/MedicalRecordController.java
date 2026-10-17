@@ -30,8 +30,8 @@ public class MedicalRecordController {
     }
 
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<MedicalRecordDTO>> getMedicalRecordsByPetId(@PathVariable Long petId) {
-        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPetId(petId));
+    public ResponseEntity<List<MedicalRecordDTO>> getMedicalRecordsByPetId(@PathVariable Long petId, org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPetId(petId, pageable));
     }
 
     @PutMapping("/{id}")

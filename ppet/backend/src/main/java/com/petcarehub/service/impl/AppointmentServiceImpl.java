@@ -118,17 +118,17 @@ public class AppointmentServiceImpl implements AppointmentService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAllAppointments() {
-        return appointmentRepository.findAll().stream()
+    public List<AppointmentDTO> getAllAppointments(org.springframework.data.domain.Pageable pageable) {
+        return appointmentRepository.findAll(pageable).stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
     
     @Override
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByUser(Long userId) {
+    public List<AppointmentDTO> getAppointmentsByUser(Long userId, org.springframework.data.domain.Pageable pageable) {
         // Just use pagination method in repository but collect to list
-        return appointmentRepository.findByCustomerId(userId, org.springframework.data.domain.Pageable.unpaged())
+        return appointmentRepository.findByCustomerId(userId, pageable)
             .getContent().stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
@@ -136,8 +136,8 @@ public class AppointmentServiceImpl implements AppointmentService {
     
     @Override
     @Transactional(readOnly = true)
-    public List<AppointmentDTO> getAppointmentsByPet(Long petId) {
-        return appointmentRepository.findByPetId(petId, org.springframework.data.domain.PageRequest.of(0, 100, org.springframework.data.domain.Sort.by("appointmentDate").descending())).stream()
+    public List<AppointmentDTO> getAppointmentsByPet(Long petId, org.springframework.data.domain.Pageable pageable) {
+        return appointmentRepository.findByPetId(petId, pageable).stream()
                 .map(this::mapToDTO).toList();
     }
 

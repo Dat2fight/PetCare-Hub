@@ -65,8 +65,8 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<MedicalRecordDTO> getMedicalRecordsByPetId(Long petId) {
-        return medicalRecordRepository.findByPetId(petId, org.springframework.data.domain.Pageable.unpaged()).stream()
+    public List<MedicalRecordDTO> getMedicalRecordsByPetId(Long petId, org.springframework.data.domain.Pageable pageable) {
+        return medicalRecordRepository.findByPetId(petId, pageable).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    boolean existsByCustomerIdAndServiceIdAndStatus(Long customerId, Long serviceId, AppointmentStatus status);
     Page<Appointment> findByPetId(Long petId, Pageable pageable);
     Page<Appointment> findByCustomerId(Long customerId, Pageable pageable);
 

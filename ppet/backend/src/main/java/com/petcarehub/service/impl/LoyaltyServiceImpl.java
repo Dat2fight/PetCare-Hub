@@ -95,8 +95,8 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     @Override
-    public List<LoyaltyTransactionDTO> getTransactions(Long accountId) {
-        return transactionRepository.findByLoyaltyAccountId(accountId, Pageable.unpaged()).getContent().stream().map(tx -> {
+    public List<LoyaltyTransactionDTO> getTransactions(Long accountId, org.springframework.data.domain.Pageable pageable) {
+        return transactionRepository.findByLoyaltyAccountId(accountId, pageable).getContent().stream().map(tx -> {
             LoyaltyTransactionDTO dto = new LoyaltyTransactionDTO();
             dto.setId(tx.getId());
             dto.setPoints(tx.getPoints());

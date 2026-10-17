@@ -40,7 +40,7 @@ public class LoyaltyController {
     }
 
     @GetMapping("/account/{accountId}/transactions")
-    public ResponseEntity<List<LoyaltyTransactionDTO>> getTransactions(@PathVariable Long accountId) {
-        return ResponseEntity.ok(loyaltyService.getTransactions(accountId));
+    public ResponseEntity<List<LoyaltyTransactionDTO>> getTransactions(@PathVariable Long accountId, org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(loyaltyService.getTransactions(accountId, pageable));
     }
 }

@@ -31,16 +31,12 @@ public class AdminServiceImpl implements AdminService {
     private final RoleRepository roleRepository;
 
     @Override
-    public DashboardSummaryDTO getDashboardSummary() {
+    public DashboardSummaryDTO getDashboardSummary(java.time.LocalDate from, java.time.LocalDate to) {
         long totalUsers = userRepository.count();
         long totalOrders = orderRepository.count();
         long totalPets = petRepository.count();
 
-        List<Order> allOrders = orderRepository.findAll();
-        BigDecimal totalRevenue = allOrders.stream()
-                .map(Order::getTotalAmount) // Assuming Order has getTotalAmount returning BigDecimal
-                .filter(amount -> amount != null)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalRevenue = revenue(from, to).getRevenue();
 
         return DashboardSummaryDTO.builder()
                 .totalUsers(totalUsers)
@@ -51,18 +47,22 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public RevenueReportDTO getRevenueReport() {
-        List<Order> allOrders = orderRepository.findAll();
-        BigDecimal totalRevenue = allOrders.stream()
-                .map(Order::getTotalAmount)
-                .filter(amount -> amount != null)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    public RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to) {
+        var summary = revenue(from, to);
 
         return RevenueReportDTO.builder()
                 .reportDate(LocalDate.now())
-                .totalOrders(allOrders.size())
-                .totalRevenue(totalRevenue)
+                .totalOrders(summary.getCount())
+                .totalRevenue(summary.getRevenue())
                 .build();
+    }
+
+    private OrderRepository.RevenueTotal revenue(LocalDate from, LocalDate to) {
+        LocalDate end = to == null ? LocalDate.now() : to;
+        LocalDate start = from == null ? end.withDayOfMonth(1) : from;
+        if (start.isAfter(end)) throw new BadRequestException("Ngày bắt đầu không được sau ngày kết thúc");
+        // NEEDS DECISION: no paidAt/partial refund fields; use createdAt and exclude fully refunded payments.
+        return orderRepository.summarizeRevenue(start.atStartOfDay(), end.plusDays(1).atStartOfDay());
     }
 
     @Override

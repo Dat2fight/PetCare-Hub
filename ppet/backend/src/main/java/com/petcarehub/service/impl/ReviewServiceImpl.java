@@ -28,6 +28,9 @@ public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+    private final com.petcarehub.repository.OrderRepository orders;
+    private final com.petcarehub.repository.AppointmentRepository appointments;
+    private final jakarta.persistence.EntityManager entityManager;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
@@ -45,20 +48,30 @@ public class ReviewServiceImpl implements ReviewService {
                 customer = userRepository.findByUsername(authentication.getName())
                         .orElseThrow(() -> new ResourceNotFoundException("User not found with username " + authentication.getName()));
             }
-        } else if (request.getReviewerId() != null) {
-            customer = userRepository.findById(request.getReviewerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + request.getReviewerId()));
         } else {
-            throw new BadRequestException("Bạn cần đăng nhập để gửi đánh giá");
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập để gửi đánh giá");
         }
+        String type = request.getTargetType().toUpperCase(java.util.Locale.ROOT);
+        Class<?> target = switch (type) {
+            case "PRODUCT" -> com.petcarehub.entity.Product.class;
+            case "PET" -> com.petcarehub.entity.Pet.class;
+            case "SERVICE" -> com.petcarehub.entity.ServiceEntity.class;
+            default -> throw new BadRequestException("Loại đánh giá không hợp lệ");
+        };
+        if (entityManager.find(target, request.getTargetId()) == null) throw new ResourceNotFoundException("Không tìm thấy đối tượng đánh giá");
+        userRepository.findLockedById(customer.getId()).orElseThrow(); // Serialize duplicate submissions by this customer.
+        boolean eligible = type.equals("SERVICE") ? appointments.existsByCustomerIdAndServiceIdAndStatus(customer.getId(), request.getTargetId(), com.petcarehub.enums.AppointmentStatus.COMPLETED)
+                : orders.hasDeliveredTarget(customer.getId(), type, request.getTargetId());
+        if (!eligible) throw new org.springframework.security.access.AccessDeniedException("Bạn cần hoàn thành giao dịch trước khi đánh giá");
+        if (reviewRepository.existsByCustomerIdAndReviewableTypeAndReviewableId(customer.getId(), type, request.getTargetId())) throw new IllegalStateException("Bạn đã đánh giá đối tượng này");
 
         Review review = Review.builder()
                 .customer(customer)
                 .rating(request.getRating())
                 .comment(request.getComment())
-                .reviewableType(request.getTargetType())
+                .reviewableType(type)
                 .reviewableId(request.getTargetId())
-                .approved(true) // default or based on logic
+                .approved(false) // NEEDS DECISION: pending until an administrator approves.
                 .build();
 
         review = reviewRepository.save(review);
@@ -72,14 +85,27 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     public ReviewDTO getReviewById(Long id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
+        if (!Boolean.TRUE.equals(review.getApproved())) {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            boolean visible = auth != null && (auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
+                    || auth.getPrincipal() instanceof UserDetailsImpl p && p.getId().equals(review.getCustomer().getId()));
+            if (!visible) throw new ResourceNotFoundException("Không tìm thấy đánh giá");
+        }
         return mapToDTO(review);
     }
 
     @Override
     public List<ReviewDTO> getReviewsByReviewable(String type, Long id) {
-        return reviewRepository.findByReviewableTypeAndReviewableId(type, id, Pageable.unpaged())
+        return reviewRepository.findByReviewableTypeAndReviewableIdAndApprovedTrue(type, id, org.springframework.data.domain.PageRequest.of(0, 100))
                 .stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public ReviewDTO approveReview(Long id) {
+        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
+        review.setApproved(true); return mapToDTO(reviewRepository.save(review));
     }
 
     private ReviewDTO mapToDTO(Review review) {

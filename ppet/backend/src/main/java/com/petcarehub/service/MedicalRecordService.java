@@ -7,7 +7,7 @@ import java.util.List;
 public interface MedicalRecordService {
     MedicalRecordDTO createMedicalRecord(MedicalRecordCreateRequest request);
     MedicalRecordDTO getMedicalRecordById(Long id);
-    List<MedicalRecordDTO> getMedicalRecordsByPetId(Long petId);
+    List<MedicalRecordDTO> getMedicalRecordsByPetId(Long petId, org.springframework.data.domain.Pageable pageable);
     MedicalRecordDTO updateMedicalRecord(Long id, MedicalRecordCreateRequest request);
     void deleteMedicalRecord(Long id);
 }
