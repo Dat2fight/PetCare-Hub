@@ -17,6 +17,8 @@ public class PetDTO {
     private Long breedId;
     private String breedName;
     private Integer age;
+    private java.time.LocalDate birthDate;
+    private java.math.BigDecimal price;
     private String healthStatus;
     private String availabilityStatus;
     private Long ownerId;

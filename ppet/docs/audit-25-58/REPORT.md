@@ -43,3 +43,11 @@ Seed: đặt ba biến môi trường rồi chạy `node seed_pets.js` từ ppet
 - #44 phần pet: truy vấn findByPetId có giới hạn 100, sắp xếp theo ngày. Cần hoàn thiện API phân trang bên ngoài ở E.
 - Tests: AppointmentServiceImplTest (duration, availability, toàn bộ bảng transition). Backend PASS, frontend build PASS sau sửa null pet, lint lỗi baseline.
 - NEEDS DECISION: GROOMING → SALES_STAFF; VETERINARY → VETERINARIAN. Không có lịch nghỉ/chuyên môn riêng trong schema. Khách được hủy trước giờ bắt đầu (chưa có khoảng phạt hủy).
+
+## Đợt D
+- #33/#57: update sức khỏe qua PetHealthService; enum sai trả 400; breed/species kiểm tra; owner không tồn tại bị từ chối; giá null giữ nguyên.
+- #39: thêm birthDate và price; age tính từ dateOfBirth. Legacy age quy đổi năm chỉ nếu chưa có ngày sinh. Giá chỉ trả cho pet chưa có chủ đang AVAILABLE.
+- #38: ánh xạ quiz tường minh; availableCareTime đơn vị giờ/ngày; principal quyết định user; mapper Pet dùng chung đầy đủ quan hệ.
+- #46: ba trang pet list/detail/quiz dùng API thật, không fallback pet đầu tiên hoặc điểm 98%; có loading/error/empty. Các thông tin mẫu không có nguồn API đã bỏ khỏi trang.
+- Tests: PetAuditTest (state machine, breed/owner, giữ giá, mapper/tuổi/quyền riêng tư, cả ba matching strategy). Backend/TypeScript/build PASS; lint lỗi baseline.
+- NEEDS DECISION: age là năm tròn, ngày sinh suy ra chỉ là ước lượng; có thể thay bằng từ chối age và bắt buộc birthDate. Chưa xác minh E2E bằng trình duyệt.

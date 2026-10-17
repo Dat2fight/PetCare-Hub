@@ -38,10 +38,15 @@ public class PetMatchingServiceImpl implements PetMatchingService {
     }
 
     @Override
+    @org.springframework.transaction.annotation.Transactional
     public List<MatchResultDTO> matchPets(Long userId, QuizSubmitRequest request) {
         PetMatchingQuiz quiz = new PetMatchingQuiz();
-        BeanUtils.copyProperties(request, quiz);
-        quiz.setCustomer(userRepository.findById(userId).orElse(null));
+        quiz.setHouseSize(request.getHouseSize());
+        quiz.setLivingEnvironment(request.getLivingEnvironment());
+        quiz.setHasChildren(request.getPresenceOfChildren());
+        quiz.setActivityLevel(request.getActivityLevel());
+        quiz.setDailyCareHours(java.math.BigDecimal.valueOf(request.getAvailableCareTime())); // API unit: hours per day.
+        quiz.setCustomer(userRepository.findById(userId).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản")));
         quiz = quizRepository.save(quiz);
 
         List<Pet> availablePets = petRepository.findByAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.AVAILABLE, org.springframework.data.domain.Pageable.unpaged()).getContent();
@@ -62,8 +67,7 @@ public class PetMatchingServiceImpl implements PetMatchingService {
             resultEntity.setExplanation(explanation.toString());
             resultRepository.save(resultEntity);
 
-            PetDTO petDTO = new PetDTO();
-            BeanUtils.copyProperties(pet, petDTO);
+            PetDTO petDTO = com.petcarehub.mapper.PetMapper.toDTO(pet);
             results.add(new MatchResultDTO(petDTO, totalScore, explanation.toString()));
         }
 

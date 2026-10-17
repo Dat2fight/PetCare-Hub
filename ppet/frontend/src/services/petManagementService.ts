@@ -8,6 +8,8 @@ export interface PetDTO {
     breedId?: number;
     breedName?: string;
     age?: number;
+    birthDate?: string;
+    price?: number | null;
     healthStatus: string;
     availabilityStatus: string;
     ownerId?: number;
