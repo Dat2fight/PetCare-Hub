@@ -10,6 +10,8 @@ function ScrollToTop() {
 
   return null;
 }
+import ProtectedRoute from './components/common/ProtectedRoute';
+import { OrdersPage } from './pages/orders/OrdersPage';
 import { AuthProvider } from './contexts/AuthContext';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
@@ -52,19 +54,22 @@ function App() {
               <Route path="/pets/:id" element={<PetDetailPage />} />
               <Route path="/products" element={<ProductListPage />} />
               <Route path="/products/:id" element={<ProductDetailPage />} />
-              <Route path="/cart" element={<CartPage />} />
-              <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/orders/tracking" element={<OrderTrackingPage />} />
+              <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
+              <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
+              <Route path="/orders/tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
               <Route path="/services" element={<ServiceListPage />} />
-              <Route path="/services/booking" element={<BookingPage />} />
-              <Route path="/my-pets" element={<MyPetsPage />} />
-              <Route path="/my-pets/:id/health" element={<PetHealthHistoryPage />} />
-              <Route path="/my-pets/:id/vaccinations" element={<PetVaccinationPage />} />
-              <Route path="/loyalty" element={<LoyaltyPage />} />
-              <Route path="/membership" element={<MembershipPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
-              <Route path="/pet-matching" element={<PetMatchingPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/services/booking" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
+              <Route path="/my-pets" element={<ProtectedRoute><MyPetsPage /></ProtectedRoute>} />
+              <Route path="/my-pets/:id/health" element={<ProtectedRoute><PetHealthHistoryPage /></ProtectedRoute>} />
+              <Route path="/my-pets/:id/vaccinations" element={<ProtectedRoute><PetVaccinationPage /></ProtectedRoute>} />
+              <Route path="/loyalty" element={<ProtectedRoute><LoyaltyPage /></ProtectedRoute>} />
+              <Route path="/membership" element={<ProtectedRoute><MembershipPage /></ProtectedRoute>} />
+              <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+              <Route path="/pet-matching" element={<ProtectedRoute><PetMatchingPage /></ProtectedRoute>} />
+              <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+              <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/unauthorized" element={<div className="p-8">403 — Bạn không có quyền truy cập.</div>} />
+              <Route path="*" element={<div className="p-8">404 — Không tìm thấy trang.</div>} />
             </Routes>
           </main>
           <Footer />

@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MedicalRecordServiceImpl implements MedicalRecordService {
     
+    private final com.petcarehub.security.Ownership ownership;
     private final MedicalRecordRepository medicalRecordRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
@@ -60,12 +61,14 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     public MedicalRecordDTO getMedicalRecordById(Long id) {
         MedicalRecord record = medicalRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Medical Record not found with id: " + id));
+        ownership.requirePet(record.getPet().getId());
         return mapToDTO(record);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<MedicalRecordDTO> getMedicalRecordsByPetId(Long petId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requirePet(petId);
         return medicalRecordRepository.findByPetId(petId, pageable).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());

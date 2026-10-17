@@ -19,6 +19,21 @@ import org.springframework.web.bind.annotation.*;
 public class PetController {
 
     private final PetService petService;
+    private final com.petcarehub.security.Ownership ownership;
+    @PostMapping("/my-pets")
+    public ResponseEntity<PetDTO> createMine(@Valid @RequestBody PetCreateRequest request) {
+        request.setOwnerId(ownership.userId()); request.setPrice(java.math.BigDecimal.ZERO);
+        request.setHealthStatus("HEALTHY"); request.setAvailabilityStatus("UNAVAILABLE");
+        return ResponseEntity.status(HttpStatus.CREATED).body(petService.createPet(request));
+    }
+    @PutMapping("/my-pets/{id}")
+    public ResponseEntity<PetDTO> updateMine(@PathVariable Long id, @Valid @RequestBody PetUpdateRequest request) {
+        PetDTO current = petService.getPetById(id);
+        if (!ownership.userId().equals(current.getOwnerId())) throw new org.springframework.security.access.AccessDeniedException("Bạn chỉ được sửa thú cưng của mình");
+        request.setOwnerId(ownership.userId()); request.setPrice(null);
+        request.setHealthStatus(current.getHealthStatus()); request.setAvailabilityStatus(current.getAvailabilityStatus());
+        return ResponseEntity.ok(petService.updatePet(id, request));
+    }
 
     @GetMapping
     public ResponseEntity<Page<PetDTO>> getAllPets(

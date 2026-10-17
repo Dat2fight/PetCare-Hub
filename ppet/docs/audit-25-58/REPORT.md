@@ -58,3 +58,13 @@ Seed: đặt ba biến môi trường rồi chạy `node seed_pets.js` từ ppet
 - #44/#48 backend: thông báo trả Page, ownership, read/read-all/unread-count; pageable toàn hệ thống mặc định 20, max 100. Lịch hẹn/hồ sơ/loyalty giữ response list nhưng nhận page/size thật để tương thích.
 - Tests: ReviewAuditTest và RevenueRepositoryTest (H2, các trạng thái thanh toán/hủy/khoảng thời gian); toàn bộ backend PASS. tsc/build PASS; lint lỗi baseline.
 - Quét ngoài phạm vi: findAll còn ở danh mục, species, services, promotions, admin users; matching vẫn đánh giá toàn bộ pet available. Chưa có GROUP BY theo kỳ vì DTO báo cáo hiện chỉ tổng; cần bổ sung nếu muốn breakdown theo ngày/tháng.
+
+## Đợt F
+- #51: ProtectedRoute chờ restore phiên, state.from và role; các trang cá nhân không mount trước đăng nhập. Profile null không spinner vô hạn.
+- #52: /orders lấy Page theo principal, catch-all 404, giữ BrowserRouter basename Vite; CI copy index.html thành 404.html. Chưa deploy nên chưa xác minh refresh trên host thật.
+- #47: loyalty/membership dùng dữ liệu thật; backend là nguồn ngưỡng 1000/5000/10000, trả tier/nextTier/pointsToNextTier/thresholds. NEEDS DECISION về ngưỡng.
+- #48: notifications nối API đầy đủ, polling 30s + cleanup theo phiên. NEEDS DECISION: WebSocket chưa có STOMP authentication, không kích hoạt hook chưa an toàn.
+- #49: PUT users/me validated; thêm/sửa pets/my-pets gán owner từ principal, không cho khách đổi trạng thái y tế/giá/owner; OAuth/quên mật khẩu ghi Sắp ra mắt và vô hiệu hóa.
+- #50: lịch sử y tế/tiêm phòng/my-pets phân biệt error, empty, loading; cleanup chống response cũ, retry, phân trang lịch sử.
+- Tests: HTTP customer/admin và ownership notification + profile validation; frontend build PASS, lint lỗi baseline. Chưa có browser E2E.
+- Phát hiện thêm: OrderServiceImpl và checkout trước đó là demo/stub; xử lý trong G để kiểm thử persistence có ý nghĩa.

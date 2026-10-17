@@ -54,13 +54,13 @@ export const petManagementService = {
         return response.data;
     },
 
-    getMedicalRecords: async (petId: number): Promise<MedicalRecordDTO[]> => {
-        const response = await apiClient.get<MedicalRecordDTO[]>(`/medical-records/pet/${petId}`);
+    getMedicalRecords: async (petId: number, page = 0): Promise<MedicalRecordDTO[]> => {
+        const response = await apiClient.get<MedicalRecordDTO[]>(`/medical-records/pet/${petId}?page=${page}&size=20`);
         return response.data;
     },
 
-    getVaccinations: async (petId: number): Promise<VaccinationDTO[]> => {
-        const response = await apiClient.get<VaccinationDTO[]>(`/vaccinations/pet/${petId}`);
+    getVaccinations: async (petId: number, page = 0): Promise<VaccinationDTO[]> => {
+        const response = await apiClient.get<VaccinationDTO[]>(`/vaccinations/pet/${petId}?page=${page}&size=20`);
         return response.data;
     }
 };

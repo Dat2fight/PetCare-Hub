@@ -1,100 +1,27 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
-import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Badge } from '../../components/common/Badge';
-import { petManagementService, PetDTO } from '../../services/petManagementService';
-
-export const MyPetsPage: React.FC = () => {
-  const [pets, setPets] = useState<PetDTO[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchPets = async () => {
-      try {
-        const data = await petManagementService.getMyPets();
-        setPets(data);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPets();
-  }, []);
-
-  if (loading) {
-    return <div className="min-h-screen py-20 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
-  }
-
-  return (
-    <div className="bg-background min-h-screen py-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Thú cưng của tôi</h1>
-          <Button>+ Thêm thú cưng</Button>
-        </div>
-
-        {pets.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 text-center">
-            <h2 className="text-xl font-bold text-gray-500 mb-4">Bạn chưa có thú cưng nào.</h2>
-          </div>
-        ) : (
-          pets.map(pet => (
-            <div key={pet.id} className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 flex flex-col md:flex-row gap-8 mb-8">
-              <div className="flex flex-col items-center justify-center w-full md:w-1/4">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-primary-50 mb-4">
-                  <img src={pet.imageUrl || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'} alt={pet.name} className="w-full h-full object-cover" />
-                </div>
-                <h2 className="text-2xl font-bold text-gray-900">{pet.name}</h2>
-                <p className="text-gray-500 mb-2">{pet.breedName || 'Không rõ'} • {pet.age ? pet.age + ' tuổi' : 'Không rõ'}</p>
-                <Badge variant={pet.healthStatus === 'HEALTHY' ? 'success' : 'warning'}>
-                  {pet.healthStatus === 'HEALTHY' ? 'Khỏe mạnh' : 'Đang theo dõi'}
-                </Badge>
-              </div>
-
-              <div className="w-full md:w-3/4">
-                <div className="border-b border-gray-100 flex gap-6 mb-6">
-                  <button className="pb-3 border-b-2 border-primary-600 text-primary-600 font-semibold text-lg">
-                    Thông tin
-                  </button>
-                  <Link
-                    to={`/my-pets/${pet.id}/health`}
-                    className="pb-3 border-b-2 border-transparent text-gray-400 hover:text-gray-600 font-medium text-lg"
-                  >
-                    Sức khỏe
-                  </Link>
-                  <Link
-                    to={`/my-pets/${pet.id}/vaccinations`}
-                    className="pb-3 border-b-2 border-transparent text-gray-400 hover:text-gray-600 font-medium text-lg"
-                  >
-                    Lịch sử tiêm
-                  </Link>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-12">
-                  <div className="flex justify-between border-b border-gray-50 pb-2">
-                    <span className="text-gray-500">Giống loài:</span>
-                    <span className="font-semibold text-gray-900">{pet.speciesName}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-50 pb-2">
-                    <span className="text-gray-500">Trạng thái:</span>
-                    <span className="font-semibold text-gray-900">{pet.availabilityStatus}</span>
-                  </div>
-                  <div className="flex justify-between border-b border-gray-50 pb-2">
-                    <span className="text-gray-500">Ghi chú:</span>
-                    <span className="font-semibold text-gray-900 line-clamp-1">{pet.description || 'Không có'}</span>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex justify-end">
-                  <Button variant="outline">Chỉnh sửa thông tin</Button>
-                </div>
-              </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
+import apiClient from '../../api/client';
+import { PetDTO } from '../../services/petManagementService';
+import toast from 'react-hot-toast';
+export const MyPetsPage = () => {
+ const [pets,setPets] = useState<PetDTO[]>([]); const [species,setSpecies] = useState<{id:number;name:string}[]>([]);
+ const [loading,setLoading] = useState(true);const [error,setError] = useState(false);const [retry,setRetry] = useState(0);
+ const [editing,setEditing] = useState<PetDTO|null>(null);const [show,setShow] = useState(false);const [busy,setBusy] = useState(false);
+ useEffect(() => {const controller = new AbortController();setLoading(true);setError(false);
+  Promise.all([apiClient.get<PetDTO[]>('/pets/my-pets',{signal:controller.signal}),apiClient.get('/species',{signal:controller.signal})])
+   .then(([p,s]) => {setPets(p.data);setSpecies(s.data);}).catch(() => {if(!controller.signal.aborted)setError(true);}).finally(() => {if(!controller.signal.aborted)setLoading(false);});
+  return () => controller.abort();
+ },[retry]);
+ const save = async (e: FormEvent<HTMLFormElement>) => {e.preventDefault();const data = new FormData(e.currentTarget);setBusy(true);
+  const payload = {name:data.get('name'),speciesId:Number(data.get('speciesId')),breedId:editing?.breedId,birthDate:data.get('birthDate') || null,description:data.get('description'),healthStatus:editing?.healthStatus || 'HEALTHY',availabilityStatus:editing?.availabilityStatus || 'UNAVAILABLE'};
+  try {if(editing) await apiClient.put(`/pets/my-pets/${editing.id}`,payload);else await apiClient.post('/pets/my-pets',payload);setShow(false);setRetry(retry+1);toast.success('Đã lưu thú cưng');}
+  catch {toast.error('Không lưu được thú cưng. Vui lòng kiểm tra thông tin.');}finally{setBusy(false);}
+ };
+ return <div className="max-w-5xl mx-auto p-8"><h1 className="text-3xl font-bold mb-6">Thú cưng của tôi</h1><button onClick={() => {setEditing(null);setShow(true);}}>+ Thêm thú cưng</button>
+ {show && <form key={editing?.id || 'new'} onSubmit={save} className="grid gap-4 p-6 bg-white rounded-xl my-6"><label>Tên <input name="name" required maxLength={100} defaultValue={editing?.name}/></label>
+ <label>Loài <select name="speciesId" required defaultValue={editing?.speciesId}>{species.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
+ <label>Ngày sinh <input name="birthDate" type="date" defaultValue={editing?.birthDate}/></label><label>Ghi chú <textarea name="description" defaultValue={editing?.description}/></label>
+ <button disabled={busy}>{busy?'Đang lưu…':'Lưu'}</button><button type="button" onClick={() => setShow(false)}>Đóng</button></form>}
+ {loading?<p>Đang tải…</p>:error?<p role="alert">Không tải được thú cưng. <button onClick={() => setRetry(retry+1)}>Thử lại</button></p>:!pets.length?<p>Bạn chưa có thú cưng nào.</p>:pets.map(pet => <article key={pet.id} className="bg-white p-6 rounded-xl my-4"><h2 className="text-xl font-bold">{pet.name}</h2><p>{pet.speciesName} · {pet.breedName}</p><div className="flex gap-5"><Link to={`/my-pets/${pet.id}/health`}>Hồ sơ sức khỏe</Link><Link to={`/my-pets/${pet.id}/vaccinations`}>Tiêm phòng</Link><button onClick={() => {setEditing(pet);setShow(true);}}>Chỉnh sửa</button></div></article>)}
+ </div>;
 };

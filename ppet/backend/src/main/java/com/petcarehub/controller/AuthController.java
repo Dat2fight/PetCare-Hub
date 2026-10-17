@@ -50,6 +50,7 @@ public class AuthController {
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setRoles(user.getRoles().stream().map(r -> r.getName()).collect(Collectors.toSet()));
@@ -83,6 +84,7 @@ public class AuthController {
         userDTO.setId(user.getId());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
+        userDTO.setPhone(user.getPhone());
         userDTO.setFirstName(user.getFirstName());
         userDTO.setLastName(user.getLastName());
         userDTO.setRoles(user.getRoles().stream().map(r -> r.getName()).collect(Collectors.toSet()));

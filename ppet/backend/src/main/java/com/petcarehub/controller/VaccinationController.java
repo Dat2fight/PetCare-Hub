@@ -30,8 +30,8 @@ public class VaccinationController {
     }
 
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByPetId(@PathVariable Long petId) {
-        return ResponseEntity.ok(vaccinationService.getVaccinationsByPetId(petId));
+    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByPetId(@PathVariable Long petId, org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(vaccinationService.getVaccinationsByPetId(petId, pageable));
     }
 
     @PutMapping("/{id}")

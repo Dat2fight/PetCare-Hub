@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VaccinationServiceImpl implements VaccinationService {
 
+    private final com.petcarehub.security.Ownership ownership;
     private final VaccinationRepository vaccinationRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
@@ -53,13 +54,15 @@ public class VaccinationServiceImpl implements VaccinationService {
     public VaccinationDTO getVaccinationById(Long id) {
         Vaccination vaccination = vaccinationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vaccination not found"));
+        ownership.requirePet(vaccination.getPet().getId());
         return mapToDTO(vaccination);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<VaccinationDTO> getVaccinationsByPetId(Long petId) {
-        return vaccinationRepository.findByPetId(petId).stream()
+    public List<VaccinationDTO> getVaccinationsByPetId(Long petId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requirePet(petId);
+        return vaccinationRepository.findByPetId(petId, pageable).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

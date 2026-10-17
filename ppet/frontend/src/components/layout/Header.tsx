@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import apiClient from '../../api/client';
 
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -15,6 +16,14 @@ const Header: React.FC = () => {
   const { user, logout } = useAuth();
 
   const navigate = useNavigate();
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    setUnread(0); if (!user) return;
+    const controller = new AbortController();
+    const load = () => apiClient.get('/notifications/unread-count', {signal:controller.signal}).then(({data}) => { if(!controller.signal.aborted) setUnread(data.count); }).catch(() => {});
+    void load(); const timer = window.setInterval(load,30000);
+    return () => {controller.abort();window.clearInterval(timer);};
+  },[user?.id]);
 
 
 

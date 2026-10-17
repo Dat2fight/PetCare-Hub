@@ -30,7 +30,7 @@ class AuditValidationTest {
     }
 
     @Test void reversedVaccinationDatesAreRejectedBeforePersistence() {
-        var service = new VaccinationServiceImpl(null, null, null);
+        var service = new VaccinationServiceImpl(null, null, null, null);
         var request = new VaccinationCreateRequest();
         request.setDateAdministered(LocalDate.now()); request.setNextDueDate(LocalDate.now().minusDays(1));
         assertThrows(com.petcarehub.exception.BadRequestException.class, () -> service.createVaccination(request));

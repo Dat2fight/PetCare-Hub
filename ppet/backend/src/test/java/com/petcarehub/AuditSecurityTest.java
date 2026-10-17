@@ -39,6 +39,7 @@ class AuditSecurityTest {
     @Autowired JwtProperties properties;
     @MockBean UserRepository users;
     @MockBean PetService pets;
+    @MockBean com.petcarehub.repository.NotificationRepository notifications;
     @MockBean ServiceManagementService services;
     @MockBean TreatmentService treatments;
 
@@ -75,5 +76,17 @@ class AuditSecurityTest {
         mvc.perform(post("/api/v1/auth/register").contentType("application/json")
                 .content("{\"email\":\"invalid\",\"password\":\"short\"}"))
                 .andExpect(status().isBadRequest()).andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("email")));
+    }
+
+    @Test void customerCannotAccessAdminOrAnotherUsersNotifications() throws Exception {
+        var principal = new UserDetailsImpl(1L, "a", "a@test", "unused", List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CUSTOMER")));
+        mvc.perform(get("/api/v1/admin/dashboard").with(user(principal))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/notifications/2").with(user(principal))).andExpect(status().isForbidden());
+        var owner = new User(); owner.setId(2L);
+        var notice = com.petcarehub.entity.Notification.builder().user(owner).build();
+        when(notifications.findById(10L)).thenReturn(Optional.of(notice));
+        mvc.perform(put("/api/v1/notifications/10/read").with(user(principal))).andExpect(status().isForbidden());
+        mvc.perform(put("/api/v1/users/me").with(user(principal)).contentType("application/json").content("{}"))
+                .andExpect(status().isBadRequest());
     }
 }

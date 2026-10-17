@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
 import { Button } from '../../components/common/Button';
@@ -16,6 +16,7 @@ export const LoginPage: React.FC = () => {
   
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +27,8 @@ export const LoginPage: React.FC = () => {
       const res = await apiClient.post('/auth/login', { username, password });
       const token = res.data.token || res.data.accessToken;
       await login(token, res.data.user);
-      navigate('/');
+      const from = location.state?.from;
+      navigate(from?.pathname && from.pathname.startsWith('/') && !from.pathname.startsWith('//') && !from.pathname.includes('\\') ? from.pathname + (from.search || '') : '/', { replace: true });
     } catch (err) {
       setError('Thông tin đăng nhập không chính xác');
     } finally {
@@ -92,7 +94,7 @@ export const LoginPage: React.FC = () => {
                 <input type="checkbox" className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-gray-300" />
                 <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
               </label>
-              <a href="#" className="text-sm font-medium text-primary-600 hover:text-primary-500">Quên mật khẩu?</a>
+              <span aria-disabled="true">Quên mật khẩu — Sắp ra mắt</span>
             </div>
 
             <Button type="submit" fullWidth isLoading={isLoading} className="mt-8">
@@ -103,13 +105,13 @@ export const LoginPage: React.FC = () => {
           <div className="mt-8 pt-6 border-t border-gray-100">
             <p className="text-center text-sm text-gray-500 mb-4">Hoặc đăng nhập bằng</p>
             <div className="grid grid-cols-2 gap-4">
-              <button className="flex items-center justify-center py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
+              <button disabled aria-disabled="true" title="Sắp ra mắt" className="flex items-center justify-center py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
                 <FcGoogle size={20} className="mr-2" />
-                <span className="text-sm font-medium text-gray-700">Google</span>
+                <span className="text-sm font-medium text-gray-700">Google — Sắp ra mắt</span>
               </button>
-              <button className="flex items-center justify-center py-2.5 px-4 bg-[#1877F2] text-white rounded-xl hover:bg-[#1877F2]/90 transition-colors">
+              <button disabled aria-disabled="true" title="Sắp ra mắt" className="flex items-center justify-center py-2.5 px-4 bg-[#1877F2] text-white rounded-xl hover:bg-[#1877F2]/90 transition-colors">
                 <FaFacebook size={20} className="mr-2" />
-                <span className="text-sm font-medium">Facebook</span>
+                <span className="text-sm font-medium">Facebook — Sắp ra mắt</span>
               </button>
             </div>
           </div>
