@@ -46,7 +46,7 @@ export const LoginPage: React.FC = () => {
           alt="Happy Golden Retriever and Cat" 
           className="absolute inset-0 w-full h-full object-cover opacity-90"
         />
-        <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-gradient-to-t from-black/80 to-transparent text-white">
+        <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-linear-to-t from-black/80 to-transparent text-white">
           <h1 className="text-4xl font-bold mb-4">PetCare Hub</h1>
           <p className="text-xl text-gray-200">Better Care, Happier Pets</p>
         </div>

@@ -92,7 +92,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentDTO updateAppointmentStatus(Long id, AppointmentUpdateRequest request) {
-        Appointment appointment = appointmentRepository.findById(id)
+        Appointment appointment = appointmentRepository.findLockedById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
             
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

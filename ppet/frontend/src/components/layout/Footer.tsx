@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MdPets } from 'react-icons/md';
-import { FiFacebook, FiInstagram, FiTwitter, FiYoutube } from 'react-icons/fi';
+
 
 const Footer: React.FC = () => {
   return (
@@ -13,7 +13,7 @@ const Footer: React.FC = () => {
           <div className="lg:col-span-2">
             <div className="flex flex-col items-start mb-6">
               <div className="flex items-center">
-                <div className="bg-primary-500 p-1.5 rounded-lg text-white mr-2 shadow-sm">
+                <div className="bg-primary-500 p-1.5 rounded-lg text-white mr-2 shadow-xs">
                   <MdPets size={22} />
                 </div>
                 <span className="font-extrabold text-2xl text-gray-900 tracking-tight">PetCare Hub</span>
@@ -23,20 +23,7 @@ const Footer: React.FC = () => {
             <p className="text-gray-500 text-sm leading-relaxed mb-6 max-w-sm">
               Chúng tôi cam kết mang đến những sản phẩm và dịch vụ tốt nhất, để mọi thú cưng đều được yêu thương và chăm sóc đúng cách.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                <FiFacebook size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                <FiInstagram size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                <FiYoutube size={18} />
-              </a>
-              <a href="#" className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400 hover:bg-primary-50 hover:text-primary-600 transition-colors">
-                <FiTwitter size={18} />
-              </a>
-            </div>
+
           </div>
 
           {/* Links Col */}
@@ -56,11 +43,11 @@ const Footer: React.FC = () => {
             <h3 className="font-bold text-gray-900 mb-6">Tải ứng dụng</h3>
             <p className="text-gray-500 text-sm mb-4">Mua sắm và đặt lịch dễ dàng hơn trên ứng dụng di động.</p>
             <div className="space-y-3">
-              <button className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
-                <span className="font-semibold text-sm">App Store</span>
+              <button disabled aria-disabled="true" title="Sắp ra mắt" className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
+                <span className="font-semibold text-sm">App Store — Sắp ra mắt</span>
               </button>
-              <button className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
-                <span className="font-semibold text-sm">Google Play</span>
+              <button disabled aria-disabled="true" title="Sắp ra mắt" className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
+                <span className="font-semibold text-sm">Google Play — Sắp ra mắt</span>
               </button>
             </div>
           </div>
@@ -73,8 +60,8 @@ const Footer: React.FC = () => {
             © 2025 PetCare Hub. Tất cả quyền được bảo lưu.
           </p>
           <div className="flex space-x-6">
-            <a href="#" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Điều khoản sử dụng</a>
-            <a href="#" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Chính sách bảo mật</a>
+            <span aria-disabled="true" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Điều khoản sử dụng — Sắp cập nhật</span>
+            <span aria-disabled="true" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Chính sách bảo mật — Sắp cập nhật</span>
           </div>
         </div>
       </div>

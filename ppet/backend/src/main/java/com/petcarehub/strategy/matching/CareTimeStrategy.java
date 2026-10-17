@@ -12,13 +12,13 @@ public class CareTimeStrategy implements PetMatchingStrategy {
         if (careTime == null) return 0.0;
         
         if (careTime.compareTo(new BigDecimal("2")) < 0) {
-            explanation.append("Low daily care time might be challenging. ");
+            explanation.append("Thời gian chăm sóc ít có thể gây khó khăn. ");
             return 10.0;
         } else if (careTime.compareTo(new BigDecimal("2")) >= 0 && careTime.compareTo(new BigDecimal("4")) < 0) {
-            explanation.append("Moderate daily care time is sufficient. ");
+            explanation.append("Thời gian chăm sóc vừa phải đáp ứng nhu cầu cơ bản. ");
             return 20.0;
         } else {
-            explanation.append("High daily care time provides great attention for the pet. ");
+            explanation.append("Bạn có nhiều thời gian quan tâm thú cưng. ");
             return 30.0;
         }
     }

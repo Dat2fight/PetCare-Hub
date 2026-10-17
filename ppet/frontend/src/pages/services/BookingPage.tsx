@@ -103,7 +103,7 @@ export const BookingPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Đặt lịch: {service.name}</h1>
 
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-10">
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xs border border-gray-100 flex flex-col md:flex-row gap-10">
           <div className="flex-1 space-y-8">
             
             {/* Pet Selection */}

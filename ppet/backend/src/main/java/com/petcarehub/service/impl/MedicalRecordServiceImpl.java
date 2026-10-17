@@ -31,16 +31,18 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional
     public MedicalRecordDTO createMedicalRecord(MedicalRecordCreateRequest request) {
+        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now()))
+            throw new com.petcarehub.exception.BadRequestException("examinationDate: Ngày khám không được trống hoặc trong tương lai");
         Pet pet = petRepository.findById(request.getPetId())
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + request.getPetId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng: " + request.getPetId()));
                 
         User vet = userRepository.findById(request.getVeterinarianId())
-                .orElseThrow(() -> new ResourceNotFoundException("Veterinarian not found with id: " + request.getVeterinarianId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy bác sĩ: " + request.getVeterinarianId()));
                 
         Appointment appointment = null;
         if (request.getAppointmentId() != null) {
             appointment = appointmentRepository.findById(request.getAppointmentId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
         }
 
         MedicalRecord record = MedicalRecord.builder()
@@ -60,7 +62,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Transactional(readOnly = true)
     public MedicalRecordDTO getMedicalRecordById(Long id) {
         MedicalRecord record = medicalRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medical Record not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ y tế: " + id));
         ownership.requirePet(record.getPet().getId());
         return mapToDTO(record);
     }
@@ -77,8 +79,10 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional
     public MedicalRecordDTO updateMedicalRecord(Long id, MedicalRecordCreateRequest request) {
+        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now()))
+            throw new com.petcarehub.exception.BadRequestException("examinationDate: Ngày khám không được trống hoặc trong tương lai");
         MedicalRecord record = medicalRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medical Record not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ y tế: " + id));
                 
         record.setExaminationDate(request.getExaminationDate());
         record.setFindings(request.getFindings());
@@ -92,7 +96,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Transactional
     public void deleteMedicalRecord(Long id) {
         MedicalRecord record = medicalRecordRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Medical Record not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ y tế: " + id));
         medicalRecordRepository.delete(record);
     }
     

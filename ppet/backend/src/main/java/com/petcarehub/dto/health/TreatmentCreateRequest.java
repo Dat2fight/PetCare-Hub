@@ -12,4 +12,9 @@ public class TreatmentCreateRequest {
     private String medicine;
     @NotBlank(message="Liều lượng là bắt buộc") @Size(max=100, message="Liều lượng tối đa 100 ký tự")
     private String dosage;
+    @NotBlank(message="Tần suất dùng thuốc là bắt buộc") @Size(max=100, message="Tần suất tối đa 100 ký tự")
+    private String frequency;
+    @NotNull(message="Ngày bắt đầu là bắt buộc")
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
 }

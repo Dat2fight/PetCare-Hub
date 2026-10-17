@@ -48,7 +48,7 @@ export const HomePage: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row items-center">
           
           <div className="lg:w-5/12 z-20 mb-12 lg:mb-0">
-            <span className="inline-block py-1.5 px-4 rounded-full bg-primary-100 text-primary-700 font-bold text-sm mb-6 shadow-sm">
+            <span className="inline-block py-1.5 px-4 rounded-full bg-primary-100 text-primary-700 font-bold text-sm mb-6 shadow-xs">
               Chào mừng đến với PetCare Hub!
             </span>
             <h1 className="text-5xl lg:text-[64px] font-extrabold text-gray-900 leading-[1.1] mb-6 tracking-tight">
@@ -95,7 +95,7 @@ export const HomePage: React.FC = () => {
 
       {/* 2. TRUST / BENEFIT STRIP */}
       <section className="relative -mt-10 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="bg-white rounded-3xl shadow-sm p-4 flex flex-col md:flex-row justify-between items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 border border-gray-100">
+        <div className="bg-white rounded-3xl shadow-xs p-4 flex flex-col md:flex-row justify-between items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 border border-gray-100">
           {[
             { icon: <FiTruck />, title: "Giao hàng toàn quốc", desc: "Nhanh chóng & an toàn" },
             { icon: <FiShield />, title: "Thú cưng khỏe mạnh", desc: "Được kiểm tra sức khỏe" },
@@ -103,7 +103,7 @@ export const HomePage: React.FC = () => {
             { icon: <FiClock />, title: "Hỗ trợ 24/7", desc: "Luôn bên bạn" },
           ].map((item, idx) => (
             <div key={idx} className="flex items-center gap-4 px-6 py-4 w-full md:w-1/4 justify-center md:justify-start">
-              <div className="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0 text-xl">
+              <div className="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 text-xl">
                 {item.icon}
               </div>
               <div>
@@ -142,14 +142,14 @@ export const HomePage: React.FC = () => {
               <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-gray-100 hover:border-primary-200">
               <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 rounded-t-2xl p-2">
                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
-                <button className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-coral-500 transition-colors shadow-sm">
+                <button className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-coral-500 transition-colors shadow-xs">
                   <FiHeart size={16} />
                 </button>
                 <div className="absolute bottom-4 left-4">
-                  <span className={`${pet.bg} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-sm`}>{pet.status}</span>
+                  <span className={`${pet.bg} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-xs`}>{pet.status}</span>
                 </div>
               </div>
-              <div className="p-4 flex flex-col flex-grow">
+              <div className="p-4 flex flex-col grow">
                 <h3 className="font-bold text-[15px] text-gray-900 mb-2 line-clamp-1">{pet.name}</h3>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 divide-x divide-gray-200">
                   <span className="flex items-center gap-1"><FiUser size={12}/> {pet.age}</span>
@@ -166,10 +166,10 @@ export const HomePage: React.FC = () => {
 
       {/* 4. PET MATCHING CTA */}
       <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-primary-50 to-primary-100/50 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between relative overflow-hidden border border-primary-100">
+        <div className="bg-linear-to-r from-primary-50 to-primary-100/50 rounded-[32px] p-8 md:p-12 flex flex-col md:flex-row items-center justify-between relative overflow-hidden border border-primary-100">
           <div className="md:w-1/2 relative z-10">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center text-primary-500">
+              <div className="w-10 h-10 bg-white rounded-xl shadow-xs flex items-center justify-center text-primary-500">
                 <MdPets size={20} />
               </div>
               <h2 className="text-3xl font-extrabold text-gray-900">Tìm thú cưng phù hợp với bạn</h2>
@@ -211,7 +211,7 @@ export const HomePage: React.FC = () => {
 
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
           {categoryCards.map(cat => (
-            <Link to={cat.to} key={cat.to + cat.name} className={`${cat.bg} hover:brightness-95 rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-sm cursor-pointer`}>
+            <Link to={cat.to} key={cat.to + cat.name} className={`${cat.bg} hover:brightness-95 rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-xs cursor-pointer`}>
               <div className="text-4xl mb-3 drop-shadow-sm">{cat.icon}</div>
               <h4 className="font-bold text-gray-900 text-sm mb-1">{cat.name}</h4>
             </Link>
@@ -246,7 +246,7 @@ export const HomePage: React.FC = () => {
               <div className="h-36 overflow-hidden relative">
                 <img src={srv.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={srv.title} />
               </div>
-              <div className="p-5 flex flex-col flex-grow relative">
+              <div className="p-5 flex flex-col grow relative">
                 <div className="absolute -top-6 left-4 w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center text-2xl border border-gray-50">
                   {srv.icon}
                 </div>
@@ -312,7 +312,7 @@ export const HomePage: React.FC = () => {
                   <div className="relative aspect-square p-4 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center">
                     <ProductImage src={product.imageUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
                   </div>
-                  <div className="p-4 bg-gray-50/50 flex flex-col flex-grow rounded-b-3xl border-t border-gray-100">
+                  <div className="p-4 bg-gray-50/50 flex flex-col grow rounded-b-3xl border-t border-gray-100">
                     <h3 className="font-bold text-[13px] text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
                     <p className="text-[11px] text-gray-500 mb-2 line-clamp-2">{product.description}</p>
                     <div className="mt-auto font-extrabold text-primary-600 text-sm">
@@ -330,7 +330,7 @@ export const HomePage: React.FC = () => {
 
       {/* 9. CUSTOMER REVIEWS */}
       <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[32px] shadow-sm border border-gray-100 p-8 md:p-12 flex flex-col lg:flex-row gap-12 items-center">
+        <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 p-8 md:p-12 flex flex-col lg:flex-row gap-12 items-center">
           
           <div className="lg:w-1/3 flex flex-col items-center lg:items-start text-center lg:text-left">
             <div className="flex items-center gap-3 mb-2">
@@ -368,11 +368,11 @@ export const HomePage: React.FC = () => {
                 { name: "Trần Văn Hùng", date: "05/04/2025", text: "\"Mình mua thức ăn cho cún ở đây suốt 1 năm nay, giá cả hợp lý, giao hàng nhanh chóng. Rất hài lòng với chất lượng sản phẩm.\"", avatar: mockImages.avatar2 },
                 { name: "Lê Minh Tuấn", date: "28/03/2025", text: "\"Tính năng tìm kiếm thú cưng phù hợp rất tuyệt vời. Mình đã tìm được một bé Corgi rất ngoan và khỏe mạnh thông qua gợi ý của PetCare Hub.\"", avatar: mockImages.placeholder }
               ].map((review, idx) => (
-                <Card key={idx} className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center flex-shrink-0">
+                <Card key={idx} className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0">
                   <div className="absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none">"</div>
                   
                   <div className="flex items-start gap-4 mb-4 relative z-10">
-                    <img src={review.avatar} alt="Customer" className="w-12 h-12 rounded-full object-cover shadow-sm" />
+                    <img src={review.avatar} alt="Customer" className="w-12 h-12 rounded-full object-cover shadow-xs" />
                     <div>
                       <h4 className="font-bold text-gray-900">{review.name}</h4>
                       <div className="flex text-secondary-400 text-sm mt-0.5">

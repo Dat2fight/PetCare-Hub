@@ -49,9 +49,12 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to) {
         var summary = revenue(from, to);
+        LocalDate end = to == null ? LocalDate.now() : to;
+        LocalDate start = from == null ? end.withDayOfMonth(1) : from;
 
         return RevenueReportDTO.builder()
                 .reportDate(LocalDate.now())
+                .periods(orderRepository.revenueByMonth(start.atStartOfDay(), end.plusDays(1).atStartOfDay()))
                 .totalOrders(summary.getCount())
                 .totalRevenue(summary.getRevenue())
                 .build();

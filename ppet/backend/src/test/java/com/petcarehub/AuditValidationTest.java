@@ -37,6 +37,13 @@ class AuditValidationTest {
         assertThrows(com.petcarehub.exception.BadRequestException.class, () -> service.updateVaccination(1L, request));
     }
 
+    @Test void futureMedicalDatesAreRejectedByService() {
+        var service=new com.petcarehub.service.impl.MedicalRecordServiceImpl(null,null,null,null,null);
+        var request=new MedicalRecordCreateRequest(); request.setExaminationDate(LocalDate.now().plusDays(1));
+        assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createMedicalRecord(request));
+        assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.updateMedicalRecord(1L,request));
+    }
+
     @Test void exceptionMappingsDoNotLeakInternalDetails() {
         var handler = new GlobalExceptionHandler();
         var request = new ServletWebRequest(new MockHttpServletRequest());

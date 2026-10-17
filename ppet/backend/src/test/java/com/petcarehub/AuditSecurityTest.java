@@ -39,9 +39,18 @@ class AuditSecurityTest {
     @Autowired JwtProperties properties;
     @MockBean UserRepository users;
     @MockBean PetService pets;
+    @MockBean com.petcarehub.service.ProductService products;
     @MockBean com.petcarehub.repository.NotificationRepository notifications;
     @MockBean ServiceManagementService services;
     @MockBean TreatmentService treatments;
+
+    @Test void storefrontForcesActiveAndHidesInactiveDetails() throws Exception {
+        when(products.searchProducts(org.mockito.ArgumentMatchers.isNull(),org.mockito.ArgumentMatchers.eq(true),org.mockito.ArgumentMatchers.isNull(),org.mockito.ArgumentMatchers.any())).thenReturn(org.springframework.data.domain.Page.empty(org.springframework.data.domain.PageRequest.of(0,20)));
+        mvc.perform(get("/api/v1/products?active=false")).andExpect(status().isOk());
+        org.mockito.Mockito.verify(products).searchProducts(org.mockito.ArgumentMatchers.isNull(),org.mockito.ArgumentMatchers.eq(true),org.mockito.ArgumentMatchers.isNull(),org.mockito.ArgumentMatchers.any());
+        when(products.getProductById(1L)).thenReturn(com.petcarehub.dto.product.ProductDTO.builder().active(false).build());
+        mvc.perform(get("/api/v1/products/1")).andExpect(status().isNotFound());
+    }
 
     @Test void anonymousPersonalEndpointsReturn401() throws Exception {
         for (String path : List.of("/api/v1/auth/me", "/api/v1/pets/my-pets")) {

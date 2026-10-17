@@ -25,6 +25,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final InventoryRepository inventoryRepository;
+    private final com.petcarehub.service.InventoryService inventoryService;
 
     private ProductDTO toDTO(Product p) {
         return toDTO(p, inventoryRepository.findByProductId(p.getId()).map(Inventory::getQuantity).orElse(0));
@@ -100,7 +101,13 @@ public class ProductServiceImpl implements ProductService {
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
-        return toDTO(productRepository.save(product));
+        product = productRepository.save(product);
+        inventoryRepository.save(Inventory.builder().product(product).quantity(0).build());
+        if (request.getStockQuantity() != null && request.getStockQuantity() > 0) {
+            var stock = new com.petcarehub.dto.inventory.StockUpdateRequest(); stock.setProductId(product.getId()); stock.setQuantity(request.getStockQuantity()); stock.setReason("Tồn kho ban đầu");
+            inventoryService.addStock(stock);
+        }
+        return toDTO(product);
     }
 
     @Override

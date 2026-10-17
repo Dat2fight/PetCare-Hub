@@ -46,4 +46,20 @@ class PetAuditTest {
         assertEquals(30, new com.petcarehub.strategy.matching.CareTimeStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
         assertEquals(40, new com.petcarehub.strategy.matching.LivingEnvironmentStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
     }
+
+    @Test void quizAnswersAreMappedExplicitly() {
+        var pets=mock(PetRepository.class); var users=mock(UserRepository.class);
+        var quizzes=mock(PetMatchingQuizRepository.class); var results=mock(PetMatchingResultRepository.class);
+        var service=new PetMatchingServiceImpl(java.util.List.of(), pets, users, quizzes, results);
+        User customer=new User(); customer.setId(7L);
+        when(users.findById(7L)).thenReturn(Optional.of(customer));
+        when(quizzes.save(any())).thenAnswer(call->call.getArgument(0));
+        when(pets.findByAvailabilityStatus(eq(AvailabilityStatus.AVAILABLE),any())).thenReturn(org.springframework.data.domain.Page.empty());
+        var request=new com.petcarehub.dto.matching.QuizSubmitRequest();
+        request.setPresenceOfChildren(true); request.setAvailableCareTime(4); request.setActivityLevel("HIGH"); request.setHouseSize("SMALL"); request.setLivingEnvironment("APARTMENT");
+        assertTrue(service.matchPets(7L,request).isEmpty());
+        var captured=org.mockito.ArgumentCaptor.forClass(PetMatchingQuiz.class); verify(quizzes).save(captured.capture());
+        var quiz=captured.getValue(); assertTrue(quiz.getHasChildren()); assertEquals(BigDecimal.valueOf(4),quiz.getDailyCareHours());
+        assertEquals("HIGH",quiz.getActivityLevel()); assertEquals("SMALL",quiz.getHouseSize()); assertEquals("APARTMENT",quiz.getLivingEnvironment()); assertEquals(7L,quiz.getCustomer().getId());
+    }
 }

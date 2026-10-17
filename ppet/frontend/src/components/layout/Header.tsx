@@ -5,7 +5,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 import { useAuth } from '../../contexts/AuthContext';
 
-import { FiSearch, FiBell, FiShoppingCart, FiUser, FiLogOut, FiChevronDown } from 'react-icons/fi';
+import { FiSearch, FiBell, FiShoppingCart, FiLogOut, FiChevronDown } from 'react-icons/fi';
 
 import { MdPets } from 'react-icons/md';
 
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
 
   return (
 
-    <header className="bg-white shadow-sm sticky top-0 z-50 border-b border-gray-100">
+    <header className="bg-white shadow-xs sticky top-0 z-50 border-b border-gray-100">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -49,11 +49,11 @@ const Header: React.FC = () => {
 
           {/* Logo */}
 
-          <div className="flex-shrink-0 flex flex-col items-start cursor-pointer group" onClick={() => navigate('/')}>
+          <div className="shrink-0 flex flex-col items-start cursor-pointer group" onClick={() => navigate('/')}>
 
             <div className="flex items-center">
 
-              <div className="bg-primary-500 p-1.5 rounded-lg text-white mr-2 shadow-sm group-hover:scale-105 transition-transform">
+              <div className="bg-primary-500 p-1.5 rounded-lg text-white mr-2 shadow-xs group-hover:scale-105 transition-transform">
 
                 <MdPets size={22} />
 
@@ -105,7 +105,7 @@ const Header: React.FC = () => {
 
                 <Link to="/notifications" className="text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative">
 
-                  <FiBell size={22} />
+                  <FiBell size={22} />{unread > 0 && <span aria-label={`${unread} thông báo chưa đọc`}>{unread}</span>}
 
                   <span className="absolute top-1 right-1 block h-2.5 w-2.5 rounded-full bg-coral-500 ring-2 ring-white" />
 
@@ -123,7 +123,7 @@ const Header: React.FC = () => {
 
                 <div className="relative group ml-2">
 
-                  <button className="flex items-center gap-2 focus:outline-none bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors">
+                  <button className="flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors">
 
                     <img className="h-8 w-8 rounded-full border border-primary-100 object-cover" src={user.avatarUrl || "https://placehold.co/100x100/ecfdf5/047857?text=U"} alt="User avatar" />
 
@@ -173,7 +173,7 @@ const Header: React.FC = () => {
 
                 <Link to="/login" className="text-gray-700 hover:text-primary-600 font-medium px-2">Đăng nhập</Link>
 
-                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-sm">Đăng ký</Link>
+                <Link to="/register" className="bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs">Đăng ký</Link>
 
               </div>
 

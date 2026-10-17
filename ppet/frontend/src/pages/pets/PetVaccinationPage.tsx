@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { petManagementService, PetDTO, VaccinationDTO } from '../../services/petManagementService';
 
 export const PetVaccinationPage: React.FC = () => {
@@ -48,7 +48,7 @@ export const PetVaccinationPage: React.FC = () => {
           Lịch sử tiêm phòng - {pet.name}
         </h1>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+        <div className="bg-white rounded-3xl shadow-xs border border-gray-100 p-8 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Danh sách vaccine đã tiêm</h2>
           </div>

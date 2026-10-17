@@ -25,7 +25,7 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<OrderDTO> createOrder(@RequestBody OrderCreateRequest request) {
+    public ResponseEntity<OrderDTO> createOrder(@jakarta.validation.Valid @RequestBody OrderCreateRequest request) {
         return ResponseEntity.ok(orderService.createOrder(request));
     }
 

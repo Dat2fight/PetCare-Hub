@@ -143,7 +143,7 @@ export const ProductListPage: React.FC = () => {
             </div>
             <input
               type="text"
-              className="block w-full rounded-full border border-gray-200 py-3 pl-12 pr-4 text-gray-900 focus:ring-2 focus:ring-primary-500 bg-white shadow-sm"
+              className="block w-full rounded-full border border-gray-200 py-3 pl-12 pr-4 text-gray-900 focus:ring-2 focus:ring-primary-500 bg-white shadow-xs"
               placeholder="Tìm kiếm hạt Royal Canin, vòng cổ..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -219,7 +219,7 @@ export const ProductListPage: React.FC = () => {
                       )}
                     </button>
                   </div>
-                  <div className="p-5 flex flex-col flex-grow bg-white">
+                  <div className="p-5 flex flex-col grow bg-white">
                     <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
                       {product.name}
                     </h3>

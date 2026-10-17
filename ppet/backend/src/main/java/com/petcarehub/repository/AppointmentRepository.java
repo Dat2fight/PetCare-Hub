@@ -13,6 +13,9 @@ import java.util.List;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Appointment a where a.id = :id")
+    java.util.Optional<Appointment> findLockedById(Long id);
     boolean existsByCustomerIdAndServiceIdAndStatus(Long customerId, Long serviceId, AppointmentStatus status);
     Page<Appointment> findByPetId(Long petId, Pageable pageable);
     Page<Appointment> findByCustomerId(Long customerId, Pageable pageable);

@@ -20,19 +20,23 @@ import org.springframework.format.annotation.DateTimeFormat;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final com.petcarehub.security.Ownership ownership;
 
     @GetMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF', 'VETERINARIAN')")
     public ResponseEntity<List<AppointmentDTO>> getAllAppointments(org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(appointmentService.getAllAppointments(pageable));
     }
 
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AppointmentDTO>> getAppointmentsByUser(@PathVariable Long userId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requireUser(userId);
         return ResponseEntity.ok(appointmentService.getAppointmentsByUser(userId, pageable));
     }
 
     @GetMapping("/pet/{petId}")
     public ResponseEntity<List<AppointmentDTO>> getAppointmentsByPet(@PathVariable Long petId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requirePet(petId);
         return ResponseEntity.ok(appointmentService.getAppointmentsByPet(petId, pageable));
     }
 

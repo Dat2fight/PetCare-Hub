@@ -92,7 +92,7 @@ export const RegisterPage: React.FC = () => {
           alt="Happy Poodle" 
           className="absolute inset-0 w-full h-full object-cover opacity-90"
         />
-        <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-gradient-to-t from-black/80 to-transparent text-white">
+        <div className="absolute bottom-0 left-0 right-0 p-12 z-20 bg-linear-to-t from-black/80 to-transparent text-white">
           <h1 className="text-4xl font-bold mb-4">Cộng đồng yêu thú cưng</h1>
           <p className="text-xl text-gray-200">Hãy tham gia cùng chúng tôi để mang lại cuộc sống tốt đẹp nhất cho những người bạn bốn chân.</p>
         </div>

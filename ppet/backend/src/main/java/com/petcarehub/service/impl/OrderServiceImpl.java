@@ -1,100 +1,81 @@
 package com.petcarehub.service.impl;
 
-import com.petcarehub.dto.order.OrderCreateRequest;
-import com.petcarehub.dto.order.OrderDTO;
-import com.petcarehub.entity.Order;
-import com.petcarehub.enums.OrderStatus;
-import com.petcarehub.service.InventoryService;
-import com.petcarehub.service.OrderService;
+import com.petcarehub.dto.order.*;
+import com.petcarehub.dto.inventory.StockUpdateRequest;
+import com.petcarehub.entity.*;
+import com.petcarehub.enums.*;
+import com.petcarehub.exception.*;
+import com.petcarehub.repository.*;
+import com.petcarehub.security.Ownership;
+import com.petcarehub.service.*;
 import com.petcarehub.state.order.*;
-import org.springframework.stereotype.Service;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class OrderServiceImpl implements OrderService {
-
-    // private final OrderRepository orderRepository;
-    private final InventoryService inventoryService;
+    private final OrderRepository orders;
+    private final ProductRepository products;
+    private final UserRepository users;
+    private final InventoryService inventory;
+    private final Ownership ownership;
 
     @Override
     public OrderDTO createOrder(OrderCreateRequest request) {
-        // Implementation for creating order
-        return new OrderDTO();
-    }
-
-    @Override
-    public OrderDTO confirmOrder(Long orderId) {
-        Order order = getOrderById(orderId);
-        OrderState state = getState(order.getStatus());
-        state.confirm(order);
-        // deduct stock
-        // inventoryService.deductStock(order.getItems());
-        // save order
-        return mapToDTO(order);
-    }
-
-    @Override
-    public OrderDTO processOrder(Long orderId) {
-        Order order = getOrderById(orderId);
-        OrderState state = getState(order.getStatus());
-        state.process(order);
-        // save order
-        return mapToDTO(order);
-    }
-
-    @Override
-    public OrderDTO shipOrder(Long orderId) {
-        Order order = getOrderById(orderId);
-        OrderState state = getState(order.getStatus());
-        state.ship(order);
-        // save order
-        return mapToDTO(order);
-    }
-
-    @Override
-    public OrderDTO deliverOrder(Long orderId) {
-        Order order = getOrderById(orderId);
-        OrderState state = getState(order.getStatus());
-        state.deliver(order);
-        // save order
-        return mapToDTO(order);
-    }
-
-    @Override
-    public OrderDTO cancelOrder(Long orderId) {
-        Order order = getOrderById(orderId);
-        OrderState state = getState(order.getStatus());
-        state.cancel(order);
-        // save order
-        return mapToDTO(order);
-    }
-
-    private OrderState getState(OrderStatus status) {
-        if (status == null) return new PendingState();
-        switch (status) {
-            case PENDING: return new PendingState();
-            case CONFIRMED: return new ConfirmedState();
-            case PROCESSING: return new ProcessingState();
-            case SHIPPING: return new ShippingState();
-            case DELIVERED: return new DeliveredState();
-            case CANCELLED: return new CancelledState();
-            default: return new PendingState();
+        Long customerId = ownership.userId();
+        if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
+        for (OrderItemDTO item : request.getItems()) if (item == null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
+        Order order = Order.builder().customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
+                .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
+                .paymentMethod("COD").shippingAddress(request.getShippingAddress()).build();
+        BigDecimal total = BigDecimal.ZERO;
+        // Stable ordering reduces deadlocks; reserve stock in this same transaction.
+        for (OrderItemDTO item : request.getItems().stream().sorted(java.util.Comparator.comparing(OrderItemDTO::getProductId)).toList()) {
+            if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
+            Product product = products.findById(item.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
+            if (!Boolean.TRUE.equals(product.getActive())) throw new BadRequestException("Sản phẩm đã ngừng bán");
+            inventory.reduceStock(product.getId(), item.getQuantity());
+            BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
+            order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
+            total = total.add(subtotal);
         }
+        order.setSubtotal(total); order.setTotalAmount(total);
+        return dto(orders.save(order));
     }
-
-    private Order getOrderById(Long orderId) {
-        // Fetch order from DB
-        Order order = new Order();
-        order.setStatus(OrderStatus.PENDING);
-        return order;
+    private Order locked(Long id) {
+        return orders.findLockedById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
     }
-
-    private OrderDTO mapToDTO(Order order) {
-        OrderDTO dto = new OrderDTO();
-        dto.setStatus(order.getStatus().name());
-        return dto;
+    private void requireStaff() {
+        if (!ownership.hasRole("ADMIN") && !ownership.hasRole("SALES_STAFF")) throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xử lý đơn hàng");
+    }
+    @Override public OrderDTO confirmOrder(Long id) { requireStaff(); Order o=locked(id); state(o).confirm(o); return dto(orders.save(o)); }
+    @Override public OrderDTO processOrder(Long id) { requireStaff(); Order o=locked(id); state(o).process(o); return dto(orders.save(o)); }
+    @Override public OrderDTO shipOrder(Long id) { requireStaff(); Order o=locked(id); state(o).ship(o); return dto(orders.save(o)); }
+    @Override public OrderDTO deliverOrder(Long id) {
+        requireStaff(); Order o=locked(id); state(o).deliver(o);
+        // NEEDS DECISION: COD is collected on delivery; no online payment claim is made.
+        if ("COD".equals(o.getPaymentMethod())) o.setPaymentStatus(PaymentStatus.COMPLETED);
+        return dto(orders.save(o));
+    }
+    @Override public OrderDTO cancelOrder(Long id) {
+        Order o=locked(id); ownership.requireUser(o.getCustomer().getId()); state(o).cancel(o);
+        for (OrderItem item : o.getItems()) if (item.getProduct()!=null) {
+            StockUpdateRequest stock = new StockUpdateRequest(); stock.setProductId(item.getProduct().getId()); stock.setQuantity(item.getQuantity()); stock.setReason("Hủy đơn " + o.getOrderNumber()); inventory.addStock(stock);
+        }
+        return dto(orders.save(o));
+    }
+    private OrderState state(Order o) {
+        return switch(o.getStatus()) {
+            case PENDING -> new PendingState(); case CONFIRMED -> new ConfirmedState(); case PROCESSING -> new ProcessingState();
+            case SHIPPING -> new ShippingState(); case DELIVERED -> new DeliveredState(); case CANCELLED -> new CancelledState();
+        };
+    }
+    private OrderDTO dto(Order o) {
+        OrderDTO dto = new OrderDTO(); dto.setId(o.getId()); dto.setUserId(o.getCustomer().getId()); dto.setStatus(o.getStatus().name()); dto.setTotalPrice(o.getTotalAmount().doubleValue());
+        dto.setItems(o.getItems().stream().map(item -> { OrderItemDTO d=new OrderItemDTO(); d.setProductId(item.getProduct()==null?null:item.getProduct().getId()); d.setQuantity(item.getQuantity()); d.setPrice(item.getUnitPrice().doubleValue()); return d; }).toList()); return dto;
     }
 }
-
-

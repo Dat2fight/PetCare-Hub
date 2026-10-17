@@ -4,7 +4,6 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { mockImages } from '../../data/mockImages';
 import { FiScissors, FiActivity, FiCalendar, FiClock } from 'react-icons/fi';
-import { MdPets } from 'react-icons/md';
 import { serviceService, Service } from '../../services/serviceService';
 import toast from 'react-hot-toast';
 
@@ -56,7 +55,7 @@ export const ServiceListPage: React.FC = () => {
               <Card key={service.id} noPadding className="flex flex-col h-full hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
                 <div className="h-48 overflow-hidden relative">
                   <img src={getServiceImage(service.serviceType, service.id)} alt={service.name} className="w-full h-full object-cover" />
-                  <div className="absolute -bottom-6 right-6 w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center">
+                  <div className="absolute -bottom-6 right-6 w-12 h-12 bg-white rounded-2xl shadow-xs flex items-center justify-center">
                     {getServiceIcon(service.serviceType)}
                   </div>
                 </div>
@@ -84,7 +83,7 @@ export const ServiceListPage: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-6">Tại sao chọn dịch vụ của PetCare Hub?</h2>
             <div className="space-y-4">
               <div className="flex items-start">
-                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 mr-4 flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600 mr-4 shrink-0">
                   <FiClock />
                 </div>
                 <div>
@@ -93,7 +92,7 @@ export const ServiceListPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4 flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-4 shrink-0">
                   <FiActivity />
                 </div>
                 <div>
@@ -102,7 +101,7 @@ export const ServiceListPage: React.FC = () => {
                 </div>
               </div>
               <div className="flex items-start">
-                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-4 flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-orange-100 flex items-center justify-center text-orange-600 mr-4 shrink-0">
                   <FiCalendar />
                 </div>
                 <div>
@@ -112,7 +111,7 @@ export const ServiceListPage: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="md:w-1/2 rounded-2xl overflow-hidden shadow-sm h-64">
+          <div className="md:w-1/2 rounded-2xl overflow-hidden shadow-xs h-64">
             <img src={mockImages.dogHero} className="w-full h-full object-cover" alt="Happy pet" />
           </div>
         </div>
