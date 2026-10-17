@@ -37,99 +37,43 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final PetRepository petRepository;
     private final UserRepository userRepository;
     private final EntityManager entityManager;
+    private final com.petcarehub.config.BookingProperties booking;
     
     @Override
     @Transactional
     public AppointmentDTO bookAppointment(AppointmentCreateRequest request) {
-        // Customer resolution: Zero Trust - extract from SecurityContextHolder
-        User customer = null;
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
-            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
-                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                customer = userRepository.findById(userDetails.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + userDetails.getId()));
-            } else {
-                customer = userRepository.findByUsername(authentication.getName())
-                        .orElseThrow(() -> new ResourceNotFoundException("Customer not found with username " + authentication.getName()));
-            }
-        } else if (request.getCustomerId() != null) {
-            customer = userRepository.findById(request.getCustomerId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Customer not found with id " + request.getCustomerId()));
-        } else {
-            throw new BadRequestException("Bạn cần đăng nhập để đặt lịch hẹn");
-        }
-
-        Pet pet = null;
-        if (request.getPetId() != null) {
-            pet = petRepository.findById(request.getPetId()).orElse(null);
-        }
-        if (pet == null) {
-            List<Pet> customerPets = petRepository.findByOwnerId(customer.getId());
-            if (!customerPets.isEmpty()) {
-                pet = customerPets.get(0);
-            } else {
-                List<Pet> allPets = petRepository.findAll();
-                if (!allPets.isEmpty()) {
-                    pet = allPets.get(0);
-                } else {
-                    throw new ResourceNotFoundException("Pet not found with id " + request.getPetId());
-                }
-            }
-        }
-                
-        ServiceEntity serviceEntity = entityManager.find(ServiceEntity.class, request.getServiceId());
-        if (serviceEntity == null) {
-            throw new ResourceNotFoundException("Service not found with id " + request.getServiceId());
-        }
-        
-        LocalDate appointmentDate = request.getAppointmentTime().toLocalDate();
-        LocalTime startTime = request.getAppointmentTime().toLocalTime();
-        int duration = serviceEntity.getDurationMinutes() != null ? serviceEntity.getDurationMinutes() : 60;
-        LocalTime endTime = startTime.plusMinutes(duration);
-
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl principal))
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
+        User customer = userRepository.findById(principal.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        Pet pet = petRepository.findById(request.getPetId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng"));
+        if (pet.getOwner() == null || !pet.getOwner().getId().equals(customer.getId()))
+            throw new org.springframework.security.access.AccessDeniedException("Bạn chỉ được đặt lịch cho thú cưng của mình");
+        ServiceEntity serviceEntity = requireService(request.getServiceId());
+        LocalDateTime start = request.getAppointmentTime();
+        int duration = serviceEntity.getDurationMinutes() == null ? 0 : serviceEntity.getDurationMinutes();
+        if (duration < 5 || duration > 480 || start == null || !start.isAfter(LocalDateTime.now().plusMinutes(booking.getMinimumNoticeMinutes())))
+            throw new BadRequestException("Thời gian đặt lịch hoặc thời lượng không hợp lệ");
+        LocalDateTime end = start.plusMinutes(duration);
+        if (start.toLocalTime().isBefore(booking.getOpeningTime()) || !start.toLocalDate().equals(end.toLocalDate()) || end.toLocalTime().isAfter(booking.getClosingTime()))
+            throw new BadRequestException("Lịch hẹn phải nằm trong giờ làm việc");
+        LocalDate appointmentDate = start.toLocalDate();
+        LocalTime startTime = start.toLocalTime();
+        LocalTime endTime = end.toLocalTime();
         User staff = null;
-        if (request.getStaffId() != null) {
-            staff = userRepository.findById(request.getStaffId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id " + request.getStaffId()));
-            // Double booking check for manually assigned staff
-            List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
-                    appointmentDate, staff.getId(), startTime, endTime);
-            if (!conflicts.isEmpty()) {
-                throw new BadRequestException("Nhân viên/bác sĩ đã có lịch hẹn trong khung giờ này.");
-            }
-        } else {
-            // Automatically find available staff/veterinarian
-            List<User> allUsers = userRepository.findAll();
-            List<User> potentialStaff = allUsers.stream()
-                    .filter(u -> u.getRoles().stream().anyMatch(r -> 
-                            r.getName() == RoleType.VETERINARIAN || 
-                            r.getName() == RoleType.SALES_STAFF ||
-                            r.getName() == RoleType.ADMIN))
-                    .collect(Collectors.toList());
-
-            // First pass: find a staff member who has NO conflicts for this time slot
-            for (User s : potentialStaff) {
-                List<Appointment> conflicts = appointmentRepository.findConflictingAppointments(
-                        appointmentDate, s.getId(), startTime, endTime);
-                if (conflicts.isEmpty()) {
-                    staff = s;
-                    break;
-                }
-            }
-
-            // Second pass: if none available without conflict, pick first potential staff or fallback to any user
-            if (staff == null && !potentialStaff.isEmpty()) {
-                staff = potentialStaff.get(0);
-            } else if (staff == null && !allUsers.isEmpty()) {
-                staff = allUsers.get(0);
-            }
-
-            if (staff == null) {
-                throw new BadRequestException("Không tìm thấy nhân viên khả dụng cho dịch vụ này.");
+        List<User> candidates = request.getStaffId() == null ? userRepository.findEligibleStaff(serviceEntity.getServiceType().staffRole())
+                : List.of(userRepository.findById(request.getStaffId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên")));
+        for (User candidate : candidates) {
+            // Lock a stable resource row even when there are no existing appointments.
+            User locked = userRepository.findLockedById(candidate.getId()).orElseThrow();
+            if (eligible(locked, serviceEntity) && appointmentRepository.findConflictingAppointments(appointmentDate, locked.getId(), startTime, endTime).isEmpty()) {
+                staff = locked; break;
             }
         }
-        
+        if (staff == null) throw new IllegalStateException("Không có nhân viên phù hợp");
+
         Appointment appointment = new Appointment();
         appointment.setPet(pet);
         appointment.setService(serviceEntity);
@@ -151,7 +95,17 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
             
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl principal))
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
+        boolean staff = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
+                || (appointment.getStaff() != null && appointment.getStaff().getId().equals(principal.getId()));
+        if (!staff && (appointment.getCustomer() == null || !appointment.getCustomer().getId().equals(principal.getId())
+                || request.getStatus() != AppointmentStatus.CANCELLED
+                || !LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()).isAfter(LocalDateTime.now())))
+            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền đổi trạng thái lịch hẹn");
         if (request.getStatus() != null) {
+            if (!appointment.getStatus().canTransitionTo(request.getStatus())) throw new IllegalStateException("Không thể chuyển trạng thái lịch hẹn");
             appointment.setStatus(request.getStatus());
         }
         if (request.getNotes() != null) {
@@ -183,32 +137,42 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByPet(Long petId) {
-        // As Pet has no direct method in AppointmentRepository, we can write a custom JPQL or use findAll and filter for now
-        // For production, we'd add it to the repository.
-        return appointmentRepository.findAll().stream()
-            .filter(a -> a.getPet().getId().equals(petId))
-            .map(this::mapToDTO)
-            .collect(Collectors.toList());
+        return appointmentRepository.findByPetId(petId, org.springframework.data.domain.PageRequest.of(0, 100, org.springframework.data.domain.Sort.by("appointmentDate").descending())).stream()
+                .map(this::mapToDTO).toList();
     }
-    
+
     @Override
     @Transactional(readOnly = true)
     public List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId) {
-        ServiceEntity serviceEntity = entityManager.find(ServiceEntity.class, serviceId);
-        int duration = (serviceEntity != null && serviceEntity.getDurationMinutes() != null) ? serviceEntity.getDurationMinutes() : 60;
-        
+        ServiceEntity service = requireService(serviceId);
+        int duration = service.getDurationMinutes() == null ? 0 : service.getDurationMinutes();
+        if (duration < 5 || duration > 480) return List.of();
+        List<User> staff = userRepository.findEligibleStaff(service.getServiceType().staffRole());
         List<LocalDateTime> slots = new ArrayList<>();
-        // Mock logic: 9 AM to 5 PM, slots based on duration
-        LocalTime current = LocalTime.of(9, 0);
-        LocalTime endOfDay = LocalTime.of(17, 0);
-        
-        while (current.plusMinutes(duration).isBefore(endOfDay) || current.plusMinutes(duration).equals(endOfDay)) {
-            slots.add(LocalDateTime.of(date, current));
-            current = current.plusMinutes(duration);
+        LocalDateTime close = date.atTime(booking.getClosingTime());
+        LocalDateTime now = LocalDateTime.now().plusMinutes(booking.getMinimumNoticeMinutes());
+        for (LocalDateTime start = date.atTime(booking.getOpeningTime()); !start.plusMinutes(duration).isAfter(close); start = start.plusMinutes(duration)) {
+            if (!start.isAfter(now)) continue;
+            for (User candidate : staff) {
+                if (eligible(candidate, service) && appointmentRepository.findConflictingAppointments(date, candidate.getId(), start.toLocalTime(), start.plusMinutes(duration).toLocalTime()).isEmpty()) {
+                    slots.add(start); break;
+                }
+            }
         }
         return slots;
     }
-    
+
+    private ServiceEntity requireService(Long id) {
+        ServiceEntity service = entityManager.find(ServiceEntity.class, id);
+        if (service == null) throw new ResourceNotFoundException("Không tìm thấy dịch vụ");
+        if (!Boolean.TRUE.equals(service.getActive())) throw new BadRequestException("Dịch vụ đã ngừng hoạt động");
+        return service;
+    }
+
+    private boolean eligible(User staff, ServiceEntity service) {
+        return Boolean.TRUE.equals(staff.getEnabled()) && staff.getRoles().stream().anyMatch(r -> r.getName() == service.getServiceType().staffRole());
+    }
+
     private AppointmentDTO mapToDTO(Appointment appointment) {
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(appointment.getId());

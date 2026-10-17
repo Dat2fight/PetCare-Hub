@@ -35,3 +35,11 @@ Seed: đặt ba biến môi trường rồi chạy `node seed_pets.js` từ ppet
 - #56: script chỉ thay exact string literal qua TypeScript AST, một file chỉ định, dry-run mặc định, Git sạch trước write, chạy tsc và rollback khi lỗi. Không chạy --write. Quét Idễ/disabledễ/ễ: không còn trong src từ trước lượt này; không sửa trùng.
 - Tests: InventoryServiceImplTest, ProductServiceImplTest (test cũ chuyển sang specification do cách truy vấn thay đổi). Frontend chưa có hạ tầng test: kiểm tra tìm từ khóa ở trang 2+, đổi danh mục reset trang, thử inactive và hết hàng.
 - Kiểm tra: backend PASS; tsc/build PASS; lint vẫn lỗi cấu hình baseline.
+
+## Đợt C
+- #28–32: kiểm tra dịch vụ active, thời gian tương lai và toàn bộ duration trong 09:00–17:00 (BookingProperties); chuyên môn theo ServiceType; khóa hàng nhân viên trong transaction trước truy vấn overlap SQL; không fallback tùy ý.
+- Availability dùng thời gian thực và xung đột của nhân viên; duration 0/âm/1440/vượt giờ không lặp vô hạn. State machine enum đầy đủ, khách chỉ hủy lịch của mình trước giờ bắt đầu.
+- BookingPage bỏ slot/pet mẫu, tải pet của tài khoản, tách loading/error/empty và abort request slots.
+- #44 phần pet: truy vấn findByPetId có giới hạn 100, sắp xếp theo ngày. Cần hoàn thiện API phân trang bên ngoài ở E.
+- Tests: AppointmentServiceImplTest (duration, availability, toàn bộ bảng transition). Backend PASS, frontend build PASS sau sửa null pet, lint lỗi baseline.
+- NEEDS DECISION: GROOMING → SALES_STAFF; VETERINARY → VETERINARIAN. Không có lịch nghỉ/chuyên môn riêng trong schema. Khách được hủy trước giờ bắt đầu (chưa có khoảng phạt hủy).

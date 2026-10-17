@@ -35,12 +35,12 @@ export const bookingService = {
         return response.data;
     },
 
-    getAvailableSlots: async (date: string, serviceId: number): Promise<string[]> => {
+    getAvailableSlots: async (date: string, serviceId: number, signal?: AbortSignal): Promise<string[]> => {
         const params = new URLSearchParams({
             date: date,
             serviceId: serviceId.toString()
         });
-        const response = await apiClient.get<string[]>(`/appointments/slots?${params.toString()}`);
+        const response = await apiClient.get<string[]>(`/appointments/slots?${params.toString()}`, { signal });
         return response.data;
     }
 };

@@ -24,6 +24,8 @@ public class ServiceManagementServiceImpl implements ServiceManagementService {
     @Override
     @Transactional
     public ServiceEntityDTO createService(ServiceCreateRequest request) {
+        if (request.getDurationMinutes() == null || request.getDurationMinutes() < 5 || request.getDurationMinutes() > 480)
+            throw new com.petcarehub.exception.BadRequestException("Thời lượng phải từ 5 đến 480 phút");
         ServiceEntity entity = ServiceEntity.builder()
                 .name(request.getName())
                 .description(request.getDescription())
@@ -40,6 +42,8 @@ public class ServiceManagementServiceImpl implements ServiceManagementService {
     @Override
     @Transactional
     public ServiceEntityDTO updateService(Long id, ServiceUpdateRequest request) {
+        if (request.getDurationMinutes() == null || request.getDurationMinutes() < 5 || request.getDurationMinutes() > 480)
+            throw new com.petcarehub.exception.BadRequestException("Thời lượng phải từ 5 đến 480 phút");
         ServiceEntity entity = getServiceEntity(id);
 
         entity.setName(request.getName());
