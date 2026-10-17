@@ -52,8 +52,23 @@ class ProductServiceImplTest {
         var pageable = PageRequest.of(0, 20);
         Product product = new Product();
         product.setId(2L);
-        when(products.findByCategoryId(3L, pageable)).thenReturn(new PageImpl<>(List.of(product)));
+        when(products.findAll(any(org.springframework.data.jpa.domain.Specification.class), eq(pageable))).thenReturn(new PageImpl<>(List.of(product)));
         assertEquals(2L, service.getAllProducts(3L, null, pageable).getContent().get(0).getId());
-        verify(products, never()).findAll(pageable);
+        verify(inventory).findByProductIdIn(List.of(2L));
+        verify(inventory, never()).findByProductId(anyLong());
+    }
+
+    @Test void categoryUpdateAndUnknownCategory() {
+        Product product = new Product(); product.setId(1L);
+        var category = new com.petcarehub.entity.ProductCategory(); category.setId(2L);
+        var request = new com.petcarehub.dto.product.ProductUpdateRequest(); request.setCategoryId(2L);
+        when(products.findById(1L)).thenReturn(Optional.of(product));
+        when(categories.findById(2L)).thenReturn(Optional.of(category));
+        when(products.save(product)).thenReturn(product);
+        assertEquals(2L, service.updateProduct(1L, request).getCategoryId());
+        request.setCategoryId(99L);
+        assertThrows(ResourceNotFoundException.class, () -> service.updateProduct(1L, request));
+        request.setStockQuantity(1);
+        assertThrows(com.petcarehub.exception.BadRequestException.class, () -> service.updateProduct(1L, request));
     }
 }

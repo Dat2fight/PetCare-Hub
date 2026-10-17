@@ -7,17 +7,26 @@ import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-// TODO: fetch user's pets from API when Pet Service is integrated
-import { mockPets } from '../../data/mockPets';
+import { petManagementService, PetDTO } from '../../services/petManagementService';
 
 export const BookingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const serviceId = searchParams.get('serviceId');
   
   const [service, setService] = useState<Service | null>(null);
-  const [selectedPet, setSelectedPet] = useState(mockPets[0]);
+  const [selectedPet, setSelectedPet] = useState<PetDTO | null>(null);
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
-  const [selectedTime, setSelectedTime] = useState('09:00');
+  const [selectedTime, setSelectedTime] = useState('');
+  const [pets, setPets] = useState<PetDTO[]>([]);
+  const [slotError, setSlotError] = useState<string | null>(null);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    let cancelled = false;
+    petManagementService.getMyPets().then(data => { if (!cancelled) { setPets(data); setSelectedPet(data[0] || null); } })
+      .catch(() => { if (!cancelled) toast.error('Không tải được thú cưng của bạn'); });
+    return () => { cancelled = true; };
+  }, []);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
@@ -48,27 +57,18 @@ export const BookingPage: React.FC = () => {
   }, [serviceId, navigate]);
 
   useEffect(() => {
-    if (serviceId && selectedDate) {
-      const loadSlots = async () => {
-        try {
-          const slots = await bookingService.getAvailableSlots(selectedDate, Number(serviceId));
-          // map server slots to string like "09:00"
-          const formatted = slots.map(isoStr => {
-            const date = new Date(isoStr);
-            return date.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
-          });
-          setAvailableSlots(formatted.length > 0 ? formatted : ['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00']);
-        } catch (error) {
-          console.error(error);
-          setAvailableSlots(['08:00', '09:00', '10:00', '11:00', '14:00', '15:00', '16:00']);
-        }
-      };
-      loadSlots();
-    }
-  }, [selectedDate, serviceId]);
+    if (!serviceId || !selectedDate) return;
+    const controller = new AbortController();
+    setSlotsLoading(true); setSlotError(null); setAvailableSlots([]); setSelectedTime('');
+    bookingService.getAvailableSlots(selectedDate, Number(serviceId), controller.signal)
+      .then(slots => { if (!controller.signal.aborted) setAvailableSlots(slots.map(slot => slot.slice(11, 16))); })
+      .catch(() => { if (!controller.signal.aborted) setSlotError('Không tải được giờ trống. Vui lòng thử lại.'); })
+      .finally(() => { if (!controller.signal.aborted) setSlotsLoading(false); });
+    return () => controller.abort();
+  }, [selectedDate, serviceId, retry]);
 
   const handleBooking = async () => {
-    if (!service) return;
+    if (!service || !selectedPet || !selectedTime || slotsLoading || slotError) return;
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để đặt lịch hẹn');
       navigate('/login');
@@ -79,7 +79,7 @@ export const BookingPage: React.FC = () => {
       const dateTimeString = `${selectedDate}T${selectedTime}:00`;
       
       await bookingService.bookAppointment({
-        petId: selectedPet ? Number(selectedPet.id) : 1,
+        petId: selectedPet.id,
         serviceId: service.id,
         appointmentTime: dateTimeString,
         notes: notes
@@ -103,27 +103,27 @@ export const BookingPage: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Đặt lịch: {service.name}</h1>
 
-        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row gap-10">
+        <div className="bg-white rounded-3xl p-6 md:p-8 shadow-xs border border-gray-100 flex flex-col md:flex-row gap-10">
           <div className="flex-1 space-y-8">
             
             {/* Pet Selection */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">Chọn thú cưng</h3>
               <div className="flex gap-4 overflow-x-auto pb-2">
-                {mockPets.slice(0, 2).map((pet) => (
+                {pets.map((pet) => (
                   <button
                     key={pet.id}
                     onClick={() => setSelectedPet(pet)}
                     className={`flex items-center p-3 rounded-2xl border-2 transition-colors min-w-[200px] text-left ${
-                      selectedPet.id === pet.id
+                      selectedPet?.id === pet.id
                         ? 'border-primary-600 bg-primary-50'
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <img src={pet.image} alt={pet.name} className="w-12 h-12 rounded-full object-cover mr-3" />
+                    <img src={pet.imageUrl} alt={pet.name} className="w-12 h-12 rounded-full object-cover mr-3" />
                     <div>
                       <p className="font-bold text-gray-900">{pet.name}</p>
-                      <p className="text-sm text-gray-500">{pet.breed}</p>
+                      <p className="text-sm text-gray-500">{pet.breedName}</p>
                     </div>
                   </button>
                 ))}
@@ -151,6 +151,7 @@ export const BookingPage: React.FC = () => {
                 <FiClock className="mr-2" />
                 Chọn giờ
               </h3>
+              {slotsLoading ? <p>Đang tải giờ trống…</p> : slotError ? <div role="alert">{slotError} <button onClick={() => setRetry(value => value + 1)}>Thử lại</button></div> : availableSlots.length === 0 ? <p>Hết chỗ trong ngày này. Vui lòng chọn ngày khác.</p> : null}
               <div className="grid grid-cols-4 gap-3">
                 {availableSlots.map((time) => (
                   <button
@@ -194,7 +195,7 @@ export const BookingPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Thú cưng:</span>
-                  <span className="font-medium text-gray-900 text-right">{selectedPet.name}</span>
+                  <span className="font-medium text-gray-900 text-right">{selectedPet?.name || 'Chưa chọn thú cưng'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500">Thời gian:</span>
@@ -208,7 +209,7 @@ export const BookingPage: React.FC = () => {
                   <span className="font-bold text-xl text-primary-600">{service.price.toLocaleString('vi-VN')} đ</span>
                 </div>
                 
-                <Button onClick={handleBooking} disabled={submitting} fullWidth>
+                <Button onClick={handleBooking} disabled={submitting || slotsLoading || !selectedPet || !selectedTime || !!slotError} fullWidth>
                   {submitting ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}
                 </Button>
                 <p className="text-xs text-gray-500 text-center mt-4">
@@ -223,3 +224,4 @@ export const BookingPage: React.FC = () => {
     </div>
   );
 };
+

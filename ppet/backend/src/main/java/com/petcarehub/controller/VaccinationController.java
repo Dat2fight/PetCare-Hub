@@ -20,7 +20,7 @@ public class VaccinationController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<VaccinationDTO> createVaccination(@RequestBody VaccinationCreateRequest request) {
+    public ResponseEntity<VaccinationDTO> createVaccination(@jakarta.validation.Valid @RequestBody VaccinationCreateRequest request) {
         return new ResponseEntity<>(vaccinationService.createVaccination(request), HttpStatus.CREATED);
     }
 
@@ -30,13 +30,13 @@ public class VaccinationController {
     }
 
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByPetId(@PathVariable Long petId) {
-        return ResponseEntity.ok(vaccinationService.getVaccinationsByPetId(petId));
+    public ResponseEntity<List<VaccinationDTO>> getVaccinationsByPetId(@PathVariable Long petId, org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(vaccinationService.getVaccinationsByPetId(petId, pageable));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<VaccinationDTO> updateVaccination(@PathVariable Long id, @RequestBody VaccinationCreateRequest request) {
+    public ResponseEntity<VaccinationDTO> updateVaccination(@PathVariable Long id, @jakarta.validation.Valid @RequestBody VaccinationCreateRequest request) {
         return ResponseEntity.ok(vaccinationService.updateVaccination(id, request));
     }
 

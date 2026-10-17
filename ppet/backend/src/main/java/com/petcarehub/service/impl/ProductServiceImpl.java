@@ -25,15 +25,19 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepository productRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final InventoryRepository inventoryRepository;
+    private final com.petcarehub.service.InventoryService inventoryService;
 
     private ProductDTO toDTO(Product p) {
+        return toDTO(p, inventoryRepository.findByProductId(p.getId()).map(Inventory::getQuantity).orElse(0));
+    }
+
+    private ProductDTO toDTO(Product p, int quantity) {
         return ProductDTO.builder()
                 .id(p.getId())
                 .name(p.getName())
                 .description(p.getDescription())
                 .price(p.getPrice())
-                .stockQuantity(inventoryRepository.findByProductId(p.getId())
-                        .map(Inventory::getQuantity).orElse(0))
+                .stockQuantity(quantity)
                 .imageUrl(p.getImageUrl())
                 .categoryId(p.getCategory() != null ? p.getCategory().getId() : null)
                 .categoryName(p.getCategory() != null ? p.getCategory().getName() : null)
@@ -47,17 +51,24 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(readOnly = true)
     public Page<ProductDTO> getAllProducts(Long categoryId, Boolean active, Pageable pageable) {
-        Page<Product> products;
-        if (categoryId != null && active != null && active) {
-            products = productRepository.findByCategoryIdAndActiveTrue(categoryId, pageable);
-        } else if (active != null && active) {
-            products = productRepository.findByActiveTrue(pageable);
-        } else if (categoryId != null) {
-            products = productRepository.findByCategoryId(categoryId, pageable);
-        } else {
-            products = productRepository.findAll(pageable);
-        }
-        return products.map(this::toDTO);
+        return searchProducts(categoryId, active, null, pageable);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<ProductDTO> searchProducts(Long categoryId, Boolean active, String keyword, Pageable pageable) {
+        org.springframework.data.jpa.domain.Specification<Product> filter = (root, query, cb) -> {
+            var predicates = new java.util.ArrayList<jakarta.persistence.criteria.Predicate>();
+            if (categoryId != null) predicates.add(cb.equal(root.get("category").get("id"), categoryId));
+            if (active != null) predicates.add(cb.equal(root.get("active"), active));
+            if (keyword != null && !keyword.isBlank()) predicates.add(cb.like(cb.lower(root.get("name")), "%" + keyword.trim().toLowerCase(java.util.Locale.ROOT) + "%"));
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+        Page<Product> products = productRepository.findAll(filter, pageable);
+        var ids = products.stream().map(Product::getId).toList();
+        var quantities = ids.isEmpty() ? java.util.Map.<Long,Integer>of() : inventoryRepository.findByProductIdIn(ids).stream()
+                .collect(java.util.stream.Collectors.toMap(i -> i.getProduct().getId(), Inventory::getQuantity));
+        return products.map(p -> toDTO(p, quantities.getOrDefault(p.getId(), 0)));
     }
 
     @Override
@@ -90,7 +101,13 @@ public class ProductServiceImpl implements ProductService {
                 .active(request.getActive() != null ? request.getActive() : true)
                 .build();
 
-        return toDTO(productRepository.save(product));
+        product = productRepository.save(product);
+        inventoryRepository.save(Inventory.builder().product(product).quantity(0).build());
+        if (request.getStockQuantity() != null && request.getStockQuantity() > 0) {
+            var stock = new com.petcarehub.dto.inventory.StockUpdateRequest(); stock.setProductId(product.getId()); stock.setQuantity(request.getStockQuantity()); stock.setReason("Tồn kho ban đầu");
+            inventoryService.addStock(stock);
+        }
+        return toDTO(product);
     }
 
     @Override
@@ -99,6 +116,9 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Product not found with id: " + id));
 
+        if (request.getStockQuantity() != null) throw new com.petcarehub.exception.BadRequestException("Dùng API nhập, xuất hoặc kiểm kê để thay đổi tồn kho");
+        if (request.getCategoryId() != null) product.setCategory(productCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục")));
         if (request.getName() != null)
             product.setName(request.getName());
         if (request.getDescription() != null)

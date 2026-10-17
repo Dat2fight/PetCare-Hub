@@ -16,9 +16,12 @@ import java.util.List;
 public class LoyaltyController {
 
     private final LoyaltyService loyaltyService;
+    private final com.petcarehub.security.Ownership ownership;
+    private final com.petcarehub.repository.LoyaltyAccountRepository accounts;
 
     @GetMapping("/account/{userId}")
     public ResponseEntity<LoyaltyAccountDTO> getAccount(@PathVariable Long userId) {
+        ownership.requireUser(userId);
         return ResponseEntity.ok(loyaltyService.getAccountByUserId(userId));
     }
 
@@ -36,11 +39,13 @@ public class LoyaltyController {
             @PathVariable Long userId,
             @RequestParam Integer points,
             @RequestParam String description) {
+        ownership.requireUser(userId);
         return ResponseEntity.ok(loyaltyService.spendPoints(userId, points, description));
     }
 
     @GetMapping("/account/{accountId}/transactions")
-    public ResponseEntity<List<LoyaltyTransactionDTO>> getTransactions(@PathVariable Long accountId) {
-        return ResponseEntity.ok(loyaltyService.getTransactions(accountId));
+    public ResponseEntity<List<LoyaltyTransactionDTO>> getTransactions(@PathVariable Long accountId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requireUser(accounts.findById(accountId).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản điểm")).getCustomer().getId());
+        return ResponseEntity.ok(loyaltyService.getTransactions(accountId, pageable));
     }
 }

@@ -12,7 +12,19 @@ import java.util.Optional;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    String REVENUE_FILTER = " o.paymentStatus = com.petcarehub.enums.PaymentStatus.COMPLETED and o.status <> com.petcarehub.enums.OrderStatus.CANCELLED and o.createdAt >= :from and o.createdAt < :to";
+    interface RevenuePeriod { Integer getYear(); Integer getMonth(); java.math.BigDecimal getRevenue(); long getCount(); }
+    @org.springframework.data.jpa.repository.Query("select year(o.createdAt) as year, month(o.createdAt) as month, sum(o.totalAmount) as revenue, count(o) as count from Order o where" + REVENUE_FILTER + " group by year(o.createdAt), month(o.createdAt) order by year(o.createdAt), month(o.createdAt)")
+    java.util.List<RevenuePeriod> revenueByMonth(LocalDateTime from, LocalDateTime to);
+    interface RevenueTotal { java.math.BigDecimal getRevenue(); long getCount(); }
+    @org.springframework.data.jpa.repository.Query("select coalesce(sum(o.totalAmount), 0) as revenue, count(o) as count from Order o where" + REVENUE_FILTER)
+    RevenueTotal summarizeRevenue(LocalDateTime from, LocalDateTime to);
+    @org.springframework.data.jpa.repository.Query("select count(i) > 0 from OrderItem i where i.order.customer.id = :userId and i.order.status = com.petcarehub.enums.OrderStatus.DELIVERED and ((:type = 'PRODUCT' and i.product.id = :targetId) or (:type = 'PET' and i.pet.id = :targetId))")
+    boolean hasDeliveredTarget(Long userId, String type, Long targetId);
     Page<Order> findByCustomerId(Long customerId, Pageable pageable);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select o from Order o where o.id = :id")
+    Optional<Order> findLockedById(Long id);
     Optional<Order> findByOrderNumber(String orderNumber);
     List<Order> findByStatus(OrderStatus status);
     List<Order> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);

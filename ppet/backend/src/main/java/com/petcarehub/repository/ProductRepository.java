@@ -10,6 +10,9 @@ import java.util.Optional;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+    @Override
+    @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "category")
+    Page<Product> findAll(org.springframework.data.jpa.domain.Specification<Product> specification, Pageable pageable);
     Optional<Product> findBySku(String sku);
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
     Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);

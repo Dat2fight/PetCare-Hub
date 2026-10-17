@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VaccinationServiceImpl implements VaccinationService {
 
+    private final com.petcarehub.security.Ownership ownership;
     private final VaccinationRepository vaccinationRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
@@ -28,6 +29,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     @Override
     @Transactional
     public VaccinationDTO createVaccination(VaccinationCreateRequest request) {
+        validateDates(request);
         Pet pet = petRepository.findById(request.getPetId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
                 
@@ -52,13 +54,15 @@ public class VaccinationServiceImpl implements VaccinationService {
     public VaccinationDTO getVaccinationById(Long id) {
         Vaccination vaccination = vaccinationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vaccination not found"));
+        ownership.requirePet(vaccination.getPet().getId());
         return mapToDTO(vaccination);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<VaccinationDTO> getVaccinationsByPetId(Long petId) {
-        return vaccinationRepository.findByPetId(petId).stream()
+    public List<VaccinationDTO> getVaccinationsByPetId(Long petId, org.springframework.data.domain.Pageable pageable) {
+        ownership.requirePet(petId);
+        return vaccinationRepository.findByPetId(petId, pageable).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -66,6 +70,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     @Override
     @Transactional
     public VaccinationDTO updateVaccination(Long id, VaccinationCreateRequest request) {
+        validateDates(request);
         Vaccination vaccination = vaccinationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vaccination not found"));
                 
@@ -86,6 +91,15 @@ public class VaccinationServiceImpl implements VaccinationService {
         vaccinationRepository.delete(vaccination);
     }
     
+    private void validateDates(VaccinationCreateRequest request) {
+        if (request.getDateAdministered() == null || request.getDateAdministered().isAfter(java.time.LocalDate.now())) {
+            throw new com.petcarehub.exception.BadRequestException("dateAdministered: Ngày tiêm phải là hôm nay hoặc trước đó");
+        }
+        if (request.getNextDueDate() != null && request.getNextDueDate().isBefore(request.getDateAdministered())) {
+            throw new com.petcarehub.exception.BadRequestException("nextDueDate: Ngày tiêm kế tiếp không được trước ngày tiêm");
+        }
+    }
+
     private VaccinationDTO mapToDTO(Vaccination vaccination) {
         return VaccinationDTO.builder()
                 .id(vaccination.getId())

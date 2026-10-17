@@ -18,9 +18,10 @@ public class PetMatchingController {
         this.petMatchingService = petMatchingService;
     }
 
-    @PostMapping("/submit/{userId}")
-    public ResponseEntity<List<MatchResultDTO>> submitQuiz(@PathVariable Long userId, @RequestBody QuizSubmitRequest request) {
-        List<MatchResultDTO> results = petMatchingService.matchPets(userId, request);
+    @PostMapping({"/submit", "/submit/{userId}"})
+    public ResponseEntity<List<MatchResultDTO>> submitQuiz(@org.springframework.security.core.annotation.AuthenticationPrincipal com.petcarehub.security.UserDetailsImpl principal, @jakarta.validation.Valid @RequestBody QuizSubmitRequest request) {
+        if (principal == null) throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
+        List<MatchResultDTO> results = petMatchingService.matchPets(principal.getId(), request);
         return ResponseEntity.ok(results);
     }
 }

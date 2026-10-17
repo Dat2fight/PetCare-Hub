@@ -20,7 +20,7 @@ public class MedicalRecordController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<MedicalRecordDTO> createMedicalRecord(@RequestBody MedicalRecordCreateRequest request) {
+    public ResponseEntity<MedicalRecordDTO> createMedicalRecord(@jakarta.validation.Valid @RequestBody MedicalRecordCreateRequest request) {
         return new ResponseEntity<>(medicalRecordService.createMedicalRecord(request), HttpStatus.CREATED);
     }
 
@@ -30,13 +30,13 @@ public class MedicalRecordController {
     }
 
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<MedicalRecordDTO>> getMedicalRecordsByPetId(@PathVariable Long petId) {
-        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPetId(petId));
+    public ResponseEntity<List<MedicalRecordDTO>> getMedicalRecordsByPetId(@PathVariable Long petId, org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(medicalRecordService.getMedicalRecordsByPetId(petId, pageable));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<MedicalRecordDTO> updateMedicalRecord(@PathVariable Long id, @RequestBody MedicalRecordCreateRequest request) {
+    public ResponseEntity<MedicalRecordDTO> updateMedicalRecord(@PathVariable Long id, @jakarta.validation.Valid @RequestBody MedicalRecordCreateRequest request) {
         return ResponseEntity.ok(medicalRecordService.updateMedicalRecord(id, request));
     }
 

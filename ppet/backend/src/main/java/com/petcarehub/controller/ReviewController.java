@@ -18,6 +18,10 @@ public class ReviewController {
 
     private final ReviewService reviewService;
 
+    @PutMapping("/{id}/approve")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ReviewDTO> approveReview(@PathVariable Long id) { return ResponseEntity.ok(reviewService.approveReview(id)); }
+
     @PostMapping
     public ResponseEntity<ReviewDTO> createReview(@Valid @RequestBody ReviewCreateRequest request) {
         return new ResponseEntity<>(reviewService.createReview(request), HttpStatus.CREATED);

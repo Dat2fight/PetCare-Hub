@@ -10,9 +10,9 @@ import com.petcarehub.dto.inventory.StockUpdateRequest;
 public interface InventoryService {
     boolean checkStock(Long productId, Integer requiredQuantity);
     void reduceStock(Long productId, Integer quantity);
+    void adjustStock(Long productId, Integer quantity, String reason);
     void addStock(StockUpdateRequest request);
     InventoryDTO getInventory(Long productId);
     List<InventoryDTO> getLowStockItems(Integer threshold);
     org.springframework.data.domain.Page<com.petcarehub.dto.inventory.InventoryTransactionDTO> getTransactionHistory(Long inventoryId, org.springframework.data.domain.Pageable pageable);
 }
-

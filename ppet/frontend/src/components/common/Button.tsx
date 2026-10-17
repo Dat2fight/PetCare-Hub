@@ -31,7 +31,7 @@ export const Button: React.FC<ButtonProps> = ({
     primary: 'btn-primary',
     secondary: 'btn-secondary',
     outline: 'btn-outline',
-    danger: 'bg-coral-500 text-white hover:bg-coral-600 shadow-sm rounded-full inline-flex items-center justify-center font-medium transition-colors'
+    danger: 'bg-coral-500 text-white hover:bg-coral-600 shadow-xs rounded-full inline-flex items-center justify-center font-medium transition-colors'
   };
 
   const widthClass = fullWidth ? 'w-full' : '';
@@ -39,7 +39,7 @@ export const Button: React.FC<ButtonProps> = ({
 
   return (
     <button
-      className={` ${variantClasses[variant]} ${widthClass} ${opacityClass} ${className}`}
+      className={`${sizeClasses[size]} ${variantClasses[variant]} ${widthClass} ${opacityClass} ${className}`}
       disabled={disabled || isLoading}
       {...props}
     >

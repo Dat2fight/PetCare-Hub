@@ -55,6 +55,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     @Override
     @Transactional
     public LoyaltyAccountDTO addPoints(Long userId, Integer points, String description) {
+        if (points == null || points <= 0) throw new com.petcarehub.exception.BadRequestException("Điểm phải lớn hơn 0");
         LoyaltyAccount account = getOrCreateAccount(userId);
         account.setAvailablePoints(account.getAvailablePoints() + points);
         account.setTotalPoints(account.getTotalPoints() + points);
@@ -76,9 +77,10 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     @Override
     @Transactional
     public LoyaltyAccountDTO spendPoints(Long userId, Integer points, String description) {
+        if (points == null || points <= 0) throw new com.petcarehub.exception.BadRequestException("Điểm phải lớn hơn 0");
         LoyaltyAccount account = getOrCreateAccount(userId);
         if (account.getAvailablePoints() < points) {
-            throw new RuntimeException("Insufficient points");
+            throw new com.petcarehub.exception.BadRequestException("Không đủ điểm");
         }
         account.setAvailablePoints(account.getAvailablePoints() - points);
         account = accountRepository.save(account);
@@ -95,8 +97,8 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     @Override
-    public List<LoyaltyTransactionDTO> getTransactions(Long accountId) {
-        return transactionRepository.findByLoyaltyAccountId(accountId, Pageable.unpaged()).getContent().stream().map(tx -> {
+    public List<LoyaltyTransactionDTO> getTransactions(Long accountId, org.springframework.data.domain.Pageable pageable) {
+        return transactionRepository.findByLoyaltyAccountId(accountId, pageable).getContent().stream().map(tx -> {
             LoyaltyTransactionDTO dto = new LoyaltyTransactionDTO();
             dto.setId(tx.getId());
             dto.setPoints(tx.getPoints());
@@ -107,13 +109,15 @@ public class LoyaltyServiceImpl implements LoyaltyService {
         }).collect(Collectors.toList());
     }
     
+    private static final java.util.Map<String, Integer> THRESHOLDS = java.util.Map.of("BRONZE", 0, "SILVER", 1000, "GOLD", 5000, "PLATINUM", 10000);
+
     private void updateMembershipLevel(LoyaltyAccount account) {
         int lifetime = account.getTotalPoints() == null ? 0 : account.getTotalPoints();
-        if (lifetime >= 10000) {
+        if (lifetime >= THRESHOLDS.get("PLATINUM")) {
             account.setMembershipLevel(MembershipLevel.PLATINUM);
-        } else if (lifetime >= 5000) {
+        } else if (lifetime >= THRESHOLDS.get("GOLD")) {
             account.setMembershipLevel(MembershipLevel.GOLD);
-        } else if (lifetime >= 1000) {
+        } else if (lifetime >= THRESHOLDS.get("SILVER")) {
             account.setMembershipLevel(MembershipLevel.SILVER);
         } else {
             account.setMembershipLevel(MembershipLevel.BRONZE);
@@ -127,6 +131,11 @@ public class LoyaltyServiceImpl implements LoyaltyService {
         dto.setCurrentPoints(account.getAvailablePoints());
         dto.setLifetimePoints(account.getTotalPoints());
         dto.setMembershipLevel(account.getMembershipLevel() != null ? account.getMembershipLevel().name() : "BRONZE");
+        dto.setThresholds(THRESHOLDS);
+        dto.setTier(dto.getMembershipLevel());
+        var next = THRESHOLDS.entrySet().stream().filter(e -> e.getValue() > account.getTotalPoints()).min(java.util.Map.Entry.comparingByValue());
+        dto.setNextTier(next.map(java.util.Map.Entry::getKey).orElse(null));
+        dto.setPointsToNextTier(next.map(e -> e.getValue() - account.getTotalPoints()).orElse(0));
         return dto;
     }
 }

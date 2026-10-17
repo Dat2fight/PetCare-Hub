@@ -7,7 +7,7 @@ import java.util.List;
 public interface VaccinationService {
     VaccinationDTO createVaccination(VaccinationCreateRequest request);
     VaccinationDTO getVaccinationById(Long id);
-    List<VaccinationDTO> getVaccinationsByPetId(Long petId);
+    List<VaccinationDTO> getVaccinationsByPetId(Long petId, org.springframework.data.domain.Pageable pageable);
     VaccinationDTO updateVaccination(Long id, VaccinationCreateRequest request);
     void deleteVaccination(Long id);
 }

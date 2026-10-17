@@ -22,86 +22,45 @@ const replacements = [
   ['H?t h\ufffdng', 'Hết hàng'],
   ['Th\ufffdm v\ufffdo gi? h\ufffdng', 'Thêm vào giỏ hàng'],
 
-  // Any other typical mojibake patterns
-  ['\ufffd?c', 'Đặc'],
-  ['\ufffd\ufffdng', 'Đóng'],
-  ['Th\ufffdch', 'Thích'],
-  ['th\ufffdch', 'thích'],
-  ['Th\ufffdnh', 'Thành'],
-  ['th\ufffdnh', 'thành'],
-  ['nhi\ufffdn', 'nhiên'],
-  ['d\ufffdng', 'dàng'],
-  ['Kh\ufffdng', 'Không'],
-  ['kh\ufffdng', 'không'],
-  ['th\ufffdng', 'thông'],
-  ['Vui l\ufffdng', 'Vui lòng'],
-  ['vui l\ufffdng', 'vui lòng'],
-  ['c?a h\ufffdng', 'cửa hàng'],
-  ['d\ufffdnh gi\ufffd', 'đánh giá'],
-  ['C\ufffdn h\ufffdng', 'Còn hàng'],
-  ['H?t h\ufffdng', 'Hết hàng'],
-  ['gi? h\ufffdng', 'giỏ hàng'],
-  ['s?n ph?m', 'sản phẩm'],
-  ['S?n ph?m', 'Sản phẩm'],
-  ['th?y', 'thấy'],
-  ['l?i', 'lại'],
-  ['c?a', 'của'],
-  ['h\ufffdng', 'hàng'],
-  ['ti?t', 'tiết'],
-  ['di?m', 'điểm'],
-  ['n?i', 'nổi'],
-  ['b?t', 'bật'],
-  ['gi?ng', 'giống'],
-  ['ch\ufffd', 'chó'],
-  ['m\ufffdo', 'mèo'],
-  ['ph?n', 'phần'],
-  ['c?n', 'cẩn'],
-  ['th?n', 'thận'],
-  ['b?o', 'bảo'],
-  ['qu?n', 'quản'],
-  ['d?', 'dễ'],
-  ['lu?ng', 'lượng']
 ];
 
-function cleanContent(content) {
-  // Strip BOM if present (\uFEFF)
-  let cleaned = content.replace(/^\uFEFF/, '');
-  
-  // Apply text replacements
-  for (const [bad, good] of replacements) {
-    if (cleaned.includes(bad)) {
-      cleaned = cleaned.replaceAll(bad, good);
-    }
-  }
-  return cleaned;
+// Only exact string literals in an explicit file are eligible. Never replace code tokens.
+const ts = require('typescript');
+const { execFileSync } = require('child_process');
+const write = process.argv.includes('--write');
+const relative = process.argv.find(arg => arg.startsWith('--file='))?.slice(7);
+if (!relative) {
+  console.log('Chạy --file=src/path.tsx [--dry-run | --write]. Mặc định chỉ xem thay đổi.');
+  process.exit(0);
 }
-
-function processDirectory(dir) {
-  let modifiedCount = 0;
-  let totalFiles = 0;
-  const entries = fs.readdirSync(dir, { withFileTypes: true });
-
-  for (const entry of entries) {
-    const fullPath = path.join(dir, entry.name);
-    if (entry.isDirectory()) {
-      const { total, modified } = processDirectory(fullPath);
-      totalFiles += total;
-      modifiedCount += modified;
-    } else if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx') || entry.name.endsWith('.html') || entry.name.endsWith('.json'))) {
-      totalFiles++;
-      const original = fs.readFileSync(fullPath, 'utf8');
-      const cleaned = cleanContent(original);
-      if (cleaned !== original) {
-        fs.writeFileSync(fullPath, cleaned, 'utf8');
-        console.log(`[FIXED UTF-8] ${path.relative(__dirname, fullPath)}`);
-        modifiedCount++;
-      }
-    }
-  }
-  return { total: totalFiles, modified: modifiedCount };
+const file = path.resolve(__dirname, relative);
+if (!file.startsWith(srcDir + path.sep) || !/\.tsx?$/.test(file)) throw new Error('Chỉ hỗ trợ tệp TS/TSX trong src');
+if (write && execFileSync('git', ['status', '--porcelain'], { cwd: __dirname, encoding: 'utf8' }).trim()) {
+  throw new Error('Cần Git sạch trước khi ghi');
 }
-
-console.log('--- Starting Frontend UTF-8 Normalization ---');
-const result = processDirectory(srcDir);
-console.log(`\nProcessed ${result.total} files. Modified: ${result.modified} files.`);
-
+const original = fs.readFileSync(file, 'utf8');
+const ast = ts.createSourceFile(file, original, ts.ScriptTarget.Latest, true, file.endsWith('.tsx') ? ts.ScriptKind.TSX : ts.ScriptKind.TS);
+const edits = [];
+function visit(node) {
+  if (ts.isStringLiteral(node)) {
+    const replacement = replacements.find(([bad]) => bad === node.text);
+    if (replacement) edits.push({ start: node.getStart(ast), end: node.end, text: JSON.stringify(replacement[1]) });
+  }
+  ts.forEachChild(node, visit);
+}
+visit(ast);
+let changed = original;
+for (const edit of edits.sort((a, b) => b.start - a.start)) {
+  console.log('- ' + original.slice(edit.start, edit.end)); console.log('+ ' + edit.text);
+  changed = changed.slice(0, edit.start) + edit.text + changed.slice(edit.end);
+}
+changed = changed.replace(/^\uFEFF/, '');
+if (write && changed !== original) {
+  fs.writeFileSync(file, changed, 'utf8');
+  try {
+    execFileSync(process.execPath, [require.resolve('typescript/bin/tsc'), '--noEmit', '-p', 'tsconfig.app.json'], { cwd: __dirname, stdio: 'inherit' });
+  } catch (error) {
+    fs.writeFileSync(file, original, 'utf8');
+    throw error;
+  }
+}

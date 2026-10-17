@@ -6,5 +6,10 @@ import java.util.List;
 @Data
 public class OrderCreateRequest {
     private Long userId;
+    @jakarta.validation.Valid
+    @jakarta.validation.constraints.NotEmpty(message="Đơn hàng phải có sản phẩm")
     private List<OrderItemDTO> items;
+    @jakarta.validation.constraints.NotBlank(message="Địa chỉ giao hàng là bắt buộc")
+    @jakarta.validation.constraints.Size(max=2000, message="Địa chỉ tối đa 2000 ký tự")
+    private String shippingAddress;
 }

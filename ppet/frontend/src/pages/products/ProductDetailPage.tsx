@@ -174,7 +174,7 @@ export const ProductDetailPage: React.FC = () => {
                 <Button size="lg" className="flex-1 py-4 text-lg" isLoading={addingToCart} onClick={handleAddToCart} disabled={(product.stockQuantity ?? 0) <= 0}>
                   <FiShoppingCart className="mr-2" /> Thêm vào giỏ hàng
                 </Button>
-                <button className="p-4 rounded-2xl border-2 border-gray-200 text-gray-400 hover:text-coral-500 hover:border-coral-500 transition-colors bg-white shadow-sm">
+                <button className="p-4 rounded-2xl border-2 border-gray-200 text-gray-400 hover:text-coral-500 hover:border-coral-500 transition-colors bg-white shadow-xs">
                   <FiHeart size={24} />
                 </button>
               </div>

@@ -22,8 +22,9 @@ jobs:
       - name: Install dependencies & Build Frontend
         run: |
           cd ppet/frontend
-          npm install
+          npm ci
           npm run build
+          cp dist/index.html dist/404.html
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

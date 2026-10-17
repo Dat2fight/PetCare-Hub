@@ -9,4 +9,7 @@ public class TreatmentDTO {
     private String description;
     private String medicine;
     private String dosage;
+    private String frequency;
+    private java.time.LocalDate startDate;
+    private java.time.LocalDate endDate;
 }

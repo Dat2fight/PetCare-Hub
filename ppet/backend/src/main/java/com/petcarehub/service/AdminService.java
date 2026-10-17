@@ -7,8 +7,8 @@ import com.petcarehub.entity.User;
 import java.util.List;
 
 public interface AdminService {
-    DashboardSummaryDTO getDashboardSummary();
-    RevenueReportDTO getRevenueReport();
+    DashboardSummaryDTO getDashboardSummary(java.time.LocalDate from, java.time.LocalDate to);
+    RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to);
     List<User> getAllUsers();
     User updateUserRole(Long userId, String role);
 }

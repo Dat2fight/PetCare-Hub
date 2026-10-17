@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { petManagementService, PetDTO, MedicalRecordDTO } from '../../services/petManagementService';
 
 export const PetHealthHistoryPage: React.FC = () => {
@@ -8,23 +8,32 @@ export const PetHealthHistoryPage: React.FC = () => {
   const [records, setRecords] = useState<MedicalRecordDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [error, setError] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [page, setPage] = useState(0);
+  useEffect(() => { setPage(0); }, [id]);
   useEffect(() => {
+    let cancelled = false;
+    setLoading(true); setError(false); setPet(null);
+    setRecords([]);
     const loadData = async () => {
       try {
         const petData = await petManagementService.getPetById(Number(id));
-        setPet(petData);
+        if (!cancelled) setPet(petData);
         
-        const recordsData = await petManagementService.getMedicalRecords(Number(id));
-        setRecords(recordsData);
+        const recordsData = await petManagementService.getMedicalRecords(Number(id), page);
+        if (!cancelled) setRecords(recordsData);
       } catch (error) {
-        console.error(error);
+        if (!cancelled) setError(true);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
     if (id) loadData();
-  }, [id]);
+    return () => { cancelled = true; };
+  }, [id, retry, page]);
 
+  if (error) return <div role="alert" className="p-8">Không tải được hồ sơ. <button onClick={() => setRetry(retry + 1)}>Thử lại</button></div>;
   if (loading) {
     return <div className="min-h-screen py-20 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
   }
@@ -39,7 +48,7 @@ export const PetHealthHistoryPage: React.FC = () => {
           Lịch sử sức khỏe - {pet.name}
         </h1>
 
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-8 mb-8">
+        <div className="bg-white rounded-3xl shadow-xs border border-gray-100 p-8 mb-8">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold text-gray-900">Tiến trình khám chữa bệnh</h2>
           </div>
@@ -69,6 +78,7 @@ export const PetHealthHistoryPage: React.FC = () => {
             )}
           </div>
         </div>
+<nav className="flex gap-6"><button disabled={page === 0} onClick={() => setPage(page - 1)}>Trang trước</button><span>Trang {page + 1}</span><button disabled={records.length < 20} onClick={() => setPage(page + 1)}>Trang sau</button></nav>
       </div>
     </div>
   );

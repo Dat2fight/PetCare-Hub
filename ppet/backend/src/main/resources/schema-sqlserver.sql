@@ -14,41 +14,10 @@
 -- 1. ROLES & USERS & SECURITY
 -- ------------------------------------------------------------------------------------------
 
-IF OBJECT_ID('dbo.user_roles', 'U') IS NOT NULL DROP TABLE dbo.user_roles;
-IF OBJECT_ID('dbo.user_addresses', 'U') IS NOT NULL DROP TABLE dbo.user_addresses;
-IF OBJECT_ID('dbo.notifications', 'U') IS NOT NULL DROP TABLE dbo.notifications;
-IF OBJECT_ID('dbo.loyalty_transactions', 'U') IS NOT NULL DROP TABLE dbo.loyalty_transactions;
-IF OBJECT_ID('dbo.loyalty_accounts', 'U') IS NOT NULL DROP TABLE dbo.loyalty_accounts;
-IF OBJECT_ID('dbo.promotion_usages', 'U') IS NOT NULL DROP TABLE dbo.promotion_usages;
-IF OBJECT_ID('dbo.promotions', 'U') IS NOT NULL DROP TABLE dbo.promotions;
-IF OBJECT_ID('dbo.reviews', 'U') IS NOT NULL DROP TABLE dbo.reviews;
-IF OBJECT_ID('dbo.treatments', 'U') IS NOT NULL DROP TABLE dbo.treatments;
-IF OBJECT_ID('dbo.vaccinations', 'U') IS NOT NULL DROP TABLE dbo.vaccinations;
-IF OBJECT_ID('dbo.medical_records', 'U') IS NOT NULL DROP TABLE dbo.medical_records;
-IF OBJECT_ID('dbo.appointments', 'U') IS NOT NULL DROP TABLE dbo.appointments;
-IF OBJECT_ID('dbo.services', 'U') IS NOT NULL DROP TABLE dbo.services;
-IF OBJECT_ID('dbo.care_package_subscriptions', 'U') IS NOT NULL DROP TABLE dbo.care_package_subscriptions;
-IF OBJECT_ID('dbo.care_packages', 'U') IS NOT NULL DROP TABLE dbo.care_packages;
-IF OBJECT_ID('dbo.pet_matching_results', 'U') IS NOT NULL DROP TABLE dbo.pet_matching_results;
-IF OBJECT_ID('dbo.pet_matching_quizzes', 'U') IS NOT NULL DROP TABLE dbo.pet_matching_quizzes;
-IF OBJECT_ID('dbo.order_items', 'U') IS NOT NULL DROP TABLE dbo.order_items;
-IF OBJECT_ID('dbo.orders', 'U') IS NOT NULL DROP TABLE dbo.orders;
-IF OBJECT_ID('dbo.cart_items', 'U') IS NOT NULL DROP TABLE dbo.cart_items;
-IF OBJECT_ID('dbo.carts', 'U') IS NOT NULL DROP TABLE dbo.carts;
-IF OBJECT_ID('dbo.inventory_transactions', 'U') IS NOT NULL DROP TABLE dbo.inventory_transactions;
-IF OBJECT_ID('dbo.inventory', 'U') IS NOT NULL DROP TABLE dbo.inventory;
-IF OBJECT_ID('dbo.product_images', 'U') IS NOT NULL DROP TABLE dbo.product_images;
-IF OBJECT_ID('dbo.products', 'U') IS NOT NULL DROP TABLE dbo.products;
-IF OBJECT_ID('dbo.product_categories', 'U') IS NOT NULL DROP TABLE dbo.product_categories;
-IF OBJECT_ID('dbo.pet_images', 'U') IS NOT NULL DROP TABLE dbo.pet_images;
-IF OBJECT_ID('dbo.pets', 'U') IS NOT NULL DROP TABLE dbo.pets;
-IF OBJECT_ID('dbo.breeds', 'U') IS NOT NULL DROP TABLE dbo.breeds;
-IF OBJECT_ID('dbo.species', 'U') IS NOT NULL DROP TABLE dbo.species;
-IF OBJECT_ID('dbo.users', 'U') IS NOT NULL DROP TABLE dbo.users;
-IF OBJECT_ID('dbo.roles', 'U') IS NOT NULL DROP TABLE dbo.roles;
 GO
 
 -- Bảng roles: Danh mục vai trò trong hệ thống
+IF OBJECT_ID(N'dbo.roles', N'U') IS NULL
 CREATE TABLE dbo.roles (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name VARCHAR(50) NOT NULL,
@@ -62,6 +31,7 @@ CREATE TABLE dbo.roles (
 GO
 
 -- Bảng users: Tài khoản người dùng (khách hàng, nhân viên, bác sĩ, quản trị)
+IF OBJECT_ID(N'dbo.users', N'U') IS NULL
 CREATE TABLE dbo.users (
     id BIGINT IDENTITY(1,1) NOT NULL,
     username VARCHAR(50) NOT NULL,
@@ -82,6 +52,7 @@ CREATE TABLE dbo.users (
 GO
 
 -- Bảng user_roles: Bảng liên kết N-N giữa người dùng và vai trò
+IF OBJECT_ID(N'dbo.user_roles', N'U') IS NULL
 CREATE TABLE dbo.user_roles (
     user_id BIGINT NOT NULL,
     role_id BIGINT NOT NULL,
@@ -93,6 +64,7 @@ CREATE TABLE dbo.user_roles (
 GO
 
 -- [ĐỀ XUẤT THÊM] Bảng user_addresses: Sổ địa chỉ giao hàng của khách hàng
+IF OBJECT_ID(N'dbo.user_addresses', N'U') IS NULL
 CREATE TABLE dbo.user_addresses (
     id BIGINT IDENTITY(1,1) NOT NULL,
     user_id BIGINT NOT NULL,
@@ -116,6 +88,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng species: Danh mục Loài thú cưng (Chó, Mèo, Chim, Cá...)
+IF OBJECT_ID(N'dbo.species', N'U') IS NULL
 CREATE TABLE dbo.species (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(100) NOT NULL,
@@ -129,6 +102,7 @@ CREATE TABLE dbo.species (
 GO
 
 -- Bảng breeds: Danh mục Giống loài thú cưng
+IF OBJECT_ID(N'dbo.breeds', N'U') IS NULL
 CREATE TABLE dbo.breeds (
     id BIGINT IDENTITY(1,1) NOT NULL,
     species_id BIGINT NOT NULL,
@@ -149,6 +123,7 @@ CREATE TABLE dbo.breeds (
 GO
 
 -- Bảng pets: Hồ sơ thú cưng trong cửa hàng hoặc thú cưng của khách
+IF OBJECT_ID(N'dbo.pets', N'U') IS NULL
 CREATE TABLE dbo.pets (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(100) NULL,
@@ -177,6 +152,7 @@ CREATE TABLE dbo.pets (
 GO
 
 -- [ĐỀ XUẤT THÊM] Bảng pet_images: Thư viện nhiều hình ảnh cho thú cưng
+IF OBJECT_ID(N'dbo.pet_images', N'U') IS NULL
 CREATE TABLE dbo.pet_images (
     id BIGINT IDENTITY(1,1) NOT NULL,
     pet_id BIGINT NOT NULL,
@@ -194,6 +170,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng product_categories: Phân cấp danh mục sản phẩm (hỗ trợ cha-con)
+IF OBJECT_ID(N'dbo.product_categories', N'U') IS NULL
 CREATE TABLE dbo.product_categories (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(100) NOT NULL,
@@ -208,6 +185,7 @@ CREATE TABLE dbo.product_categories (
 GO
 
 -- Bảng products: Sản phẩm (thức ăn, đồ chơi, vật dụng, phụ kiện)
+IF OBJECT_ID(N'dbo.products', N'U') IS NULL
 CREATE TABLE dbo.products (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(255) NOT NULL,
@@ -229,6 +207,7 @@ CREATE TABLE dbo.products (
 GO
 
 -- [ĐỀ XUẤT THÊM] Bảng product_images: Bộ sưu tập hình ảnh chi tiết của sản phẩm
+IF OBJECT_ID(N'dbo.product_images', N'U') IS NULL
 CREATE TABLE dbo.product_images (
     id BIGINT IDENTITY(1,1) NOT NULL,
     product_id BIGINT NOT NULL,
@@ -246,6 +225,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng inventory: Tồn kho hiện tại của sản phẩm hoặc thú cưng (Polymorphic tracking)
+IF OBJECT_ID(N'dbo.inventory', N'U') IS NULL
 CREATE TABLE dbo.inventory (
     id BIGINT IDENTITY(1,1) NOT NULL,
     pet_id BIGINT NULL,
@@ -268,6 +248,7 @@ CREATE TABLE dbo.inventory (
 GO
 
 -- Bảng inventory_transactions: Nhật ký kiểm toán xuất/nhập/điều chỉnh tồn kho
+IF OBJECT_ID(N'dbo.inventory_transactions', N'U') IS NULL
 CREATE TABLE dbo.inventory_transactions (
     id BIGINT IDENTITY(1,1) NOT NULL,
     inventory_id BIGINT NOT NULL,
@@ -290,6 +271,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng carts: Giỏ hàng trực tuyến của khách hàng (1-1 với User)
+IF OBJECT_ID(N'dbo.carts', N'U') IS NULL
 CREATE TABLE dbo.carts (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -302,6 +284,7 @@ CREATE TABLE dbo.carts (
 GO
 
 -- Bảng cart_items: Mặt hàng trong giỏ (hỗ trợ cả Product và Pet)
+IF OBJECT_ID(N'dbo.cart_items', N'U') IS NULL
 CREATE TABLE dbo.cart_items (
     id BIGINT IDENTITY(1,1) NOT NULL,
     cart_id BIGINT NOT NULL,
@@ -328,6 +311,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng orders: Đơn đặt hàng của khách
+IF OBJECT_ID(N'dbo.orders', N'U') IS NULL
 CREATE TABLE dbo.orders (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -353,6 +337,7 @@ CREATE TABLE dbo.orders (
 GO
 
 -- Bảng order_items: Chi tiết món trong đơn hàng (lưu lại snapshot giá bán lúc mua)
+IF OBJECT_ID(N'dbo.order_items', N'U') IS NULL
 CREATE TABLE dbo.order_items (
     id BIGINT IDENTITY(1,1) NOT NULL,
     order_id BIGINT NOT NULL,
@@ -379,6 +364,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng services: Danh mục dịch vụ spa, grooming và thú y
+IF OBJECT_ID(N'dbo.services', N'U') IS NULL
 CREATE TABLE dbo.services (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(100) NOT NULL,
@@ -396,6 +382,7 @@ CREATE TABLE dbo.services (
 GO
 
 -- Bảng appointments: Lịch hẹn dịch vụ chăm sóc / khám bệnh
+IF OBJECT_ID(N'dbo.appointments', N'U') IS NULL
 CREATE TABLE dbo.appointments (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -424,6 +411,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng medical_records: Hồ sơ bệnh án của thú cưng
+IF OBJECT_ID(N'dbo.medical_records', N'U') IS NULL
 CREATE TABLE dbo.medical_records (
     id BIGINT IDENTITY(1,1) NOT NULL,
     pet_id BIGINT NOT NULL,
@@ -444,6 +432,7 @@ CREATE TABLE dbo.medical_records (
 GO
 
 -- Bảng vaccinations: Lịch sử tiêm phòng vaccine của thú cưng
+IF OBJECT_ID(N'dbo.vaccinations', N'U') IS NULL
 CREATE TABLE dbo.vaccinations (
     id BIGINT IDENTITY(1,1) NOT NULL,
     pet_id BIGINT NOT NULL,
@@ -463,6 +452,7 @@ CREATE TABLE dbo.vaccinations (
 GO
 
 -- Bảng treatments: Đơn thuốc và tiến trình điều trị bệnh
+IF OBJECT_ID(N'dbo.treatments', N'U') IS NULL
 CREATE TABLE dbo.treatments (
     id BIGINT IDENTITY(1,1) NOT NULL,
     medical_record_id BIGINT NOT NULL,
@@ -488,6 +478,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng reviews: Đánh giá và bình luận (Polymorphic cho PET, PRODUCT, SERVICE)
+IF OBJECT_ID(N'dbo.reviews', N'U') IS NULL
 CREATE TABLE dbo.reviews (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -507,6 +498,7 @@ CREATE TABLE dbo.reviews (
 GO
 
 -- Bảng promotions: Mã phiếu giảm giá khuyến mãi
+IF OBJECT_ID(N'dbo.promotions', N'U') IS NULL
 CREATE TABLE dbo.promotions (
     id BIGINT IDENTITY(1,1) NOT NULL,
     code VARCHAR(50) NOT NULL,
@@ -529,6 +521,7 @@ CREATE TABLE dbo.promotions (
 GO
 
 -- Bảng promotion_usages: Lịch sử áp dụng khuyến mãi theo đơn hàng
+IF OBJECT_ID(N'dbo.promotion_usages', N'U') IS NULL
 CREATE TABLE dbo.promotion_usages (
     id BIGINT IDENTITY(1,1) NOT NULL,
     promotion_id BIGINT NOT NULL,
@@ -547,6 +540,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng loyalty_accounts: Điểm tích lũy và thứ hạng thành viên
+IF OBJECT_ID(N'dbo.loyalty_accounts', N'U') IS NULL
 CREATE TABLE dbo.loyalty_accounts (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -563,6 +557,7 @@ CREATE TABLE dbo.loyalty_accounts (
 GO
 
 -- Bảng loyalty_transactions: Lịch sử cộng/trừ điểm thưởng
+IF OBJECT_ID(N'dbo.loyalty_transactions', N'U') IS NULL
 CREATE TABLE dbo.loyalty_transactions (
     id BIGINT IDENTITY(1,1) NOT NULL,
     loyalty_account_id BIGINT NOT NULL,
@@ -584,6 +579,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng care_packages: Danh mục gói dịch vụ định kỳ
+IF OBJECT_ID(N'dbo.care_packages', N'U') IS NULL
 CREATE TABLE dbo.care_packages (
     id BIGINT IDENTITY(1,1) NOT NULL,
     name NVARCHAR(255) NOT NULL,
@@ -602,6 +598,7 @@ CREATE TABLE dbo.care_packages (
 GO
 
 -- Bảng care_package_subscriptions: Hợp đồng đăng ký gói chăm sóc cho thú cưng
+IF OBJECT_ID(N'dbo.care_package_subscriptions', N'U') IS NULL
 CREATE TABLE dbo.care_package_subscriptions (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -627,6 +624,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng pet_matching_quizzes: Câu trả lời khảo sát thói quen sinh hoạt của khách
+IF OBJECT_ID(N'dbo.pet_matching_quizzes', N'U') IS NULL
 CREATE TABLE dbo.pet_matching_quizzes (
     id BIGINT IDENTITY(1,1) NOT NULL,
     customer_id BIGINT NOT NULL,
@@ -648,6 +646,7 @@ CREATE TABLE dbo.pet_matching_quizzes (
 GO
 
 -- Bảng pet_matching_results: Kết quả chấm điểm xếp hạng thú cưng phù hợp
+IF OBJECT_ID(N'dbo.pet_matching_results', N'U') IS NULL
 CREATE TABLE dbo.pet_matching_results (
     id BIGINT IDENTITY(1,1) NOT NULL,
     quiz_id BIGINT NOT NULL,
@@ -669,6 +668,7 @@ GO
 -- ------------------------------------------------------------------------------------------
 
 -- Bảng notifications: Hộp thư thông báo người dùng
+IF OBJECT_ID(N'dbo.notifications', N'U') IS NULL
 CREATE TABLE dbo.notifications (
     id BIGINT IDENTITY(1,1) NOT NULL,
     user_id BIGINT NOT NULL,
@@ -690,42 +690,63 @@ GO
 -- ==========================================================================================
 
 -- Index cho Authentication & User
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_users_email' AND object_id = OBJECT_ID(N'dbo.users'))
 CREATE NONCLUSTERED INDEX IX_users_email ON dbo.users(email);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_users_username' AND object_id = OBJECT_ID(N'dbo.users'))
 CREATE NONCLUSTERED INDEX IX_users_username ON dbo.users(username);
 
 -- Index cho Pet search & filter
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_pets_species_breed' AND object_id = OBJECT_ID(N'dbo.pets'))
 CREATE NONCLUSTERED INDEX IX_pets_species_breed ON dbo.pets(species_id, breed_id);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_pets_availability_status' AND object_id = OBJECT_ID(N'dbo.pets'))
 CREATE NONCLUSTERED INDEX IX_pets_availability_status ON dbo.pets(availability_status) INCLUDE (price, health_status);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_pets_owner_id' AND object_id = OBJECT_ID(N'dbo.pets'))
 CREATE NONCLUSTERED INDEX IX_pets_owner_id ON dbo.pets(owner_id) WHERE owner_id IS NOT NULL;
 
 -- Index cho Product search & filter
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_products_category_active' AND object_id = OBJECT_ID(N'dbo.products'))
 CREATE NONCLUSTERED INDEX IX_products_category_active ON dbo.products(category_id, active) INCLUDE (price, name);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_products_sku' AND object_id = OBJECT_ID(N'dbo.products'))
 CREATE NONCLUSTERED INDEX IX_products_sku ON dbo.products(sku);
 
 -- Index cho Inventory
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_inventory_quantity' AND object_id = OBJECT_ID(N'dbo.inventory'))
 CREATE NONCLUSTERED INDEX IX_inventory_quantity ON dbo.inventory(quantity) INCLUDE (reorder_point);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_inv_tx_inventory_created' AND object_id = OBJECT_ID(N'dbo.inventory_transactions'))
 CREATE NONCLUSTERED INDEX IX_inv_tx_inventory_created ON dbo.inventory_transactions(inventory_id, created_at DESC);
 
 -- Index cho Orders
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_orders_customer_created' AND object_id = OBJECT_ID(N'dbo.orders'))
 CREATE NONCLUSTERED INDEX IX_orders_customer_created ON dbo.orders(customer_id, created_at DESC);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_orders_status' AND object_id = OBJECT_ID(N'dbo.orders'))
 CREATE NONCLUSTERED INDEX IX_orders_status ON dbo.orders(status) INCLUDE (total_amount, created_at);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_order_items_order_id' AND object_id = OBJECT_ID(N'dbo.order_items'))
 CREATE NONCLUSTERED INDEX IX_order_items_order_id ON dbo.order_items(order_id);
 
 -- Index cho Appointments (chống trùng lịch nhân viên/bác sĩ)
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_appointments_staff_schedule' AND object_id = OBJECT_ID(N'dbo.appointments'))
 CREATE NONCLUSTERED INDEX IX_appointments_staff_schedule ON dbo.appointments(staff_id, appointment_date, start_time, end_time);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_appointments_customer' AND object_id = OBJECT_ID(N'dbo.appointments'))
 CREATE NONCLUSTERED INDEX IX_appointments_customer ON dbo.appointments(customer_id, appointment_date);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_appointments_pet' AND object_id = OBJECT_ID(N'dbo.appointments'))
 CREATE NONCLUSTERED INDEX IX_appointments_pet ON dbo.appointments(pet_id);
 
 -- Index cho Y tế & Tiêm phòng
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_medical_records_pet' AND object_id = OBJECT_ID(N'dbo.medical_records'))
 CREATE NONCLUSTERED INDEX IX_medical_records_pet ON dbo.medical_records(pet_id, examination_date DESC);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_vaccinations_pet_next_due' AND object_id = OBJECT_ID(N'dbo.vaccinations'))
 CREATE NONCLUSTERED INDEX IX_vaccinations_pet_next_due ON dbo.vaccinations(pet_id, next_due_date);
 
 -- Index cho Reviews & Promotions & Loyalty
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_reviews_target' AND object_id = OBJECT_ID(N'dbo.reviews'))
 CREATE NONCLUSTERED INDEX IX_reviews_target ON dbo.reviews(reviewable_type, reviewable_id, approved);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_promotions_code_active' AND object_id = OBJECT_ID(N'dbo.promotions'))
 CREATE NONCLUSTERED INDEX IX_promotions_code_active ON dbo.promotions(code, active, start_date, end_date);
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_loyalty_tx_account' AND object_id = OBJECT_ID(N'dbo.loyalty_transactions'))
 CREATE NONCLUSTERED INDEX IX_loyalty_tx_account ON dbo.loyalty_transactions(loyalty_account_id, created_at DESC);
 
 -- Index cho Notifications
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_notifications_user_unread' AND object_id = OBJECT_ID(N'dbo.notifications'))
 CREATE NONCLUSTERED INDEX IX_notifications_user_unread ON dbo.notifications(user_id, is_read, created_at DESC);
 GO
 

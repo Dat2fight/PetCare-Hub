@@ -20,13 +20,13 @@ public class AdminController {
     private final AdminService adminService;
 
     @GetMapping("/dashboard")
-    public ResponseEntity<DashboardSummaryDTO> getDashboardSummary() {
-        return ResponseEntity.ok(adminService.getDashboardSummary());
+    public ResponseEntity<DashboardSummaryDTO> getDashboardSummary(@RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate from, @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate to) {
+        return ResponseEntity.ok(adminService.getDashboardSummary(from, to));
     }
 
     @GetMapping("/revenue-report")
-    public ResponseEntity<RevenueReportDTO> getRevenueReport() {
-        return ResponseEntity.ok(adminService.getRevenueReport());
+    public ResponseEntity<RevenueReportDTO> getRevenueReport(@RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate from, @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate to) {
+        return ResponseEntity.ok(adminService.getRevenueReport(from, to));
     }
 
     @GetMapping("/users")

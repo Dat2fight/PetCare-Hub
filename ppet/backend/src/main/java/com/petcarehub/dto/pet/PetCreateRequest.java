@@ -18,7 +18,10 @@ public class PetCreateRequest {
 
     private Long breedId;
 
+    @jakarta.validation.constraints.PositiveOrZero(message="Tuổi không được âm")
     private Integer age;
+    @jakarta.validation.constraints.PastOrPresent(message="Ngày sinh không được trong tương lai")
+    private java.time.LocalDate birthDate;
 
     @NotBlank
     private String healthStatus;
@@ -32,5 +35,6 @@ public class PetCreateRequest {
     
     private String imageUrl;
     
+    @jakarta.validation.constraints.DecimalMin(value="0", message="Giá không được âm")
     private java.math.BigDecimal price;
 }

@@ -13,4 +13,8 @@ public class LoyaltyAccountDTO {
     private Integer currentPoints;
     private Integer lifetimePoints;
     private String membershipLevel;
+    private String tier;
+    private String nextTier;
+    private Integer pointsToNextTier;
+    private java.util.Map<String, Integer> thresholds;
 }

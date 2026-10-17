@@ -8,5 +8,5 @@ public interface LoyaltyService {
     LoyaltyAccountDTO getAccountByUserId(Long userId);
     LoyaltyAccountDTO addPoints(Long userId, Integer points, String description);
     LoyaltyAccountDTO spendPoints(Long userId, Integer points, String description);
-    List<LoyaltyTransactionDTO> getTransactions(Long accountId);
+    List<LoyaltyTransactionDTO> getTransactions(Long accountId, org.springframework.data.domain.Pageable pageable);
 }

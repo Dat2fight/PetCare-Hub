@@ -1,51 +1,17 @@
-import React from 'react';
-import { FiBox, FiCalendar, FiBell } from 'react-icons/fi';
-
-export const NotificationsPage: React.FC = () => {
-  return (
-    <div className="bg-background min-h-screen py-10">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Thông báo</h1>
-          <button className="text-primary-600 font-medium hover:underline">
-            Đánh dấu tất cả đã đọc
-          </button>
-        </div>
-
-        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-          {[
-            { id: 1, icon: <FiBox />, title: 'Đơn hàng #DH123456 đã được giao', time: '2 phút trước', color: 'bg-green-100 text-green-600', unread: true },
-            { id: 2, icon: <FiCalendar />, title: 'Lịch hẹn Grooming sắp đến', time: '1 giờ trước', color: 'bg-blue-100 text-blue-600', unread: true },
-            { id: 3, icon: <FiBell />, title: 'Bạn nhận được 120 điểm thưởng', time: '1 ngày trước', color: 'bg-yellow-100 text-yellow-600', unread: false },
-          ].map(notif => (
-            <div
-              key={notif.id}
-              className={`flex items-start p-6 border-b border-gray-50 transition-colors ${
-                notif.unread ? 'bg-primary-50/30' : ''
-              }`}
-            >
-              <div
-                className={`w-12 h-12 rounded-full flex items-center justify-center mr-4 flex-shrink-0 ${notif.color}`}
-              >
-                {notif.icon}
-              </div>
-              <div className="flex-1">
-                <h4
-                  className={`text-base ${
-                    notif.unread ? 'font-semibold text-gray-900' : 'font-medium text-gray-600'
-                  }`}
-                >
-                  {notif.title}
-                </h4>
-                <p className="text-sm text-gray-500 mt-1">{notif.time}</p>
-              </div>
-              {notif.unread && (
-                <div className="w-3 h-3 bg-primary-600 rounded-full mt-2"></div>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+import { useEffect, useState } from 'react';
+import apiClient from '../../api/client';
+import toast from 'react-hot-toast';
+interface Notice { id: number; message: string; read: boolean; createdAt: string }
+export const NotificationsPage = () => {
+ const [items, setItems] = useState<Notice[]>([]); const [page,setPage] = useState(0); const [total,setTotal] = useState(0);
+ const [loading,setLoading] = useState(true); const [error,setError] = useState(false); const [retry,setRetry] = useState(0); const [busy,setBusy] = useState(false);
+ useEffect(() => { const controller = new AbortController(); setLoading(true); setError(false);
+  const load = () => apiClient.get('/notifications', {params:{page,size:20},signal:controller.signal}).then(({data}) => {setItems(data.content);setTotal(data.totalPages);setError(false);})
+   .catch(() => {if (!controller.signal.aborted) setError(true);}).finally(() => {if (!controller.signal.aborted) setLoading(false);});
+  void load(); const timer = window.setInterval(load,30000); return () => {controller.abort();window.clearInterval(timer);};
+ },[page,retry]);
+ const read = async (id?: number) => { setBusy(true); try { await apiClient.put(id ? `/notifications/${id}/read` : '/notifications/read-all'); setRetry(retry+1); toast.success('Đã đánh dấu đã đọc'); } catch {toast.error('Không cập nhật được thông báo');} finally {setBusy(false);} };
+ return <div className="max-w-4xl mx-auto p-8"><h1 className="text-3xl font-bold mb-6">Thông báo</h1><button disabled={busy} onClick={() => read()}>Đọc tất cả</button>
+ {loading ? <p>Đang tải…</p> : error ? <p role="alert">Không tải được thông báo. <button onClick={() => setRetry(retry+1)}>Thử lại</button></p> : !items.length ? <p>Chưa có thông báo.</p> : items.map(n => <article className="bg-white rounded-xl p-5 my-3" key={n.id}><p>{n.message}</p><p>{new Date(n.createdAt).toLocaleString('vi-VN')}</p>{!n.read && <button disabled={busy} onClick={() => read(n.id)}>Đánh dấu đã đọc</button>}</article>)}
+ <nav className="flex gap-6"><button disabled={!page} onClick={() => setPage(page-1)}>Trang trước</button><button disabled={page+1 >= total} onClick={() => setPage(page+1)}>Trang sau</button></nav></div>;
 };

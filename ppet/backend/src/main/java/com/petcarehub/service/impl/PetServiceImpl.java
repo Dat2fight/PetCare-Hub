@@ -27,6 +27,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PetServiceImpl implements PetService {
 
+    private final com.petcarehub.service.PetHealthService petHealthService;
     private final PetRepository petRepository;
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
@@ -78,14 +79,17 @@ public class PetServiceImpl implements PetService {
         Pet pet = new Pet();
         pet.setName(request.getName());
         pet.setSpecies(species);
+        if (breed != null && !breed.getSpecies().getId().equals(species.getId())) throw new com.petcarehub.exception.BadRequestException("Giống không thuộc loài đã chọn");
         pet.setBreed(breed);
-        // no age field in Pet entity
-        pet.setHealthStatus(com.petcarehub.enums.HealthStatus.valueOf(request.getHealthStatus()));
-        pet.setAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.valueOf(request.getAvailabilityStatus()));
+        // NEEDS DECISION: legacy age is whole years; estimate birth date only when absent.
+        if (request.getBirthDate() != null) pet.setDateOfBirth(request.getBirthDate());
+        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()));
+        pet.setHealthStatus(parseEnum(com.petcarehub.enums.HealthStatus.class, request.getHealthStatus()));
+        pet.setAvailabilityStatus(parseEnum(com.petcarehub.enums.AvailabilityStatus.class, request.getAvailabilityStatus()));
         pet.setDescription(request.getDescription());
         pet.setImageUrl(request.getImageUrl());
         pet.setPrice(request.getPrice() != null ? request.getPrice() : java.math.BigDecimal.ZERO);
-        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElse(null));
+        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ thú cưng")));
         pet.setCreatedAt(LocalDateTime.now());
         pet.setUpdatedAt(LocalDateTime.now());
 
@@ -110,14 +114,18 @@ public class PetServiceImpl implements PetService {
 
         pet.setName(request.getName());
         pet.setSpecies(species);
+        if (breed != null && !breed.getSpecies().getId().equals(species.getId())) throw new com.petcarehub.exception.BadRequestException("Giống không thuộc loài đã chọn");
         pet.setBreed(breed);
-        // no age field in Pet entity
-        pet.setHealthStatus(com.petcarehub.enums.HealthStatus.valueOf(request.getHealthStatus()));
-        pet.setAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.valueOf(request.getAvailabilityStatus()));
+        // NEEDS DECISION: legacy age is whole years; estimate birth date only when absent.
+        if (request.getBirthDate() != null) pet.setDateOfBirth(request.getBirthDate());
+        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()));
+        var newHealth = parseEnum(com.petcarehub.enums.HealthStatus.class, request.getHealthStatus());
+        if (newHealth != pet.getHealthStatus()) petHealthService.updatePetHealthStatus(id, newHealth);
+        pet.setAvailabilityStatus(parseEnum(com.petcarehub.enums.AvailabilityStatus.class, request.getAvailabilityStatus()));
         pet.setDescription(request.getDescription());
         pet.setImageUrl(request.getImageUrl());
-        pet.setPrice(request.getPrice() != null ? request.getPrice() : java.math.BigDecimal.ZERO);
-        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElse(null));
+        if (request.getPrice() != null) pet.setPrice(request.getPrice());
+        if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ thú cưng")));
         pet.setUpdatedAt(LocalDateTime.now());
 
         Pet updatedPet = petRepository.save(pet);
@@ -140,24 +148,10 @@ public class PetServiceImpl implements PetService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
-    private PetDTO mapToDTO(Pet pet) {
-        return new PetDTO(
-                pet.getId(),
-                pet.getName(),
-                pet.getSpecies() != null ? pet.getSpecies().getId() : null,
-                pet.getSpecies() != null ? pet.getSpecies().getName() : null,
-                pet.getBreed() != null ? pet.getBreed().getId() : null,
-                pet.getBreed() != null ? pet.getBreed().getName() : null,
-                null,
-                pet.getHealthStatus().name(),
-                pet.getAvailabilityStatus().name(),
-                pet.getOwner() != null ? pet.getOwner().getId() : null,
-                pet.getDescription(),
-                pet.getImageUrl(),
-                pet.getCreatedAt(),
-                pet.getUpdatedAt()
-        );
+    private <E extends Enum<E>> E parseEnum(Class<E> type, String value) {
+        try { return Enum.valueOf(type, value); }
+        catch (IllegalArgumentException | NullPointerException ex) { throw new com.petcarehub.exception.BadRequestException("Trạng thái không hợp lệ"); }
     }
+
+    private PetDTO mapToDTO(Pet pet) { return com.petcarehub.mapper.PetMapper.toDTO(pet); }
 }
-
-

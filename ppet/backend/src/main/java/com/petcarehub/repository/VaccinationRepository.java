@@ -9,6 +9,7 @@ import java.util.List;
 
 @Repository
 public interface VaccinationRepository extends JpaRepository<Vaccination, Long> {
+    org.springframework.data.domain.Page<Vaccination> findByPetId(Long petId, org.springframework.data.domain.Pageable pageable);
     List<Vaccination> findByPetId(Long petId);
 
     @Query("SELECT v FROM Vaccination v WHERE v.nextDueDate <= :date AND v.nextDueDate IS NOT NULL")

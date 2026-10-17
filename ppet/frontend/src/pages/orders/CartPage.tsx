@@ -50,8 +50,8 @@ export const CartPage: React.FC = () => {
           {/* Cart Items */}
           <div className="lg:w-2/3 space-y-4">
             {cartItems.map((item, idx) => (
-              <div key={idx} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-gray-100 flex flex-col sm:flex-row items-center gap-6">
-                <div className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden flex-shrink-0 p-2">
+              <div key={idx} className="bg-white rounded-2xl p-4 sm:p-6 shadow-xs border border-gray-100 flex flex-col sm:flex-row items-center gap-6">
+                <div className="w-24 h-24 bg-gray-50 rounded-xl overflow-hidden shrink-0 p-2">
                   <img src={item.product.image} alt={item.product.name} className="w-full h-full object-contain mix-blend-multiply" />
                 </div>
                 

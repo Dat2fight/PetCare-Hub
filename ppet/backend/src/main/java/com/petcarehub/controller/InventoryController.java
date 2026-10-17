@@ -25,7 +25,7 @@ public class InventoryController {
 
     @PostMapping("/add")
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('WAREHOUSE_STAFF', 'ADMIN')")
-    public ResponseEntity<Void> addStock(@RequestBody StockUpdateRequest request) {
+    public ResponseEntity<Void> addStock(@jakarta.validation.Valid @RequestBody StockUpdateRequest request) {
         inventoryService.addStock(request);
         return ResponseEntity.ok().build();
     }
@@ -36,6 +36,13 @@ public class InventoryController {
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('WAREHOUSE_STAFF', 'ADMIN')")
     public ResponseEntity<Void> reduceStock(@RequestParam Long productId, @RequestParam Integer quantity) {
         inventoryService.reduceStock(productId, quantity);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/adjust")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('WAREHOUSE_STAFF', 'ADMIN')")
+    public ResponseEntity<Void> adjustStock(@RequestParam Long productId, @RequestParam Integer quantity, @RequestParam String reason) {
+        inventoryService.adjustStock(productId, quantity, reason);
         return ResponseEntity.ok().build();
     }
 

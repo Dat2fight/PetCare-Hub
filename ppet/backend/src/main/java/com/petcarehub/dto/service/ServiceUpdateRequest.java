@@ -27,7 +27,8 @@ public class ServiceUpdateRequest {
     private ServiceType serviceType;
 
     @NotNull(message = "Duration is required")
-    @Min(value = 1, message = "Duration must be at least 1 minute")
+    @Min(value = 5, message = "Thời lượng tối thiểu 5 phút")
+    @jakarta.validation.constraints.Max(value = 480, message = "Thời lượng tối đa 480 phút")
     private Integer durationMinutes;
 
     @NotNull(message = "Price is required")

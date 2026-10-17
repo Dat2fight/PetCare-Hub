@@ -16,4 +16,5 @@ public class RevenueReportDTO {
     private LocalDate reportDate;
     private BigDecimal totalRevenue;
     private long totalOrders;
+    private java.util.List<com.petcarehub.repository.OrderRepository.RevenuePeriod> periods;
 }
