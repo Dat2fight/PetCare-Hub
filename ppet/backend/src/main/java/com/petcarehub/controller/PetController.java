@@ -36,26 +36,25 @@ public class PetController {
     }
 
     @GetMapping("/my-pets")
-    public ResponseEntity<java.util.List<PetDTO>> getMyPets() {
-        org.springframework.security.core.Authentication authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
-        com.petcarehub.security.UserDetailsImpl userDetails = (com.petcarehub.security.UserDetailsImpl) authentication.getPrincipal();
+    public ResponseEntity<java.util.List<PetDTO>> getMyPets(@org.springframework.security.core.annotation.AuthenticationPrincipal com.petcarehub.security.UserDetailsImpl userDetails) {
+        if (userDetails == null) throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
         return ResponseEntity.ok(petService.getPetsByOwner(userDetails.getId()));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<PetDTO> createPet(@Valid @RequestBody PetCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(petService.createPet(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<PetDTO> updatePet(@PathVariable Long id, @Valid @RequestBody PetUpdateRequest request) {
         return ResponseEntity.ok(petService.updatePet(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<Void> deletePet(@PathVariable Long id) {
         petService.deletePet(id);
         return ResponseEntity.noContent().build();

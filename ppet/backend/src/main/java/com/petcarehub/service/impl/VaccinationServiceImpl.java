@@ -28,6 +28,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     @Override
     @Transactional
     public VaccinationDTO createVaccination(VaccinationCreateRequest request) {
+        validateDates(request);
         Pet pet = petRepository.findById(request.getPetId())
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found"));
                 
@@ -66,6 +67,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     @Override
     @Transactional
     public VaccinationDTO updateVaccination(Long id, VaccinationCreateRequest request) {
+        validateDates(request);
         Vaccination vaccination = vaccinationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Vaccination not found"));
                 
@@ -86,6 +88,15 @@ public class VaccinationServiceImpl implements VaccinationService {
         vaccinationRepository.delete(vaccination);
     }
     
+    private void validateDates(VaccinationCreateRequest request) {
+        if (request.getDateAdministered() == null || request.getDateAdministered().isAfter(java.time.LocalDate.now())) {
+            throw new com.petcarehub.exception.BadRequestException("dateAdministered: Ngày tiêm phải là hôm nay hoặc trước đó");
+        }
+        if (request.getNextDueDate() != null && request.getNextDueDate().isBefore(request.getDateAdministered())) {
+            throw new com.petcarehub.exception.BadRequestException("nextDueDate: Ngày tiêm kế tiếp không được trước ngày tiêm");
+        }
+    }
+
     private VaccinationDTO mapToDTO(Vaccination vaccination) {
         return VaccinationDTO.builder()
                 .id(vaccination.getId())

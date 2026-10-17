@@ -31,11 +31,7 @@ public class UserFactory {
         user.setPhone(request.getPhone());
 
         Set<Role> roles = new HashSet<>();
-        RoleType requestRole = request.getRole();
-
-        if (requestRole == null || (requestRole != RoleType.CUSTOMER && requestRole != RoleType.SALES_STAFF)) {
-            requestRole = RoleType.CUSTOMER;
-        }
+        RoleType requestRole = RoleType.CUSTOMER; // Staff roles require an administrator.
 
         Role userRole = roleRepository.findByName(requestRole)
                 .orElseThrow(() -> new RuntimeException("Error: Role is not found."));

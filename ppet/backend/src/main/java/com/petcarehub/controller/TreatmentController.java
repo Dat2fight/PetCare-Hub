@@ -19,8 +19,8 @@ public class TreatmentController {
     private final TreatmentService treatmentService;
 
     @PostMapping
-    @PreAuthorize("hasRole('VETERINARIAN')")
-    public ResponseEntity<TreatmentDTO> createTreatment(@RequestBody TreatmentCreateRequest request) {
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
+    public ResponseEntity<TreatmentDTO> createTreatment(@jakarta.validation.Valid @RequestBody TreatmentCreateRequest request) {
         return new ResponseEntity<>(treatmentService.createTreatment(request), HttpStatus.CREATED);
     }
 
@@ -35,13 +35,13 @@ public class TreatmentController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
-    public ResponseEntity<TreatmentDTO> updateTreatment(@PathVariable Long id, @RequestBody TreatmentCreateRequest request) {
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
+    public ResponseEntity<TreatmentDTO> updateTreatment(@PathVariable Long id, @jakarta.validation.Valid @RequestBody TreatmentCreateRequest request) {
         return ResponseEntity.ok(treatmentService.updateTreatment(id, request));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('VETERINARIAN')")
+    @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
     public ResponseEntity<Void> deleteTreatment(@PathVariable Long id) {
         treatmentService.deleteTreatment(id);
         return ResponseEntity.noContent().build();

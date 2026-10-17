@@ -20,7 +20,7 @@ public class VaccinationController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<VaccinationDTO> createVaccination(@RequestBody VaccinationCreateRequest request) {
+    public ResponseEntity<VaccinationDTO> createVaccination(@jakarta.validation.Valid @RequestBody VaccinationCreateRequest request) {
         return new ResponseEntity<>(vaccinationService.createVaccination(request), HttpStatus.CREATED);
     }
 
@@ -36,7 +36,7 @@ public class VaccinationController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('VETERINARIAN', 'ADMIN')")
-    public ResponseEntity<VaccinationDTO> updateVaccination(@PathVariable Long id, @RequestBody VaccinationCreateRequest request) {
+    public ResponseEntity<VaccinationDTO> updateVaccination(@PathVariable Long id, @jakarta.validation.Valid @RequestBody VaccinationCreateRequest request) {
         return ResponseEntity.ok(vaccinationService.updateVaccination(id, request));
     }
 

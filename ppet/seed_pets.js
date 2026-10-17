@@ -1,4 +1,8 @@
-const API_URL = 'http://localhost:8081/api/v1';
+const { ADMIN_EMAIL, ADMIN_PASSWORD, API_BASE_URL: API_URL } = process.env;
+if (!ADMIN_EMAIL || !ADMIN_PASSWORD || !API_URL) {
+  console.error('Cần đặt ADMIN_EMAIL, ADMIN_PASSWORD và API_BASE_URL trước khi chạy. ADMIN_EMAIL là tên đăng nhập của tài khoản quản trị hiện có.');
+  process.exit(1);
+}
 
 async function seed() {
   try {
@@ -8,14 +12,14 @@ async function seed() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        username: 'admin',
-        password: 'admin123'
+        username: ADMIN_EMAIL,
+        password: ADMIN_PASSWORD
       })
     });
-    if (!loginRes.ok) throw new Error(await loginRes.text());
+    if (!loginRes.ok) throw new Error('Đăng nhập thất bại');
     const loginData = await loginRes.json();
     const token = loginData.token;
-    console.log('Token received:', token);
+    console.log('Đăng nhập thành công');
 
     const headers = { 
       'Content-Type': 'application/json',

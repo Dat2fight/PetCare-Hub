@@ -7,5 +7,10 @@ public record ErrorResponse(
         int status,
         String error,
         String message,
-        String path
-) {}
+        String path,
+        String correlationId
+) {
+    public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
+        this(timestamp, status, error, message, path, null);
+    }
+}

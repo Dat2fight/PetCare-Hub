@@ -40,14 +40,14 @@ public class ServiceController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<ServiceEntityDTO> createService(@Valid @RequestBody ServiceCreateRequest request) {
         ServiceEntityDTO createdService = serviceManagementService.createService(request);
         return new ResponseEntity<>(createdService, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<ServiceEntityDTO> updateService(
             @PathVariable Long id,
             @Valid @RequestBody ServiceUpdateRequest request) {
@@ -55,7 +55,7 @@ public class ServiceController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'STAFF')")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<Void> deleteService(@PathVariable Long id) {
         serviceManagementService.deleteService(id);
         return ResponseEntity.noContent().build();
