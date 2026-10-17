@@ -16,11 +16,10 @@ public class ProductUpdateRequest {
     private String description;
     @DecimalMin(value="0.0", message="Giá không được âm")
     private BigDecimal price;
-    @PositiveOrZero(message="Tồn kho không được âm")
+    @Null(message="Dùng API nhập, xuất hoặc kiểm kê để thay đổi tồn kho")
     private Integer stockQuantity;
     private Long categoryId;
     private Boolean active;
     private String sku;
     private String imageUrl;
 }
-

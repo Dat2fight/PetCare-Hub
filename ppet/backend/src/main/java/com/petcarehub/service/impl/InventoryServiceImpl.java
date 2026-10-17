@@ -61,11 +61,12 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public void reduceStock(Long productId, Integer quantity) {
-        Inventory inventory = inventoryRepository.findByProductId(productId)
+        requirePositive(quantity);
+        Inventory inventory = inventoryRepository.findLockedByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product: " + productId));
 
         if (inventory.getQuantity() < quantity) {
-            throw new BadRequestException("Insufficient stock for product " + productId);
+            throw new BadRequestException("Không đủ tồn kho cho sản phẩm " + productId);
         }
 
         inventory.setQuantity(inventory.getQuantity() - quantity);
@@ -83,9 +84,13 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public void addStock(StockUpdateRequest request) {
-        Inventory inventory = inventoryRepository.findByProductId(request.getProductId())
+        requirePositive(request.getQuantity());
+        Inventory inventory = inventoryRepository.findLockedByProductId(request.getProductId())
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product: " + request.getProductId()));
 
+        if ((long) inventory.getQuantity() + request.getQuantity() > Integer.MAX_VALUE) {
+            throw new BadRequestException("Số lượng tồn kho vượt giới hạn");
+        }
         inventory.setQuantity(inventory.getQuantity() + request.getQuantity());
         inventoryRepository.save(inventory);
 
@@ -115,6 +120,30 @@ public class InventoryServiceImpl implements InventoryService {
     public Page<InventoryTransactionDTO> getTransactionHistory(Long inventoryId, Pageable pageable) {
         Page<InventoryTransaction> transactions = inventoryTransactionRepository.findByInventoryId(inventoryId, pageable);
         return transactions.map(this::mapToTransactionDTO);
+    }
+
+    private void requirePositive(Integer quantity) {
+        if (quantity == null || quantity <= 0) throw new BadRequestException("quantity: Số lượng phải lớn hơn 0");
+    }
+
+    @Override
+    @Transactional
+    public void adjustStock(Long productId, Integer quantity, String reason) {
+        if (quantity == null || quantity < 0 || reason == null || reason.isBlank()) {
+            throw new BadRequestException("Số lượng kiểm kê không được âm và phải có lý do");
+        }
+        Inventory inventory = inventoryRepository.findLockedByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tồn kho"));
+        int delta = quantity - inventory.getQuantity();
+        inventory.setQuantity(quantity);
+        inventoryRepository.save(inventory);
+        InventoryTransaction transaction = new InventoryTransaction();
+        transaction.setInventory(inventory);
+        transaction.setTransactionType(TransactionType.ADJUSTMENT);
+        transaction.setQuantity(delta); // Signed difference for stocktaking; stock in/out remain positive.
+        transaction.setNotes(reason);
+        transaction.setPerformedBy(getCurrentUser());
+        inventoryTransactionRepository.save(transaction);
     }
 
     private InventoryDTO mapToDTO(Inventory inventory) {

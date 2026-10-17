@@ -27,3 +27,11 @@ Nhánh: fix/audit-25-58. Không push; không chạy schema/data lên SQL Server.
 | POST/PUT/DELETE treatments | không | không | không | có | có |
 
 Seed: đặt ba biến môi trường rồi chạy `node seed_pets.js` từ ppet; không đưa giá trị mật khẩu vào Git hoặc log.
+
+## Đợt B
+- #25: số lượng dương ở DTO/service; khóa pessimistic hàng kho; overflow bị chặn; adjustment riêng với lý do, dùng enum/schema ADJUSTMENT có sẵn.
+- #40: cập nhật category có kiểm tra tồn tại; stockQuantity gửi vào update bị từ chối rõ (giữ field legacy với @Null).
+- #41/#42/#43: storefront ép active và 404 detail inactive; /products/manage có role và lọc Boolean ba trạng thái; tìm kiếm SQL, phân trang URL, debounce, abort; một truy vấn kho mỗi trang và EntityGraph category.
+- #56: script chỉ thay exact string literal qua TypeScript AST, một file chỉ định, dry-run mặc định, Git sạch trước write, chạy tsc và rollback khi lỗi. Không chạy --write. Quét Idễ/disabledễ/ễ: không còn trong src từ trước lượt này; không sửa trùng.
+- Tests: InventoryServiceImplTest, ProductServiceImplTest (test cũ chuyển sang specification do cách truy vấn thay đổi). Frontend chưa có hạ tầng test: kiểm tra tìm từ khóa ở trang 2+, đổi danh mục reset trang, thử inactive và hết hàng.
+- Kiểm tra: backend PASS; tsc/build PASS; lint vẫn lỗi cấu hình baseline.

@@ -13,8 +13,22 @@ import toast from 'react-hot-toast';
 export const ProductListPage: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState('');
   const [searchParams, setSearchParams] = useSearchParams();
+  const [searchTerm, setSearchTerm] = useState(searchParams.get('keyword') || '');
+  const keyword = searchParams.get('keyword') || '';
+  const page = Math.max(0, Number(searchParams.get('page')) || 0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalElements, setTotalElements] = useState(0);
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      if (searchTerm === keyword) return;
+      setSearchParams(previous => {
+        const next = new URLSearchParams(previous);
+        next.set('keyword', searchTerm); next.set('page', '0'); return next;
+      });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [searchTerm, keyword, setSearchParams]);
   const categoryParam = searchParams.get('categoryId');
   const categoryId = categoryParam === null ? undefined : Number(categoryParam);
   const invalidCategory = categoryId !== undefined && (!Number.isSafeInteger(categoryId) || categoryId <= 0);
@@ -36,6 +50,7 @@ export const ProductListPage: React.FC = () => {
 
   useEffect(() => {
     let cancelled = false;
+    const controller = new AbortController();
     setLoading(true);
     setError(null);
     const fetchProducts = async () => {
@@ -45,8 +60,8 @@ export const ProductListPage: React.FC = () => {
           setError('Danh mục không hợp lệ. Vui lòng chọn lại danh mục.');
           return;
         }
-        const data = await productService.getAllProducts(0, 20, categoryId);
-        if (!cancelled) setProducts(data.content);
+        const data = await productService.getAllProducts(page, 20, categoryId, true, keyword, controller.signal);
+        if (!cancelled) { setProducts(data.content); setTotalPages(data.totalPages); setTotalElements(data.totalElements); }
       } catch (err) {
         if (!cancelled) setError('Không thể tải danh sách sản phẩm. Vui lòng thử lại sau.');
       } finally {
@@ -54,12 +69,13 @@ export const ProductListPage: React.FC = () => {
       }
     };
     fetchProducts();
-    return () => { cancelled = true; };
-  }, [categoryId, invalidCategory]);
+    return () => { cancelled = true; controller.abort(); };
+  }, [categoryId, invalidCategory, page, keyword]);
 
   const selectCategory = (id?: number) => {
     setSearchParams(previous => {
       const next = new URLSearchParams(previous);
+      next.set('page', '0');
       if (id === undefined || id === categoryId) next.delete('categoryId');
       else next.set('categoryId', String(id));
       return next;
@@ -74,7 +90,7 @@ export const ProductListPage: React.FC = () => {
     e.preventDefault();
     e.stopPropagation();
 
-    if (product.stockQuantity !== undefined && product.stockQuantity <= 0) {
+    if (!product.active || product.stockQuantity !== undefined && product.stockQuantity <= 0) {
       toast.error(`Sản phẩm "${product.name}" hiện đã hết hàng!`);
       return;
     }
@@ -106,7 +122,7 @@ export const ProductListPage: React.FC = () => {
     }
   };
 
-  const filteredProducts = products.filter(p => p.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredProducts = products;
   const categoryStyles = [
     { icon: <FaBone size={24} />, color: 'bg-orange-100 text-orange-600' },
     { icon: <MdToys size={24} />, color: 'bg-purple-100 text-purple-600' },
@@ -186,7 +202,7 @@ export const ProductListPage: React.FC = () => {
                       type="button"
                       aria-label="Thêm vào giỏ hàng"
                       title={product.stockQuantity !== undefined && product.stockQuantity <= 0 ? 'Hết hàng' : 'Thêm vào giỏ hàng'}
-                      disabled={addingProductId !== null || (product.stockQuantity !== undefined && product.stockQuantity <= 0)}
+                      disabled={!product.active || addingProductId !== null || (product.stockQuantity !== undefined && product.stockQuantity <= 0)}
                       className={`absolute bottom-3 right-3 p-3 text-white rounded-xl shadow-md transition-colors z-10 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 ${
                         product.stockQuantity !== undefined && product.stockQuantity <= 0
                           ? 'bg-gray-400 cursor-not-allowed'
@@ -219,6 +235,11 @@ export const ProductListPage: React.FC = () => {
           </div>
         )}
 
+        {!loading && !error && <nav aria-label="Phân trang" className="flex justify-center items-center gap-4 mt-8">
+          <button disabled={page === 0} onClick={() => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('page', String(page - 1)); return next; })}>Trang trước</button>
+          <span>{totalElements} sản phẩm · Trang {totalPages === 0 ? 0 : page + 1}/{totalPages}</span>
+          <button disabled={page + 1 >= totalPages} onClick={() => setSearchParams(previous => { const next = new URLSearchParams(previous); next.set('page', String(page + 1)); return next; })}>Trang sau</button>
+        </nav>}
       </div>
     </div>
   );
