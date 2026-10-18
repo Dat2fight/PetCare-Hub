@@ -13,6 +13,8 @@ public class WebSocketNotificationService {
     private final SimpMessagingTemplate messagingTemplate;
 
     public void sendNotification(Long userId, Notification notification) {
+        if (notification.getUser() == null || !userId.equals(notification.getUser().getId()))
+            throw new org.springframework.security.access.AccessDeniedException("Notification recipient does not match its owner");
         NotificationDTO dto = new NotificationDTO();
         dto.setId(notification.getId());
         dto.setUserId(userId);
@@ -20,6 +22,6 @@ public class WebSocketNotificationService {
         dto.setRead(notification.getRead());
         dto.setCreatedAt(notification.getCreatedAt());
 
-        messagingTemplate.convertAndSend("/topic/notifications/" + userId, dto);
+        messagingTemplate.convertAndSendToUser(userId.toString(), "/queue/notifications", dto);
     }
 }

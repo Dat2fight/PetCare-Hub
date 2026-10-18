@@ -87,6 +87,13 @@ cd backend
 
 The API will be available at `http://localhost:8081` (Swagger UI at `http://localhost:8081/swagger-ui.html`).
 
+WebSocket thông báo dùng SockJS `/ws`. Cấp danh sách origin chính xác, phân cách bằng
+dấu phẩy qua `APP_CORS_ALLOWED_ORIGINS` (mặc định `http://localhost:5173`); không dùng
+wildcard. STOMP CONNECT phải gửi header `Authorization: Bearer <JWT>`, sau đó subscribe
+`/user/queue/notifications`. Topic `/topic/notifications/{id}` cũ và mọi SEND từ client
+đều bị từ chối. Frontend trang thông báo dùng hook đã cập nhật, vẫn giữ polling dự phòng.
+Khi triển khai khác origin, reverse proxy cần chuyển `/api` và `/ws` tới backend.
+
 ### Frontend
 
 ```bash

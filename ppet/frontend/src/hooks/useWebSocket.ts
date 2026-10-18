@@ -4,55 +4,49 @@ import SockJS from 'sockjs-client'
 import { Notification } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 
-const WS_URL = '/ws'
+type NotificationEvent = Pick<Notification, 'id' | 'message' | 'read' | 'createdAt'>
 
-export const useWebSocket = (onNotification: (notification: Notification) => void) => {
+export const useWebSocket = (onNotification: (notification: NotificationEvent) => void) => {
   const clientRef = useRef<Client | null>(null)
+  const callbackRef = useRef(onNotification)
   const { user } = useAuth()
-
-  const connect = useCallback(() => {
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
-    if (!token) return
-
-    const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
-      connectHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-      onConnect: () => {
-        if (user?.id) {
-          client.subscribe(`/topic/notifications/${user.id}`, (message) => {
-            try {
-              const notification: Notification = JSON.parse(message.body)
-              onNotification(notification)
-            } catch (err) {
-              console.error('Error parsing notification message:', err)
-            }
-          })
-        }
-      },
-      onStompError: (frame) => {
-        console.error('STOMP error:', frame)
-      },
-      reconnectDelay: 5000,
-    })
-
-    client.activate()
-    clientRef.current = client
-  }, [onNotification, user?.id])
+  useEffect(() => { callbackRef.current = onNotification }, [onNotification])
 
   const disconnect = useCallback(() => {
-    if (clientRef.current) {
-      clientRef.current.deactivate()
-      clientRef.current = null
-    }
+    const client = clientRef.current
+    clientRef.current = null
+    if (client) void client.deactivate()
   }, [])
 
+  const connect = useCallback(() => {
+    if (!user?.id || clientRef.current?.active) return
+    const client = new Client({
+      webSocketFactory: () => new SockJS('/ws'),
+      beforeConnect: async () => {
+        const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
+        if (!token) { await client.deactivate(); return }
+        client.connectHeaders = { Authorization: `Bearer ${token}` }
+      },
+      onConnect: () => {
+        client.subscribe('/user/queue/notifications', message => {
+          try {
+            const notification: NotificationEvent = JSON.parse(message.body)
+            callbackRef.current(notification)
+          } catch { console.warn('Invalid notification message') }
+        })
+      },
+      // Do not log STOMP frames: headers may contain authentication information.
+      onStompError: () => { void client.deactivate() },
+      reconnectDelay: 5000,
+    })
+    clientRef.current = client
+    client.activate()
+  }, [user?.id])
+
   useEffect(() => {
-    return () => {
-      disconnect()
-    }
-  }, [disconnect])
+    connect()
+    return disconnect
+  }, [connect, disconnect])
 
   return { connect, disconnect }
 }
