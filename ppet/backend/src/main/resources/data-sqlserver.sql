@@ -1,8 +1,18 @@
+-- SQLCMD mode only. No admin account is created by this demo script.
+:On Error exit
+IF N'$(APP_PROFILE)' <> N'dev'
+    THROW 50000, 'Demo seed requires explicit APP_PROFILE=dev', 1;
+IF LEN(N'$(DEMO_PASSWORD_HASH)') <> 60 OR LEFT(N'$(DEMO_PASSWORD_HASH)', 4) NOT IN (N'$2a$', N'$2b$', N'$2y$')
+    THROW 50000, 'Provide a BCrypt DEMO_PASSWORD_HASH through the environment', 1;
+-- Run only on a fresh demo database, before starting application/bootstrap.
+IF EXISTS (SELECT 1 FROM dbo.users) OR EXISTS (SELECT 1 FROM dbo.roles)
+    THROW 50000, 'Demo seed requires empty users and roles tables', 1;
+GO
+
 -- ==========================================================================================
 -- PetCare Hub - Seed Data Script for Microsoft SQL Server
 -- Target: SQL Server 2016+ / Azure SQL Database
 -- Notes:
--- - Passwords are encrypted with BCrypt (Cost 10): password for all sample users is 'admin123'
 -- - Uses SET IDENTITY_INSERT where explicit IDs are inserted to ensure deterministic foreign keys
 -- ==========================================================================================
 
@@ -22,17 +32,15 @@ SET IDENTITY_INSERT dbo.roles OFF;
 GO
 
 -- ------------------------------------------------------------------------------------------
--- 2. SEED USERS (Mật khẩu mặc định cho tất cả: admin123)
--- BCrypt Hash: $2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6
+-- 2. SEED DEMO USERS (credentials supplied by operator)
 -- ------------------------------------------------------------------------------------------
 SET IDENTITY_INSERT dbo.users ON;
 
 INSERT INTO dbo.users (id, username, email, password_hash, first_name, last_name, phone, avatar_url, enabled) VALUES
-(1, 'admin', 'admin@petcarehub.com', '$2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6', N'Hệ thống', N'Quản trị', '0900000001', 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150', 1),
-(2, 'sales01', 'sales@petcarehub.com', '$2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6', N'Thị Mai', N'Nguyễn', '0900000002', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', 1),
-(3, 'warehouse01', 'warehouse@petcarehub.com', '$2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6', N'Văn Khoa', N'Trần', '0900000003', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 1),
-(4, 'vet01', 'vet@petcarehub.com', '$2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6', N'Đức Huy', N'Bác sĩ Lê', '0900000004', 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150', 1),
-(5, 'customer01', 'customer@gmail.com', '$2a$10$FmFbCOj2.EEUTEOgdCAFrehengo9JEuV2wDXVNjceeZv1N.U4fss6', N'Văn An', N'Hoàng', '0988776655', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150', 1);
+(2, 'sales01', 'sales@petcarehub.com', '$(DEMO_PASSWORD_HASH)', N'Thị Mai', N'Nguyễn', '0900000002', 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150', 1),
+(3, 'warehouse01', 'warehouse@petcarehub.com', '$(DEMO_PASSWORD_HASH)', N'Văn Khoa', N'Trần', '0900000003', 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150', 1),
+(4, 'vet01', 'vet@petcarehub.com', '$(DEMO_PASSWORD_HASH)', N'Đức Huy', N'Bác sĩ Lê', '0900000004', 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=150', 1),
+(5, 'customer01', 'customer@gmail.com', '$(DEMO_PASSWORD_HASH)', N'Văn An', N'Hoàng', '0988776655', 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150', 1);
 
 SET IDENTITY_INSERT dbo.users OFF;
 GO
@@ -41,7 +49,6 @@ GO
 -- 3. SEED USER ROLES
 -- ------------------------------------------------------------------------------------------
 INSERT INTO dbo.user_roles (user_id, role_id) VALUES
-(1, 1), -- admin -> ADMIN
 (2, 3), -- sales01 -> SALES_STAFF
 (3, 4), -- warehouse01 -> WAREHOUSE_STAFF
 (4, 5), -- vet01 -> VETERINARIAN

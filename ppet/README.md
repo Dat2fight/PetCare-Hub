@@ -59,6 +59,26 @@ ppet/
 
 ### Backend
 
+Mặc định không còn bật profile `dev`. Để chạy local với cấu hình dev, đặt
+`SPRING_PROFILES_ACTIVE=dev` trong môi trường rồi chạy lệnh bên dưới. Profile dev
+chỉ seed danh mục/demo khi DB chưa có species; không tạo tài khoản admin.
+
+Bootstrap admin riêng: cấp `BOOTSTRAP_ADMIN_ENABLED=true`, `BOOTSTRAP_ADMIN_USERNAME`,
+`BOOTSTRAP_ADMIN_EMAIL`, `BOOTSTRAP_ADMIN_PASSWORD` qua môi trường/secret store trước
+khi khởi động. Mật khẩu tối thiểu 12 ký tự, tối đa 72 byte UTF-8; không có mặc định.
+Sau lần đầu, bỏ các biến bootstrap. Chạy lại không đổi mật khẩu/quyền/trạng thái của
+admin hiện có; username trùng CUSTOMER sẽ bị từ chối. Bootstrap không phụ thuộc dev.
+
+`data-sqlserver.sql` chỉ là demo tùy chọn: dùng SQLCMD mode với `APP_PROFILE=dev`
+và `DEMO_PASSWORD_HASH` (BCrypt của mật khẩu demo do bạn tự cấp) từ môi trường.
+Script có `:On Error exit`, yêu cầu bảng users/roles rỗng, không tạo admin.
+Nếu chọn SQL demo, thực hiện sau schema/migration và **trước** khi khởi động app/bootstrap;
+nếu chọn Java demo thì không chạy thêm SQL demo. Không đưa mật khẩu/hash vào Git hay
+tham số lệnh lưu lịch sử. Không chạy seed lên database nghiệp vụ.
+
+API tạo nhân viên: ADMIN gọi `POST /api/v1/admin/staff` với các field đăng ký hiện có
+và role `SALES_STAFF`, `WAREHOUSE_STAFF` hoặc `VETERINARIAN`. Public register luôn tạo CUSTOMER.
+
 ```bash
 cd backend
 ./mvnw spring-boot:run

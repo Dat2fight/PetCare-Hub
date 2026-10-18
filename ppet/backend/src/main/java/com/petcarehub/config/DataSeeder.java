@@ -18,29 +18,27 @@ import java.util.Set;
 
 @Component
 @Profile("dev")
+@org.springframework.core.annotation.Order(10)
 @RequiredArgsConstructor
 @Slf4j
 public class DataSeeder implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
-    private final UserRepository userRepository;
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
     private final ProductCategoryRepository productCategoryRepository;
     private final ServiceEntityRepository serviceEntityRepository;
     private final CarePackageRepository carePackageRepository;
-    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
     public void run(String... args) {
-        if (roleRepository.count() > 0) {
+        if (speciesRepository.count() > 0) {
             log.info("Database already seeded. Skipping.");
             return;
         }
         log.info("Seeding database...");
         seedRoles();
-        seedAdminUser();
         seedSpeciesAndBreeds();
         seedProductCategories();
         seedServices();
@@ -50,6 +48,7 @@ public class DataSeeder implements CommandLineRunner {
 
     private void seedRoles() {
         Arrays.stream(RoleType.values()).forEach(roleType -> {
+            if (roleRepository.findByName(roleType).isPresent()) return;
             Role role = Role.builder()
                     .name(roleType)
                     .description(roleType.name().replace("_", " "))
@@ -57,22 +56,6 @@ public class DataSeeder implements CommandLineRunner {
             roleRepository.save(role);
         });
         log.info("Roles seeded: {}", RoleType.values().length);
-    }
-
-    private void seedAdminUser() {
-        Role adminRole = roleRepository.findByName(RoleType.ADMIN).orElseThrow();
-        User admin = User.builder()
-                .username("admin")
-                .email("admin@petcarehub.com")
-                .passwordHash(passwordEncoder.encode("admin123"))
-                .firstName("System")
-                .lastName("Administrator")
-                .phone("0000000000")
-                .enabled(true)
-                .roles(Set.of(adminRole))
-                .build();
-        userRepository.save(admin);
-        log.info("Admin user seeded.");
     }
 
     private void seedSpeciesAndBreeds() {
