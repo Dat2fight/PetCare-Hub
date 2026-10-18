@@ -18,6 +18,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     java.util.Optional<Appointment> findLockedById(Long id);
     boolean existsByCustomerIdAndServiceIdAndStatus(Long customerId, Long serviceId, AppointmentStatus status);
     Page<Appointment> findByPetId(Long petId, Pageable pageable);
+    Page<Appointment> findByPetIdAndCustomerId(Long petId, Long customerId, Pageable pageable);
     Page<Appointment> findByCustomerId(Long customerId, Pageable pageable);
 
     Page<Appointment> findByStaffId(Long staffId, Pageable pageable);

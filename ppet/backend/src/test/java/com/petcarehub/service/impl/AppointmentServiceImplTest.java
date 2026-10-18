@@ -16,7 +16,7 @@ class AppointmentServiceImplTest {
     final UserRepository users = mock(UserRepository.class);
     final EntityManager em = mock(EntityManager.class);
     final PetRepository pets = mock(PetRepository.class);
-    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties());
+    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets));
 
     @Test void invalidDurationsTerminateAndAvailabilityUsesRealConflicts() {
         ServiceEntity treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).build();

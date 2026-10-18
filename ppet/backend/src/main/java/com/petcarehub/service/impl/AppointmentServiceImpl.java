@@ -38,6 +38,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final EntityManager entityManager;
     private final com.petcarehub.config.BookingProperties booking;
+    private final com.petcarehub.security.Ownership ownership;
     
     @Override
     @Transactional
@@ -95,12 +96,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         Appointment appointment = appointmentRepository.findLockedById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
             
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl principal))
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
-        boolean staff = principal.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))
-                || (appointment.getStaff() != null && appointment.getStaff().getId().equals(principal.getId()));
-        if (!staff && (appointment.getCustomer() == null || !appointment.getCustomer().getId().equals(principal.getId())
+        Long currentUserId = ownership.userId();
+        boolean staff = ownership.hasRole("ADMIN")
+                || ((ownership.hasRole("SALES_STAFF") || ownership.hasRole("VETERINARIAN"))
+                    && appointment.getStaff() != null && appointment.getStaff().getId().equals(currentUserId));
+        if (!staff && (appointment.getCustomer() == null || !appointment.getCustomer().getId().equals(currentUserId)
                 || request.getStatus() != AppointmentStatus.CANCELLED
                 || !LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()).isAfter(LocalDateTime.now())))
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền đổi trạng thái lịch hẹn");
@@ -118,6 +118,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     
     @Override
     @Transactional(readOnly = true)
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF', 'VETERINARIAN')")
     public List<AppointmentDTO> getAllAppointments(org.springframework.data.domain.Pageable pageable) {
         return appointmentRepository.findAll(pageable).stream()
             .map(this::mapToDTO)
@@ -127,7 +128,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByUser(Long userId, org.springframework.data.domain.Pageable pageable) {
-        // Just use pagination method in repository but collect to list
+        ownership.requireUser(userId);
         return appointmentRepository.findByCustomerId(userId, pageable)
             .getContent().stream()
             .map(this::mapToDTO)
@@ -137,8 +138,12 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional(readOnly = true)
     public List<AppointmentDTO> getAppointmentsByPet(Long petId, org.springframework.data.domain.Pageable pageable) {
-        return appointmentRepository.findByPetId(petId, pageable).stream()
-                .map(this::mapToDTO).toList();
+        ownership.requirePet(petId);
+        // A pet may change owners; customers must not see a previous owner's appointments.
+        var appointments = ownership.hasRole("ADMIN") || ownership.hasRole("VETERINARIAN")
+                ? appointmentRepository.findByPetId(petId, pageable)
+                : appointmentRepository.findByPetIdAndCustomerId(petId, ownership.userId(), pageable);
+        return appointments.stream().map(this::mapToDTO).toList();
     }
 
     @Override
