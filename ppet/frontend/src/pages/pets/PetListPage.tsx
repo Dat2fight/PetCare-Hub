@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../api/client';
-import { PetDTO } from '../../services/petManagementService';
+import { PublicPetDTO } from '../../services/petManagementService';
 
 export const PetListPage = () => {
-  const [pets, setPets] = useState<PetDTO[]>([]);
+  const [pets, setPets] = useState<PublicPetDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [page, setPage] = useState(0);

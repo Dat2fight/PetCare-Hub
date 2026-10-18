@@ -2,6 +2,7 @@ package com.petcarehub.controller;
 
 import com.petcarehub.dto.pet.PetCreateRequest;
 import com.petcarehub.dto.pet.PetDTO;
+import com.petcarehub.dto.pet.PublicPetDTO;
 import com.petcarehub.dto.pet.PetUpdateRequest;
 import com.petcarehub.service.PetService;
 import jakarta.validation.Valid;
@@ -36,17 +37,23 @@ public class PetController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<PetDTO>> getAllPets(
+    public ResponseEntity<Page<PublicPetDTO>> getAllPets(
             @RequestParam(required = false) String healthStatus,
             @RequestParam(required = false) String availabilityStatus,
             @RequestParam(required = false) Long speciesId,
             @RequestParam(required = false) Long breedId,
             Pageable pageable) {
-        return ResponseEntity.ok(petService.getPets(healthStatus, availabilityStatus, speciesId, breedId, pageable));
+        return ResponseEntity.ok(petService.getPets(healthStatus, availabilityStatus, speciesId, breedId, pageable).map(PublicPetDTO::from));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PetDTO> getPetById(@PathVariable Long id) {
+    public ResponseEntity<PublicPetDTO> getPetById(@PathVariable Long id) {
+        return ResponseEntity.ok(PublicPetDTO.from(petService.getPetById(id)));
+    }
+
+    @GetMapping("/my-pets/{id}")
+    public ResponseEntity<PetDTO> getPrivatePet(@PathVariable Long id) {
+        ownership.requirePet(id);
         return ResponseEntity.ok(petService.getPetById(id));
     }
 

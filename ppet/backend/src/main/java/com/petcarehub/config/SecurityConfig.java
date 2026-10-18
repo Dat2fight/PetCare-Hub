@@ -60,7 +60,7 @@ public class SecurityConfig {
                     response.getWriter().write("{\"status\":401,\"message\":\"Bạn cần đăng nhập\"}");
                 }))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/auth/me", "/api/v1/pets/my-pets").authenticated()
+                        .requestMatchers("/api/v1/auth/me", "/api/v1/pets/my-pets", "/api/v1/pets/my-pets/**").authenticated()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pets/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
