@@ -85,6 +85,11 @@ PetCare-Hub/
 
 ### Bước 2: Khởi động Backend (Spring Boot)
 
+**Bắt buộc cấp `JWT_SECRET` trước khi chạy**, kể cả profile dev. Không còn khóa mặc
+định; thiếu/khóa ngắn/`CHANGE_ME`/khóa từng công khai sẽ làm ứng dụng dừng khởi động.
+Xem [cách sinh và cấp khóa JWT](ppet/README.md#khóa-ký-jwt-bắt-buộc) và
+[báo cáo Critical #1](ppet/docs/critical-jwt-secret/REPORT.md). Không đặt khóa trong frontend.
+
 1. Mở một terminal mới tại thư mục gốc của dự án (`PetCare-Hub`).
 2. Di chuyển vào thư mục backend:
    ```bash

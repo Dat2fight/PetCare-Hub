@@ -79,6 +79,54 @@ tham số lệnh lưu lịch sử. Không chạy seed lên database nghiệp v�
 API tạo nhân viên: ADMIN gọi `POST /api/v1/admin/staff` với các field đăng ký hiện có
 và role `SALES_STAFF`, `WAREHOUSE_STAFF` hoặc `VETERINARIAN`. Public register luôn tạo CUSTOMER.
 
+#### Khóa ký JWT bắt buộc
+
+Trước khi chạy backend, cấp **`JWT_SECRET`** qua môi trường của tiến trình hoặc secret
+store. Property duy nhất là `app.jwt.secret`; mọi profile chạy thật, kể cả dev, đều
+không có fallback. Thiếu, rỗng, chỉ khoảng trắng, `CHANGE_ME`, dưới **32 byte UTF-8**
+hoặc trùng một khóa đã từng công khai đều bị từ chối khi tạo JwtTokenProvider.
+
+Code dùng nguyên byte UTF-8 của chuỗi, **không decode Base64**. JJWT chọn HS256 ở
+32–47 byte, HS384 ở 48–63 byte, HS512 từ 64 byte. Khuyến nghị sinh **64 byte ngẫu nhiên**
+rồi biểu diễn Base64 như bên dưới; không dùng mật khẩu tự nghĩ hoặc giá trị mẫu.
+
+1. Sinh và gán khóa mà không in kết quả ra console. **PowerShell**:
+   ```powershell
+   $jwtBytes = New-Object byte[] 64
+   $jwtRng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+   try { $jwtRng.GetBytes($jwtBytes) } finally { $jwtRng.Dispose() }
+   $env:JWT_SECRET = [Convert]::ToBase64String($jwtBytes)
+   ```
+   **Bash với OpenSSL**:
+   ```bash
+   export JWT_SECRET="$(openssl rand -base64 64 | tr -d '\r\n')"
+   ```
+   Đây chỉ là lệnh hướng dẫn, không có khóa thật trong tài liệu. Giữ khóa ổn định
+   trong secret store cho môi trường đó; chạy lệnh sinh lại sẽ thay khóa và hủy phiên cũ.
+2. Chạy backend trong **cùng terminal/tiến trình được cấp biến** bằng lệnh bên dưới.
+   Chọn `SPRING_PROFILES_ACTIVE=dev` riêng nếu cần dev. Spring Boot không tự đọc `.env`:
+   `backend/.env.example` chỉ mô tả biến, `CHANGE_ME` cố ý không chạy được. Nếu dùng
+   `.env`, phải có IDE/launcher nạp biến vào tiến trình; không commit file chứa khóa.
+3. Trên server, cấp `JWT_SECRET` qua secret manager/cấu hình môi trường của service;
+   không đưa vào command-line argument, image, Git, hoặc biến `VITE_*`. Các replica
+   cùng môi trường cần cùng khóa. Dừng/restart **tất cả** instance khi đổi khóa;
+   người dùng đăng nhập lại, không giữ instance cũ tiếp tục chấp nhận khóa đã lộ.
+4. CI hiện chỉ build frontend nên không cần secret JWT. Maven test dùng khóa giả ngẫu
+   nhiên tại `src/test/resources/application-test.yml`, không cần production secret.
+   Nếu thêm job chạy backend thật, cấp env từ GitHub Actions Secrets:
+   ```yaml
+   env:
+     JWT_SECRET: ${{ secrets.JWT_SECRET }}
+   ```
+   Không echo biến, không bật shell tracing. Artifact chạy thật không chứa profile test.
+5. Kiểm tra fail-fast trên môi trường thử: bỏ biến JWT_SECRET hoặc đặt `CHANGE_ME`,
+   khởi động phải thất bại và thông báo tên biến, không hiện giá trị. Cấp khóa hợp lệ
+   rồi khởi động lại, đăng nhập và thử token trước khi đổi khóa: token cũ phải bị từ chối.
+
+Khóa đã có trong lịch sử Git phải coi là lộ vĩnh viễn. Không tái sử dụng; code không
+tự thay secret trên server hay kiểm tra việc triển khai trước đây có bị lạm dụng.
+Chi tiết và checklist: [báo cáo Critical #1](docs/critical-jwt-secret/REPORT.md).
+
 ```bash
 cd backend
 ./mvnw spring-boot:run
