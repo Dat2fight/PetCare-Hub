@@ -43,15 +43,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentDTO bookAppointment(AppointmentCreateRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl principal))
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
-        User customer = userRepository.findById(principal.getId())
+        Long currentUserId = ownership.userId();
+        User customer = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
-        Pet pet = petRepository.findById(request.getPetId())
-                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng"));
-        if (pet.getOwner() == null || !pet.getOwner().getId().equals(customer.getId()))
-            throw new org.springframework.security.access.AccessDeniedException("Bạn chỉ được đặt lịch cho thú cưng của mình");
+        Pet pet = ownership.ownedPet(request.getPetId());
         ServiceEntity serviceEntity = requireService(request.getServiceId());
         LocalDateTime start = request.getAppointmentTime();
         int duration = serviceEntity.getDurationMinutes() == null ? 0 : serviceEntity.getDurationMinutes();

@@ -27,6 +27,14 @@ public class Ownership {
         var auth = SecurityContextHolder.getContext().getAuthentication();
         return auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_" + role));
     }
+    // Booking and customer editing require actual ownership, without a clinical/admin override.
+    public com.petcarehub.entity.Pet ownedPet(Long id) {
+        Long currentId = userId();
+        var pet = pets.findById(id).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
+        if (pet.getOwner() == null || !currentId.equals(pet.getOwner().getId()))
+            throw new AccessDeniedException("Bạn chỉ được thao tác với thú cưng của mình");
+        return pet;
+    }
     public void requirePet(Long id) {
         var pet = pets.findById(id).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
         if (hasRole("ADMIN") || hasRole("VETERINARIAN")) return;
