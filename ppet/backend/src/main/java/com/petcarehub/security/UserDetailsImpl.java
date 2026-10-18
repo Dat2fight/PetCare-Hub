@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 
 public class UserDetailsImpl implements UserDetails {
 
+    private boolean enabled;
     private Long id;
     private String username;
     private String email;
@@ -19,6 +20,12 @@ public class UserDetailsImpl implements UserDetails {
 
     public UserDetailsImpl(Long id, String username, String email, String password,
             Collection<? extends GrantedAuthority> authorities) {
+        this(id, username, email, password, authorities, true);
+    }
+
+    public UserDetailsImpl(Long id, String username, String email, String password,
+            Collection<? extends GrantedAuthority> authorities, boolean enabled) {
+        this.enabled = enabled;
         this.id = id;
         this.username = username;
         this.email = email;
@@ -36,7 +43,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                authorities);
+                authorities, Boolean.TRUE.equals(user.getEnabled()));
     }
 
     public Long getId() {
@@ -79,7 +86,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return enabled;
     }
 }
 
