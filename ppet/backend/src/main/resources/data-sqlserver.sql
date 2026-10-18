@@ -5,6 +5,7 @@ IF N'$(APP_PROFILE)' <> N'dev'
 IF LEN(N'$(DEMO_PASSWORD_HASH)') <> 60 OR LEFT(N'$(DEMO_PASSWORD_HASH)', 4) NOT IN (N'$2a$', N'$2b$', N'$2y$')
     THROW 50000, 'Provide a BCrypt DEMO_PASSWORD_HASH through the environment', 1;
 -- Run only on a fresh demo database, before starting application/bootstrap.
+-- Apply schema and migrations 001, 002, 003 first: inventory uses filtered unique indexes.
 IF EXISTS (SELECT 1 FROM dbo.users) OR EXISTS (SELECT 1 FROM dbo.roles)
     THROW 50000, 'Demo seed requires empty users and roles tables', 1;
 GO
