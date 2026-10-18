@@ -18,7 +18,8 @@ class SqlServerConstraintTest {
     @Test void nullableUniqueIndexesAndNonnegativeStock() throws Exception {
         // Container-only scratch database; never connects to the developer's SQL Server.
         try (var connection=DriverManager.getConnection(sql.getJdbcUrl(),sql.getUsername(),sql.getPassword()); var statement=connection.createStatement()) {
-            for (String resource : new String[]{"schema-sqlserver.sql", "migrations/001_inventory_nullable_unique.sql", "schema-sqlserver.sql", "migrations/001_inventory_nullable_unique.sql"}) {
+            for (String resource : new String[]{"schema-sqlserver.sql", "migrations/001_inventory_nullable_unique.sql", "migrations/002_cart_product_unique.sql",
+                    "schema-sqlserver.sql", "migrations/001_inventory_nullable_unique.sql", "migrations/002_cart_product_unique.sql"}) {
                 try (var input=getClass().getClassLoader().getResourceAsStream(resource)) {
                     assertNotNull(input);
                     String script=new String(input.readAllBytes(), java.nio.charset.StandardCharsets.UTF_8);
@@ -33,6 +34,10 @@ class SqlServerConstraintTest {
             assertThrows(SQLException.class,()->statement.execute("UPDATE dbo.inventory SET quantity=-1"));
             assertEquals(2, statement.executeUpdate("UPDATE dbo.inventory SET quantity=quantity-1 WHERE quantity>=1"));
             assertEquals(0, statement.executeUpdate("UPDATE dbo.inventory SET quantity=quantity-1 WHERE quantity>=1"));
+            statement.execute("INSERT INTO dbo.users(username,email,password_hash,first_name,last_name) VALUES('cart-test','cart@example.test','unused','Test','Cart')");
+            statement.execute("INSERT INTO dbo.carts(customer_id) SELECT id FROM dbo.users WHERE username='cart-test'");
+            assertEquals(2, statement.executeUpdate("INSERT INTO dbo.cart_items(cart_id,product_id,item_type,quantity) SELECT c.id,p.id,'PRODUCT',1 FROM dbo.carts c CROSS JOIN dbo.products p WHERE p.sku IN ('audit-a','audit-b')"));
+            assertThrows(SQLException.class, () -> statement.execute("INSERT INTO dbo.cart_items(cart_id,product_id,item_type,quantity) SELECT c.id,p.id,'PRODUCT',1 FROM dbo.carts c CROSS JOIN dbo.products p WHERE p.sku='audit-a'"));
         }
     }
 }

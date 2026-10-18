@@ -10,6 +10,15 @@
 --USE petcarehub;
 --GO
 
+-- Required session settings for filtered indexes (also used by explicit migrations).
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET ARITHABORT ON;
+SET NUMERIC_ROUNDABORT OFF;
+
 -- ------------------------------------------------------------------------------------------
 -- 1. ROLES & USERS & SECURITY
 -- ------------------------------------------------------------------------------------------
@@ -309,6 +318,12 @@ GO
 -- ------------------------------------------------------------------------------------------
 -- 6. ORDERS & ORDER ITEMS
 -- ------------------------------------------------------------------------------------------
+
+-- Product lines are unique; NULL product_id remains available for distinct PET lines.
+-- Existing databases should apply migration 002 after reconciling any duplicates.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_cart_items_cart_product_present' AND object_id = OBJECT_ID(N'dbo.cart_items'))
+CREATE UNIQUE INDEX UX_cart_items_cart_product_present ON dbo.cart_items(cart_id, product_id) WHERE product_id IS NOT NULL;
+GO
 
 -- Bảng orders: Đơn đặt hàng của khách
 IF OBJECT_ID(N'dbo.orders', N'U') IS NULL

@@ -28,6 +28,7 @@ class LoyaltyLimitsTest {
     @Autowired LoyaltyService loyalty;
     @MockBean LoyaltyAccountRepository accounts;
     @MockBean LoyaltyTransactionRepository transactions;
+    @MockBean UserRepository users;
     UserDetailsImpl caller(String role) { return new UserDetailsImpl(1L,"caller","caller@example.test","unused",List.of(new SimpleGrantedAuthority("ROLE_"+role))); }
 
     @ParameterizedTest @ValueSource(ints={-1,0,1000001,Integer.MAX_VALUE})
@@ -44,6 +45,7 @@ class LoyaltyLimitsTest {
         verifyNoInteractions(accounts, transactions);
     }
     @Test void accumulatedIntegerOverflowReturns400() throws Exception {
+        when(users.findLockedById(1L)).thenReturn(Optional.of(new com.petcarehub.entity.User()));
         var account = LoyaltyAccount.builder().availablePoints(10).totalPoints(Integer.MAX_VALUE).build();
         when(accounts.findByCustomerId(1L)).thenReturn(Optional.of(account));
         mvc.perform(post("/api/v1/loyalty/account/1/add").with(user(caller("ADMIN")))

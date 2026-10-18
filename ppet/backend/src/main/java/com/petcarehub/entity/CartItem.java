@@ -32,6 +32,8 @@ public class CartItem {
     @JoinColumn(name = "pet_id")
     private Pet pet;
 
+    // (cart_id, product_id) is unique for non-null products via SQL migration 002.
+    // A plain JPA unique constraint would also restrict NULL pet lines on SQL Server.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     private Product product;

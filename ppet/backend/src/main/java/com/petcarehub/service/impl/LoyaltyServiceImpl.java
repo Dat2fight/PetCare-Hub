@@ -42,9 +42,11 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     private LoyaltyAccount getOrCreateAccount(Long userId) {
-        return accountRepository.findByCustomerId(userId).orElseGet(() -> {
-            User user = userRepository.findById(userId)
+        // Serialize on the stable parent even before the first loyalty account exists.
+        // Every caller holds this lock until its balance and ledger transaction commits.
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
+        return accountRepository.findByCustomerId(userId).orElseGet(() -> {
             LoyaltyAccount account = new LoyaltyAccount();
             account.setCustomer(user);
             account.setAvailablePoints(0);
@@ -55,6 +57,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     @Override
+    @Transactional
     public LoyaltyAccountDTO getAccountByUserId(Long userId) {
         return mapToDTO(getOrCreateAccount(userId));
     }
