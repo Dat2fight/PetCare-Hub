@@ -1,6 +1,5 @@
 package com.petcarehub.config;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -12,7 +11,8 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "app.jwt")
 public class JwtProperties {
-    @NotBlank
+    // Provider validates without Spring binding errors echoing rejected secret values.
+    @lombok.ToString.Exclude
     private String secret;
     @Positive
     private long expirationMs;
