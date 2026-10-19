@@ -19,7 +19,12 @@ public class TreatmentServiceImpl implements TreatmentService {
     private final MedicalRecordRepository records;
     private final Ownership ownership;
     @Override public TreatmentDTO createTreatment(TreatmentCreateRequest request) { return save(new Treatment(), request); }
-    @Override public TreatmentDTO updateTreatment(Long id, TreatmentCreateRequest request) { return save(find(id), request); }
+    @Override public TreatmentDTO updateTreatment(Long id, TreatmentCreateRequest request) {
+        Treatment treatment = find(id);
+        // Check the existing owner before a request can reassign the medical record.
+        ownership.requirePet(treatment.getMedicalRecord().getPet().getId());
+        return save(treatment, request);
+    }
     private TreatmentDTO save(Treatment treatment, TreatmentCreateRequest request) {
         if (request.getStartDate() == null || request.getEndDate() != null && request.getEndDate().isBefore(request.getStartDate())) throw new BadRequestException("endDate: Ngày kết thúc không được trước ngày bắt đầu");
         treatment.setMedicalRecord(records.findById(request.getMedicalRecordId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ y tế")));
