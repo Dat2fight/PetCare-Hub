@@ -28,14 +28,14 @@ class CheckoutPersistenceTest {
     @Autowired OrderService service;
     @Test void persistsServerPriceReservesAndRestoresStock() {
         User customer = users.save(User.builder().username("checkout").email("checkout@example.test").passwordHash("unused").firstName("A").lastName("B").build());
-        var principal = UserDetailsImpl.build(customer);
+        var principal = new UserDetailsImpl(customer.getId(), customer.getUsername(), customer.getEmail(), "unused", List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CUSTOMER")));
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
         try {
             var category = categories.save(ProductCategory.builder().name("Food").build());
             Product product = products.save(Product.builder().category(category).name("Food").sku("CHECKOUT").price(BigDecimal.TEN).active(true).build());
             inventory.save(Inventory.builder().product(product).quantity(3).build());
             OrderItemDTO item = new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
-            OrderCreateRequest request = new OrderCreateRequest(); request.setUserId(999L); request.setItems(List.of(item)); request.setShippingAddress("Địa chỉ thử nghiệm");
+            OrderCreateRequest request = new OrderCreateRequest(); request.setItems(List.of(item)); request.setShippingAddress("Địa chỉ thử nghiệm");
             OrderDTO result = service.createOrder(request);
             assertNotNull(result.getId()); assertEquals(customer.getId(), result.getUserId()); assertEquals(20.0, result.getTotalPrice());
             assertEquals(1, inventory.findByProductId(product.getId()).orElseThrow().getQuantity());

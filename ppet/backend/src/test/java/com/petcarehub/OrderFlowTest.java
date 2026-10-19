@@ -39,7 +39,7 @@ class OrderFlowTest {
         product=products.save(Product.builder().category(category).name("Food").sku(UUID.randomUUID().toString()).price(BigDecimal.TEN).active(true).build());
         inventory.save(Inventory.builder().product(product).quantity(5).build());
         var item=new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
-        request=new OrderCreateRequest(); request.setUserId(other.getId()); request.setItems(List.of(item)); request.setShippingAddress("Recipient, phone, address"); request.setPaymentMethod("COD");
+        request=new OrderCreateRequest(); request.setItems(List.of(item)); request.setShippingAddress("Recipient, phone, address"); request.setPaymentMethod("COD");
     }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
     @Test void persistsServerPriceAndProtectedDetail() throws Exception {

@@ -11,6 +11,7 @@ public interface PetService {
     PetDTO getPetById(Long id);
     java.util.List<PetDTO> getPetsByOwner(Long ownerId);
     PetDTO createPet(PetCreateRequest request);
+    PetDTO createMyPet(com.petcarehub.dto.pet.QuickPetCreateRequest request);
     PetDTO updatePet(Long id, PetUpdateRequest request);
     void deletePet(Long id);
 }

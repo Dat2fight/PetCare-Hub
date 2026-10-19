@@ -17,10 +17,10 @@ class PetAuditTest {
         var pets = mock(PetRepository.class); var species = mock(SpeciesRepository.class);
         var breeds = mock(BreedRepository.class); var users = mock(UserRepository.class);
         var health = new PetHealthServiceImpl(pets);
-        var service = new PetServiceImpl(health, pets, species, breeds, users);
+        var service = new PetServiceImpl(health, pets, species, breeds, users, mock(com.petcarehub.security.Ownership.class), new com.petcarehub.config.PersonalPetProperties());
         Species dog = new Species(); dog.setId(1L);
         Pet pet = Pet.builder().species(dog).price(BigDecimal.TEN).healthStatus(HealthStatus.UNDER_TREATMENT).availabilityStatus(AvailabilityStatus.AVAILABLE).build(); pet.setId(1L);
-        when(pets.findById(1L)).thenReturn(Optional.of(pet)); when(species.findById(1L)).thenReturn(Optional.of(dog)); when(pets.save(pet)).thenReturn(pet);
+        when(pets.findById(1L)).thenReturn(Optional.of(pet)); when(pets.findByIdForUpdate(1L)).thenReturn(Optional.of(pet)); when(species.findById(1L)).thenReturn(Optional.of(dog)); when(pets.save(pet)).thenReturn(pet);
         PetUpdateRequest request = new PetUpdateRequest(); request.setName("Pet"); request.setSpeciesId(1L); request.setHealthStatus("HEALTHY"); request.setAvailabilityStatus("AVAILABLE");
         assertThrows(com.petcarehub.exception.InvalidStateTransitionException.class, () -> service.updatePet(1L, request));
         request.setHealthStatus("RECOVERING"); service.updatePet(1L, request); assertEquals(HealthStatus.RECOVERING, pet.getHealthStatus());
