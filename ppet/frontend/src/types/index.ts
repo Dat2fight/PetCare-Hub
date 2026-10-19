@@ -89,13 +89,12 @@ export interface ProductCategory {
 // ===== Order Types =====
 export interface Order {
   id: number
+  userId: number
   orderNumber: string
   status: OrderStatus
-  subtotal: number
-  discountAmount: number
-  taxAmount: number
-  totalAmount: number
+  totalPrice: number
   shippingAddress: string
+  notes?: string | null
   paymentMethod: string
   paymentStatus: string
   items: OrderItem[]
@@ -103,13 +102,13 @@ export interface Order {
 }
 
 export interface OrderItem {
-  id: number
-  itemType: 'PET' | 'PRODUCT'
-  petId?: number
-  productId?: number
+  petId?: number | null
+  productId?: number | null
+  petName?: string | null
+  productName?: string | null
+  imageUrl?: string | null
   quantity: number
-  unitPrice: number
-  subtotal: number
+  price: number
 }
 
 // ===== Notification Types =====
@@ -134,6 +133,6 @@ export interface Page<T> {
 
 // ===== Enums =====
 export type HealthStatus = 'HEALTHY' | 'DUE_FOR_VACCINATION' | 'UNDER_TREATMENT' | 'RECOVERING' | 'HEALTH_WARNING'
-export type AvailabilityStatus = 'AVAILABLE' | 'SOLD' | 'RESERVED' | 'UNAVAILABLE'
+export type AvailabilityStatus = 'AVAILABLE' | 'PENDING' | 'SOLD' | 'RESERVED' | 'UNAVAILABLE'
 export type OrderStatus = 'PENDING' | 'CONFIRMED' | 'PROCESSING' | 'SHIPPING' | 'DELIVERED' | 'CANCELLED'
 export type MembershipLevel = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM'
