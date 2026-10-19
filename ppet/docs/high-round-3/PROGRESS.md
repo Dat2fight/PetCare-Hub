@@ -16,11 +16,11 @@
 | Promotion DTO/service/controller | DTO tên khác entity; BeanUtils làm mất discountType/value/active/maxUses. Write ADMIN/SALES_STAFF #4 giữ nguyên; thêm validation theo #26 |
 | Treatment DTO/service/controller | Đã CRUD transaction, medicine->medication, frequency/startDate/endDate, validate ngày, ownership đọc/xóa; write VET/ADMIN. Giữ contract và bổ sung kiểm tra dữ liệu cũ trước update |
 | Matching service/controller | @Transactional và mapper quiz #38 đã có; controller chọn userId principal. Save result thiếu rank trước sort. Giữ mapper/strategies |
-| client.ts/useWebSocket/WebConfig/WebSocketConfig/deploy.yml | HTTP /api/v1, SockJS /ws; CONNECT Bearer, user queue và origins property #7. #52 npm ci + copy404 giữ nguyên; dev proxy8081 |
+| client.ts/useWebSocket/CorsConfig/WebSocketConfig/deploy.yml | HTTP /api/v1, SockJS /ws; CONNECT Bearer, user queue và origins property #7. #52 npm ci + copy404 giữ nguyên; dev proxy8081 |
 | pom/RegisterRequest | Boot3.3.5, BCrypt, password8..72 ký tự; #24 nâng sau cùng, bổ sung giới hạn UTF-8 bytes để khớp BCrypt. Không đổi JWT logic/default secret |
 
 ## Còn lại
-Triển khai từng ID #13, #15, #14, #16, #18, #17, #19, #23, #24; commit riêng và test/build sau từng nhóm. Báo cáo cuối ghi contract, ma trận quyền và phần SQL/deploy chưa kiểm chứng.
+Cả 9 ID đã triển khai và commit riêng, test/build pass. Còn kiểm chứng SQL Server opt-in và smoke test trình duyệt/deploy của nhóm. Báo cáo đầy đủ: [REPORT.md](REPORT.md).
 
 ## Đã hoàn tất
 - #13: GET /orders/{id} với owner/ADMIN/SALES_STAFF; DTO thêm chi tiết giao hàng/thanh toán/dòng hàng. paymentMethod COD (legacy thiếu vẫn COD), phương thức khác 400. Giữ transaction/giá server/kho/state/revenue Medium. OrderFlowTest 5 test pass. Full Maven 151 = 148 pass, 3 skip, 0 lỗi; build pass, đã restore buildinfo.
