@@ -18,6 +18,8 @@ export interface PetDTO {
 }
 
 export type PublicPetDTO = Omit<PetDTO, 'ownerId' | 'healthStatus'>;
+export interface QuickPetCreateRequest { name: string; speciesId: number; age: number }
+export interface QuickPetSpecies { id: number; name: string }
 
 export interface MedicalRecordDTO {
     id: number;
@@ -46,8 +48,16 @@ export interface VaccinationDTO {
 }
 
 export const petManagementService = {
-    getMyPets: async (): Promise<PetDTO[]> => {
-        const response = await apiClient.get<PetDTO[]>('/pets/my-pets');
+    createMyPet: async (request: QuickPetCreateRequest): Promise<PetDTO> => {
+        return (await apiClient.post<PetDTO>('/pets/my-pets', { name: request.name, speciesId: request.speciesId, age: request.age })).data;
+    },
+    getQuickPetSpecies: async (signal?: AbortSignal): Promise<QuickPetSpecies[]> => {
+        const { data } = await apiClient.get<QuickPetSpecies[]>('/species', { signal });
+        // Match the existing SQL and Java seed names; never assume numeric IDs.
+        return data.filter(species => ['dog', 'cat', 'chó', 'mèo', 'chó (dog)', 'mèo (cat)'].includes(species.name.trim().toLowerCase()));
+    },
+    getMyPets: async (signal?: AbortSignal): Promise<PetDTO[]> => {
+        const response = await apiClient.get<PetDTO[]>('/pets/my-pets', { signal });
         return response.data;
     },
     
