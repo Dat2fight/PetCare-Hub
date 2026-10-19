@@ -27,6 +27,8 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDTO createOrder(OrderCreateRequest request) {
         Long customerId = ownership.userId();
+        if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
+            throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
         if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
         for (OrderItemDTO item : request.getItems()) if (item == null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
         Order order = Order.builder().customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
@@ -48,6 +50,13 @@ public class OrderServiceImpl implements OrderService {
     }
     private Order locked(Long id) {
         return orders.findLockedById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public OrderDTO getOrderById(Long id) {
+        Order order = orders.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        if (!ownership.hasRole("SALES_STAFF")) ownership.requireUser(order.getCustomer().getId());
+        return dto(order);
     }
     private void requireStaff() {
         if (!ownership.hasRole("ADMIN") && !ownership.hasRole("SALES_STAFF")) throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xử lý đơn hàng");
@@ -76,6 +85,8 @@ public class OrderServiceImpl implements OrderService {
     }
     private OrderDTO dto(Order o) {
         OrderDTO dto = new OrderDTO(); dto.setId(o.getId()); dto.setUserId(o.getCustomer().getId()); dto.setStatus(o.getStatus().name()); dto.setTotalPrice(o.getTotalAmount().doubleValue());
-        dto.setItems(o.getItems().stream().map(item -> { OrderItemDTO d=new OrderItemDTO(); d.setProductId(item.getProduct()==null?null:item.getProduct().getId()); d.setQuantity(item.getQuantity()); d.setPrice(item.getUnitPrice().doubleValue()); return d; }).toList()); return dto;
+        dto.setOrderNumber(o.getOrderNumber()); dto.setShippingAddress(o.getShippingAddress()); dto.setPaymentMethod(o.getPaymentMethod());
+        dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
+        dto.setItems(o.getItems().stream().map(item -> { OrderItemDTO d=new OrderItemDTO(); d.setProductId(item.getProduct()==null?null:item.getProduct().getId()); d.setProductName(item.getProduct()==null?null:item.getProduct().getName()); d.setQuantity(item.getQuantity()); d.setPrice(item.getUnitPrice().doubleValue()); return d; }).toList()); return dto;
     }
 }

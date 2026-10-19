@@ -5,6 +5,7 @@ import com.petcarehub.dto.order.OrderDTO;
 
 public interface OrderService {
     OrderDTO createOrder(OrderCreateRequest request);
+    OrderDTO getOrderById(Long orderId);
     OrderDTO confirmOrder(Long orderId);
     OrderDTO processOrder(Long orderId);
     OrderDTO shipOrder(Long orderId);

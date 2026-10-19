@@ -10,4 +10,5 @@ public class OrderItemDTO {
     @jakarta.validation.constraints.Positive(message="Số lượng phải lớn hơn 0")
     private Integer quantity;
     private Double price;
+    private String productName;
 }
