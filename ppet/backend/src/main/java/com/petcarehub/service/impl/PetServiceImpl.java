@@ -102,8 +102,10 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public PetDTO updatePet(Long id, PetUpdateRequest request) {
-        Pet pet = petRepository.findById(id)
+        Pet pet = petRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + id));
+        if (pet.getReservedOrder() != null || pet.getAvailabilityStatus() == com.petcarehub.enums.AvailabilityStatus.PENDING)
+            throw new IllegalStateException("Thú cưng đang được giữ chỗ bởi đơn hàng");
 
         Species species = speciesRepository.findById(request.getSpeciesId())
                 .orElseThrow(() -> new ResourceNotFoundException("Species not found with id: " + request.getSpeciesId()));
@@ -137,8 +139,10 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public void deletePet(Long id) {
-        Pet pet = petRepository.findById(id)
+        Pet pet = petRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + id));
+        if (pet.getReservedOrder() != null || pet.getAvailabilityStatus() == com.petcarehub.enums.AvailabilityStatus.PENDING)
+            throw new IllegalStateException("Thú cưng đang được giữ chỗ bởi đơn hàng");
         petRepository.delete(pet);
     }
 

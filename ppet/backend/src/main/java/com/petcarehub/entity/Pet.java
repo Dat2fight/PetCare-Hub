@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Entity
 @Table(name = "pets")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-@ToString(exclude = {"species", "breed"})
+@ToString(exclude = {"species", "breed", "owner", "reservedOrder"})
 @Data
 public class Pet extends BaseEntity {
 
@@ -64,4 +64,9 @@ public class Pet extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner_id")
     private User owner;
+
+    // The reservation belongs to one order; retries must never release another order's pet.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reserved_order_id")
+    private Order reservedOrder;
 }
