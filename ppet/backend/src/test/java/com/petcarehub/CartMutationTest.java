@@ -59,6 +59,15 @@ class CartMutationTest {
                     .andExpect(status().isBadRequest());
         assertEquals(2,carts.getCurrentUserCart(owner.getId()).getItems().get(0).getQuantity());
     }
+    @Test void cartPageReceivesCurrentServerPriceAndPersistedQuantity() throws Exception {
+        product.setPrice(new BigDecimal("12.50"));products.save(product);
+        mvc.perform(put("/api/v1/cart/items/{id}",itemId).with(user(UserDetailsImpl.build(owner)))
+                .contentType("application/json").content("{\"quantity\":3}")).andExpect(status().isOk());
+        mvc.perform(get("/api/v1/cart").with(user(UserDetailsImpl.build(owner))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].price").value(12.5))
+                .andExpect(jsonPath("$.items[0].quantity").value(3))
+                .andExpect(jsonPath("$.items[0].productName").value("Cart product"));
+    }
     @Test void updateAndAddUseSameSerializationBoundary() throws Exception {
         var pool=Executors.newFixedThreadPool(2);var start=new CountDownLatch(1);
         var request=new UpdateCartItemRequest();request.setQuantity(4);
