@@ -17,6 +17,8 @@ export interface PetDTO {
     imageUrl?: string;
 }
 
+export type PublicPetDTO = Omit<PetDTO, 'ownerId' | 'healthStatus'>;
+
 export interface MedicalRecordDTO {
     id: number;
     petId: number;
@@ -50,7 +52,7 @@ export const petManagementService = {
     },
     
     getPetById: async (id: number): Promise<PetDTO> => {
-        const response = await apiClient.get<PetDTO>(`/pets/${id}`);
+        const response = await apiClient.get<PetDTO>(`/pets/my-pets/${id}`);
         return response.data;
     },
 

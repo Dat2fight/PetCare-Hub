@@ -10,4 +10,9 @@ public class OrderDTO {
     private String status;
     private Double totalPrice;
     private List<OrderItemDTO> items;
+    private String orderNumber;
+    private String shippingAddress;
+    private String paymentMethod;
+    private String paymentStatus;
+    private java.time.LocalDateTime createdAt;
 }

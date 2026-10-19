@@ -11,8 +11,10 @@ import static org.mockito.Mockito.*;
 class LoyaltyPromotionTest {
     @Test void tierUsesLifetimePointsAndRejectsNegativeSpend() {
         var accounts=mock(LoyaltyAccountRepository.class); var transactions=mock(LoyaltyTransactionRepository.class);
-        var service=new LoyaltyServiceImpl(accounts,transactions,mock(UserRepository.class));
+        var users=mock(UserRepository.class);
+        var service=new LoyaltyServiceImpl(accounts,transactions,users);
         User user=new User();user.setId(1L);
+        when(users.findLockedById(1L)).thenReturn(Optional.of(user));
         var account=LoyaltyAccount.builder().customer(user).availablePoints(900).totalPoints(900).build();
         when(accounts.findByCustomerId(1L)).thenReturn(Optional.of(account)); when(accounts.save(account)).thenReturn(account);
         var dto=service.addPoints(1L,100,"Test"); assertEquals("SILVER",dto.getTier()); assertEquals(4000,dto.getPointsToNextTier());

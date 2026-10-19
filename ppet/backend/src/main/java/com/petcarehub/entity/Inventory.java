@@ -23,12 +23,14 @@ public class Inventory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "pet_id", unique = true)
+    // Business uniqueness is enforced by filtered SQL indexes (migrations 001/003).
+    // OneToOne would make Hibernate recreate unfiltered UNIQUE constraints on nullable keys.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pet_id")
     private Pet pet;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", unique = true)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id")
     private Product product;
 
     @Column(nullable = false)

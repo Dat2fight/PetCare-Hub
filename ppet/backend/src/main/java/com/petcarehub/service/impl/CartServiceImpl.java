@@ -63,15 +63,18 @@ public class CartServiceImpl implements CartService {
         if (!Boolean.TRUE.equals(product.getActive())) {
             throw new BadRequestException("Sản phẩm hiện không được bán");
         }
-        Cart cart = cartRepository.findByCustomerId(userId).orElseGet(() -> Cart.builder()
-                .customer(userRepository.findById(userId)
-                        .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại")))
-                .build());
+        // Cart stock is a snapshot, not a reservation; checkout rechecks under its inventory lock.
+        // Read it before locking the user to avoid reversing inventory -> audit-user lock order.
+        int stock = inventoryRepository.findByProductId(product.getId()).map(Inventory::getQuantity).orElse(0);
+        // Lock before reading the cart/items, including concurrent creation of the first cart.
+        User customer = userRepository.findLockedById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+        Cart cart = cartRepository.findByCustomerId(userId)
+                .orElseGet(() -> Cart.builder().customer(customer).build());
         CartItem existing = cart.getItems().stream()
                 .filter(item -> item.getProduct() != null && item.getProduct().getId().equals(product.getId()))
                 .findFirst().orElse(null);
         long quantity = (long) request.getQuantity() + (existing == null ? 0 : existing.getQuantity());
-        int stock = inventoryRepository.findByProductId(product.getId()).map(Inventory::getQuantity).orElse(0);
         if (quantity > stock) {
             throw new BadRequestException("Số lượng trong giỏ hàng vượt quá tồn kho (" + stock + ")");
         }
@@ -85,18 +88,49 @@ public class CartServiceImpl implements CartService {
     }
 
     @Override
+    @Transactional
     public CartDTO updateCartItemQuantity(Long userId, Long cartItemId, UpdateCartItemRequest request) {
-        // TODO: Implement updating quantity
-        return new CartDTO();
+        if (request.getQuantity() == null || request.getQuantity() <= 0)
+            throw new BadRequestException("Số lượng phải lớn hơn 0");
+        Long productId = cartRepository.findProductIdForItem(userId, cartItemId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mặt hàng trong giỏ"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new ResourceNotFoundException("Sản phẩm không tồn tại"));
+        if (!Boolean.TRUE.equals(product.getActive())) throw new BadRequestException("Sản phẩm hiện không được bán");
+        // Same snapshot/lock order as add: inventory before user, cart/items only after user.
+        int stock = inventoryRepository.findByProductId(productId).map(Inventory::getQuantity).orElse(0);
+        lockCustomer(userId);
+        Cart cart = cartRepository.findByCustomerId(userId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
+        CartItem item = requireItem(cart, cartItemId);
+        if (request.getQuantity() > stock) throw new BadRequestException("Số lượng trong giỏ hàng vượt quá tồn kho (" + stock + ")");
+        item.setQuantity(request.getQuantity());
+        return toDTO(cartRepository.saveAndFlush(cart));
     }
 
     @Override
+    @Transactional
     public void removeItemFromCart(Long userId, Long cartItemId) {
-        // TODO: Implement removing item
+        lockCustomer(userId);
+        Cart cart = cartRepository.findByCustomerId(userId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy giỏ hàng"));
+        cart.removeItem(requireItem(cart, cartItemId));
+        cartRepository.saveAndFlush(cart);
     }
 
     @Override
+    @Transactional
     public void clearCart(Long userId) {
-        // TODO: Implement clearing cart
+        lockCustomer(userId);
+        cartRepository.findByCustomerId(userId).ifPresent(cart -> {
+            cart.clearItems();
+            cartRepository.saveAndFlush(cart);
+        });
+    }
+
+    private void lockCustomer(Long userId) {
+        userRepository.findLockedById(userId).orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+    }
+
+    private CartItem requireItem(Cart cart, Long itemId) {
+        return cart.getItems().stream().filter(item -> item.getId().equals(itemId)).findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy mặt hàng trong giỏ"));
     }
 }

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import apiClient from '../../api/client';
 import toast from 'react-hot-toast';
+import { useWebSocket } from '../../hooks/useWebSocket';
 interface Notice { id: number; message: string; read: boolean; createdAt: string }
 export const NotificationsPage = () => {
  const [items, setItems] = useState<Notice[]>([]); const [page,setPage] = useState(0); const [total,setTotal] = useState(0);
  const [loading,setLoading] = useState(true); const [error,setError] = useState(false); const [retry,setRetry] = useState(0); const [busy,setBusy] = useState(false);
+ useWebSocket(() => setRetry(value => value + 1));
  useEffect(() => { const controller = new AbortController(); setLoading(true); setError(false);
   const load = () => apiClient.get('/notifications', {params:{page,size:20},signal:controller.signal}).then(({data}) => {setItems(data.content);setTotal(data.totalPages);setError(false);})
    .catch(() => {if (!controller.signal.aborted) setError(true);}).finally(() => {if (!controller.signal.aborted) setLoading(false);});

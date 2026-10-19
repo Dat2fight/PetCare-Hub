@@ -10,6 +10,15 @@
 --USE petcarehub;
 --GO
 
+-- Required session settings for filtered indexes (also used by explicit migrations).
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_PADDING ON;
+SET ANSI_WARNINGS ON;
+SET CONCAT_NULL_YIELDS_NULL ON;
+SET ARITHABORT ON;
+SET NUMERIC_ROUNDABORT OFF;
+
 -- ------------------------------------------------------------------------------------------
 -- 1. ROLES & USERS & SECURITY
 -- ------------------------------------------------------------------------------------------
@@ -236,8 +245,7 @@ CREATE TABLE dbo.inventory (
     location NVARCHAR(100) NULL,
     updated_at DATETIME2(0) NOT NULL CONSTRAINT DF_inventory_updated_at DEFAULT SYSUTCDATETIME(),
     CONSTRAINT PK_inventory PRIMARY KEY CLUSTERED (id),
-    CONSTRAINT UQ_inventory_pet UNIQUE (pet_id),
-    CONSTRAINT UQ_inventory_product UNIQUE (product_id),
+    CONSTRAINT CK_inventory_nonnegative CHECK (quantity >= 0),
     CONSTRAINT FK_inventory_pet FOREIGN KEY (pet_id) REFERENCES dbo.pets(id) ON DELETE CASCADE,
     CONSTRAINT FK_inventory_product FOREIGN KEY (product_id) REFERENCES dbo.products(id) ON DELETE CASCADE,
     CONSTRAINT CK_inventory_polymorphic CHECK (
@@ -245,6 +253,13 @@ CREATE TABLE dbo.inventory (
         (pet_id IS NULL AND product_id IS NOT NULL)
     )
 );
+GO
+
+-- Uniqueness only applies to non-null references in this polymorphic table.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_inventory_pet_present' AND object_id = OBJECT_ID(N'dbo.inventory'))
+CREATE UNIQUE INDEX UX_inventory_pet_present ON dbo.inventory(pet_id) WHERE pet_id IS NOT NULL;
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_inventory_product_present' AND object_id = OBJECT_ID(N'dbo.inventory'))
+CREATE UNIQUE INDEX UX_inventory_product_present ON dbo.inventory(product_id) WHERE product_id IS NOT NULL;
 GO
 
 -- Bảng inventory_transactions: Nhật ký kiểm toán xuất/nhập/điều chỉnh tồn kho
@@ -309,6 +324,12 @@ GO
 -- ------------------------------------------------------------------------------------------
 -- 6. ORDERS & ORDER ITEMS
 -- ------------------------------------------------------------------------------------------
+
+-- Product lines are unique; NULL product_id remains available for distinct PET lines.
+-- Existing databases should apply migration 002 after reconciling any duplicates.
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_cart_items_cart_product_present' AND object_id = OBJECT_ID(N'dbo.cart_items'))
+CREATE UNIQUE INDEX UX_cart_items_cart_product_present ON dbo.cart_items(cart_id, product_id) WHERE product_id IS NOT NULL;
+GO
 
 -- Bảng orders: Đơn đặt hàng của khách
 IF OBJECT_ID(N'dbo.orders', N'U') IS NULL

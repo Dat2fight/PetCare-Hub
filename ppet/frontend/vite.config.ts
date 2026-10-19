@@ -5,6 +5,12 @@ import path from 'path'
 export default defineConfig({
   base: '/PetCare-Hub/',
   plugins: [react()],
+  // SockJS expects Node's global alias when Vite pre-bundles it for the browser.
+  optimizeDeps: {
+    esbuildOptions: {
+      define: { global: 'globalThis' },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),

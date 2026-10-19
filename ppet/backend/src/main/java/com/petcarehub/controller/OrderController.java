@@ -29,6 +29,11 @@ public class OrderController {
         return ResponseEntity.ok(orderService.createOrder(request));
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id) {
+        return ResponseEntity.ok(orderService.getOrderById(id));
+    }
+
     @PostMapping("/{id}/confirm")
     public ResponseEntity<OrderDTO> confirmOrder(@PathVariable Long id) {
         return ResponseEntity.ok(orderService.confirmOrder(id));

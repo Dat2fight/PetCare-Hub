@@ -17,7 +17,8 @@ public class PromotionController {
     private final PromotionService promotionService;
 
     @PostMapping
-    public ResponseEntity<PromotionDTO> createPromotion(@RequestBody PromotionCreateRequest request) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
+    public ResponseEntity<PromotionDTO> createPromotion(@jakarta.validation.Valid @RequestBody PromotionCreateRequest request) {
         return ResponseEntity.ok(promotionService.createPromotion(request));
     }
 
@@ -32,11 +33,13 @@ public class PromotionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PromotionDTO> updatePromotion(@PathVariable Long id, @RequestBody PromotionCreateRequest request) {
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
+    public ResponseEntity<PromotionDTO> updatePromotion(@PathVariable Long id, @jakarta.validation.Valid @RequestBody PromotionCreateRequest request) {
         return ResponseEntity.ok(promotionService.updatePromotion(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<Void> deletePromotion(@PathVariable Long id) {
         promotionService.deletePromotion(id);
         return ResponseEntity.noContent().build();

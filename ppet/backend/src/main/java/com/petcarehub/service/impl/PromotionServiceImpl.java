@@ -6,7 +6,9 @@ import com.petcarehub.entity.Promotion;
 import com.petcarehub.repository.PromotionRepository;
 import com.petcarehub.service.PromotionService;
 import com.petcarehub.exception.ResourceNotFoundException;
-import org.springframework.beans.BeanUtils;
+import com.petcarehub.exception.BadRequestException;
+import com.petcarehub.enums.DiscountType;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -14,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PromotionServiceImpl implements PromotionService {
 
     private final PromotionRepository promotionRepository;
@@ -25,7 +28,7 @@ public class PromotionServiceImpl implements PromotionService {
     @Override
     public PromotionDTO createPromotion(PromotionCreateRequest request) {
         Promotion promotion = new Promotion();
-        BeanUtils.copyProperties(request, promotion);
+        applyRequest(request, promotion);
         promotion.setCurrentUses(0);
         promotion = promotionRepository.save(promotion);
         return mapToDTO(promotion);
@@ -48,7 +51,7 @@ public class PromotionServiceImpl implements PromotionService {
     public PromotionDTO updatePromotion(Long id, PromotionCreateRequest request) {
         Promotion promotion = promotionRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Promotion not found with id " + id));
-        BeanUtils.copyProperties(request, promotion);
+        applyRequest(request, promotion);
         promotion = promotionRepository.save(promotion);
         return mapToDTO(promotion);
     }
@@ -86,9 +89,29 @@ public class PromotionServiceImpl implements PromotionService {
         return true;
     }
     
+    private void applyRequest(PromotionCreateRequest request, Promotion promotion) {
+        if (request.getDiscountType() == null || request.getDiscountValue() == null || request.getDiscountValue().signum() <= 0
+                || (request.getDiscountType() == DiscountType.PERCENTAGE && request.getDiscountValue().compareTo(java.math.BigDecimal.valueOf(100)) > 0))
+            throw new BadRequestException("Discount must be positive; percentage must not exceed 100");
+        if (request.getStartDate() != null && request.getEndDate() != null && request.getEndDate().isBefore(request.getStartDate()))
+            throw new BadRequestException("Promotion end date must not precede start date");
+        if (request.getMaxUses() != null && request.getMaxUses() <= 0)
+            throw new BadRequestException("Maximum uses must be positive");
+        promotion.setCode(request.getCode()); promotion.setDescription(request.getDescription());
+        promotion.setDiscountType(request.getDiscountType()); promotion.setDiscountValue(request.getDiscountValue());
+        promotion.setMinOrderAmount(request.getMinOrderAmount()); promotion.setMaxUses(request.getMaxUses());
+        // Omitting active retains the legacy default (enabled); usage counters remain server-owned.
+        promotion.setActive(request.getActive() == null ? true : request.getActive());
+        promotion.setStartDate(request.getStartDate()); promotion.setEndDate(request.getEndDate());
+    }
+
     private PromotionDTO mapToDTO(Promotion promotion) {
         PromotionDTO dto = new PromotionDTO();
-        BeanUtils.copyProperties(promotion, dto);
+        dto.setId(promotion.getId()); dto.setCode(promotion.getCode()); dto.setDescription(promotion.getDescription());
+        dto.setDiscountType(promotion.getDiscountType()); dto.setDiscountValue(promotion.getDiscountValue());
+        dto.setMinOrderAmount(promotion.getMinOrderAmount()); dto.setMaxUses(promotion.getMaxUses());
+        dto.setCurrentUses(promotion.getCurrentUses()); dto.setActive(promotion.getActive());
+        dto.setStartDate(promotion.getStartDate()); dto.setEndDate(promotion.getEndDate());
         return dto;
     }
 }

@@ -38,6 +38,8 @@ public class PetServiceImpl implements PetService {
     public Page<PetDTO> getPets(String healthStatus, String availabilityStatus, Long speciesId, Long breedId, Pageable pageable) {
         Specification<Pet> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.isNull(root.get("owner")));
+            predicates.add(cb.equal(root.get("availabilityStatus"), com.petcarehub.enums.AvailabilityStatus.AVAILABLE));
             if (healthStatus != null && !healthStatus.trim().isEmpty()) {
                 predicates.add(cb.equal(root.get("healthStatus"), healthStatus));
             }

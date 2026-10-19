@@ -39,7 +39,7 @@ class CartServiceImplTest {
     @Test
     void persistsProductInAuthenticatedCustomersCart() {
         when(products.findById(1L)).thenReturn(Optional.of(product));
-        when(users.findById(5L)).thenReturn(Optional.of(customer));
+        when(users.findLockedById(5L)).thenReturn(Optional.of(customer));
         when(inventory.findByProductId(1L)).thenReturn(Optional.of(Inventory.builder().quantity(5).build()));
         when(carts.saveAndFlush(any(Cart.class))).thenAnswer(call -> call.getArgument(0));
         var result = service.addItemToCart(5L, request);
@@ -56,6 +56,7 @@ class CartServiceImplTest {
         when(products.findById(1L)).thenReturn(Optional.of(product));
         when(carts.findByCustomerId(5L)).thenReturn(Optional.of(cart));
         when(inventory.findByProductId(1L)).thenReturn(Optional.of(Inventory.builder().quantity(5).build()));
+        when(users.findLockedById(5L)).thenReturn(Optional.of(customer));
         assertThrows(BadRequestException.class, () -> service.addItemToCart(5L, request));
         assertEquals(4, cart.getItems().get(0).getQuantity());
         verify(carts, never()).saveAndFlush(any());

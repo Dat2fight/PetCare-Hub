@@ -1,3 +1,4 @@
+# Automated tests only: ephemeral fake signing key; never package this profile with the application.
 spring:
   datasource:
     url: jdbc:h2:mem:testdb
@@ -14,7 +15,7 @@ spring:
 
 app:
   jwt:
-    secret: test-secret-key-for-testing-purposes-only-must-be-256-bits-long
+    secret: ${random.value}${random.value}${random.value}${random.value}
     expiration-ms: 3600000
     refresh-expiration: 86400000
   cors:

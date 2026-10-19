@@ -21,19 +21,10 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
 
     private final CartService cartService;
-    private final UserRepository userRepository;
+    private final com.petcarehub.security.Ownership ownership;
 
     private Long getCurrentUserId() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated() || "anonymousUser".equals(authentication.getPrincipal())) {
-            throw new BadRequestException("Bạn cần đăng nhập để thao tác với giỏ hàng");
-        }
-        if (authentication.getPrincipal() instanceof UserDetailsImpl) {
-            return ((UserDetailsImpl) authentication.getPrincipal()).getId();
-        }
-        return userRepository.findByUsername(authentication.getName())
-                .map(User::getId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại"));
+        return ownership.userId();
     }
 
     @GetMapping

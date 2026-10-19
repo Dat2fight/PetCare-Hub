@@ -27,16 +27,19 @@ public class ProductCategoryController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<ProductCategoryDTO> createCategory(@RequestBody ProductCategoryDTO request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(productCategoryService.createCategory(request));
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<ProductCategoryDTO> updateCategory(@PathVariable Long id, @RequestBody ProductCategoryDTO request) {
         return ResponseEntity.ok(productCategoryService.updateCategory(id, request));
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         productCategoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();

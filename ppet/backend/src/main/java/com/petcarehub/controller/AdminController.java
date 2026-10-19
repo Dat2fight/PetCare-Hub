@@ -18,6 +18,13 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final com.petcarehub.service.StaffAccountService staffAccountService;
+
+    @PostMapping("/staff")
+    public ResponseEntity<com.petcarehub.dto.auth.UserDTO> createStaff(
+            @jakarta.validation.Valid @RequestBody com.petcarehub.dto.auth.RegisterRequest request) {
+        return ResponseEntity.status(201).body(staffAccountService.createStaff(request));
+    }
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardSummaryDTO> getDashboardSummary(@RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate from, @RequestParam(required=false) @org.springframework.format.annotation.DateTimeFormat(iso=org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate to) {

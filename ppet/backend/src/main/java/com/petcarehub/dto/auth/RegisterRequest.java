@@ -11,6 +11,7 @@ public class RegisterRequest {
     @NotBlank(message="Email không được trống") @Email(message="Email không hợp lệ") @Size(max=255, message="Email tối đa 255 ký tự")
     private String email;
     @NotBlank(message="Mật khẩu không được trống") @Size(min=8, max=72, message="Mật khẩu phải từ 8 đến 72 ký tự")
+    @com.petcarehub.validation.BcryptPasswordLength
     private String password;
     @NotBlank(message="Tên không được trống") @Size(max=100, message="Tên tối đa 100 ký tự")
     private String firstName;

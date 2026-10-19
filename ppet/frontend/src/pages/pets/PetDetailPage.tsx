@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import apiClient from '../../api/client';
-import { PetDTO } from '../../services/petManagementService';
+import { PublicPetDTO } from '../../services/petManagementService';
 
 export const PetDetailPage = () => {
   const { id } = useParams();
-  const [pet, setPet] = useState<PetDTO | null>(null);
+  const [pet, setPet] = useState<PublicPetDTO | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
   useEffect(() => {
     const controller = new AbortController(); setPet(null); setError(''); setLoading(true);
-    apiClient.get<PetDTO>(`/pets/${id}`, { signal: controller.signal }).then(({ data }) => setPet(data))
+    apiClient.get<PublicPetDTO>(`/pets/${id}`, { signal: controller.signal }).then(({ data }) => setPet(data))
       .catch(error => { if (!controller.signal.aborted) setError(error.response?.status === 404 ? 'Không tìm thấy thú cưng' : 'Không thể tải thông tin thú cưng'); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
@@ -22,6 +22,6 @@ export const PetDetailPage = () => {
     {pet.imageUrl && <img src={pet.imageUrl} alt={pet.name} className="w-full max-h-96 object-contain" />}
     <p className="my-4">{pet.speciesName} · {pet.breedName} · {pet.age == null ? 'Chưa có tuổi' : `${pet.age} tuổi`}</p>
     {pet.price != null && <p className="text-xl font-bold">{pet.price.toLocaleString('vi-VN')} ₫</p>}
-    <p>{pet.description}</p><p>Trạng thái sức khỏe: {pet.healthStatus}</p>
+    <p>{pet.description}</p>
   </article>;
 };

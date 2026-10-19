@@ -1,178 +1,41 @@
-# PetCare-Hub 🐾
+# PetCare-Hub
 
-Hệ thống quản lý và chăm sóc thú cưng toàn diện (Pet Shop & Pet Care Management Platform). Dự án kết hợp kiến trúc Backend hướng dịch vụ với Frontend SPA hiện đại, phân quyền đa vai trò cho Quản trị viên, Bác sĩ thú y, Nhân viên bán hàng, Nhân viên kho và Khách hàng.
+Hệ thống quản lý cửa hàng và dịch vụ chăm sóc thú cưng: React/Vite, Spring Boot và SQL Server.
 
----
+**[Hướng dẫn chạy chi tiết bằng PowerShell](ppet/README.md)** là tài liệu vận hành chính: chuẩn bị database, cấp secret, chạy backend/frontend, test/build và xử lý sự cố.
 
-## 🛠 Công nghệ sử dụng
+## Mục lục
 
-| Tầng (Layer) | Công nghệ chính |
-| :--- | :--- |
-| **Backend** | Java 17+, Spring Boot 3.3.5, Spring Security, Spring Data JPA, WebSocket, JWT (JJWT 0.12.6), Lombok |
-| **Frontend** | React 18, TypeScript, Vite 5, Tailwind CSS, Axios, React Router v6 |
-| **Cơ sở dữ liệu** | Microsoft SQL Server (MSSQL 2016+) |
-| **Tài liệu API** | OpenAPI 3.0 / Swagger UI |
+- [Kiến trúc](#kiến-trúc)
+- [Bắt đầu](#bắt-đầu)
+- [Kết quả kiểm chứng](#kết-quả-kiểm-chứng)
+- [Tài liệu liên quan](#tài-liệu-liên-quan)
 
----
+## Kiến trúc
 
-## 📁 Cấu trúc thư mục dự án
+| Thành phần | Công nghệ | Địa chỉ local |
+|---|---|---|
+| Frontend | React 18, TypeScript, Vite 7 | http://localhost:5173/PetCare-Hub/ |
+| Backend | Java target 17, Spring Boot 3.3.13 | http://localhost:8081/api/v1 |
+| Database | Microsoft SQL Server | localhost:1433, database petcarehub |
 
-```text
-PetCare-Hub/
-├── ppet/
-│   ├── backend/                     # Mã nguồn Backend Spring Boot
-│   │   ├── mvnw & mvnw.cmd          # Maven Wrapper
-│   │   ├── pom.xml
-│   │   └── src/main/
-│   │       ├── java/com/petcarehub/ # Controllers, Services, Entities, Security
-│   │       └── resources/
-│   │           ├── application.yml
-│   │           ├── application-dev.yml
-│   │           ├── schema-sqlserver.sql  # Script tạo 32 bảng và quan hệ
-│   │           └── data-sqlserver.sql    # Script dữ liệu mẫu (Roles, Users, Products...)
-│   ├── frontend/                    # Mã nguồn Frontend React SPA
-│   │   ├── package.json
-│   │   ├── vite.config.ts
-│   │   └── src/                     # Components, Pages, Services, Contexts
-│   └── docs/                        # Tài liệu đặc tả hệ thống
-└── README.md
-```
+Vite chuyển tiếp /api và /ws tới backend; backend có context path /.
 
----
+## Bắt đầu
 
-## 📋 Yêu cầu môi trường (Prerequisites)
+Theo [hướng dẫn đầy đủ](ppet/README.md): database → môi trường backend → backend → frontend. Spring Boot **không tự đọc .env**. Phải cấp JWT_SECRET mới, ngẫu nhiên, cho chính tiến trình backend; không có khóa mặc định.
 
-1. **Java JDK 17** (Khuyến nghị: JDK 17 hoặc JDK 21 LTS).
-   > **Lưu ý:** Dự án sử dụng Lombok với Spring Boot 3.3.5, tương thích tốt nhất với **JDK 17/21**. Nếu máy tính của bạn cài đặt phiên bản Java quá mới (như JDK 25, 27) làm mặc định trong `PATH`, hãy cấu hình biến môi trường `JAVA_HOME` trỏ về JDK 17 khi biên dịch backend.
-2. **Node.js** phiên bản **18.x** trở lên và **npm** (đi kèm Node.js).
-3. **Microsoft SQL Server** (2016 trở lên, SQL Server Express hoặc Developer Edition) đang chạy trên cổng mặc định **1433**.
-4. **SQL Server Management Studio (SSMS)**, **Azure Data Studio**, hoặc công cụ `sqlcmd` để quản lý database.
+Không chạy script reset lên dữ liệu đang dùng. Không dùng mật khẩu/khóa từng xuất hiện trong tài liệu hay lịch sử Git.
 
----
+## Kết quả kiểm chứng
 
-## 🚀 Hướng dẫn khởi động & kết nối hệ thống (Từng bước)
+Ngày 19/10/2026, nhánh `fix/critical-jwt-secret`: backend và frontend chạy được; đăng ký/đăng nhập/me có token trả 200, me không token trả 401; trang sản phẩm hiển thị dữ liệu SQL Server. Maven: 172 test, 169 pass, 3 skip. Frontend build và lint pass.
 
-### Bước 1: Khởi tạo Cơ sở dữ liệu (Microsoft SQL Server)
+Có một thay đổi cấu hình Vite tối thiểu để SockJS chạy trong dev. Database hiện có chưa áp dụng migration 001–003; chưa kiểm chứng luồng đặt lịch qua UI. Chi tiết ở [báo cáo chạy local](ppet/docs/local-run-20261019.md).
 
-1. Mở **SSMS**, **Azure Data Studio** hoặc cửa sổ dòng lệnh có `sqlcmd`.
-2. Kết nối vào SQL Server instance của bạn (`localhost:1433`).
-3. Tạo cơ sở dữ liệu `petcarehub`:
-   ```sql
-   CREATE DATABASE petcarehub;
-   GO
-   ```
-4. Mở và thực thi lần lượt 2 file script theo đúng thứ tự:
-   - **File 1 (Tạo bảng):** `ppet/backend/src/main/resources/schema-sqlserver.sql`
-   - **File 2 (Nạp dữ liệu mẫu):** `ppet/backend/src/main/resources/data-sqlserver.sql`
+## Tài liệu liên quan
 
-   *(Nếu dùng `sqlcmd` trên Windows PowerShell, bạn có thể chạy nhanh:)*
-   ```powershell
-   sqlcmd -S localhost -E -C -d petcarehub -i "ppet\backend\src\main\resources\schema-sqlserver.sql"
-   sqlcmd -S localhost -E -C -d petcarehub -i "ppet\backend\src\main\resources\data-sqlserver.sql"
-   ```
-
-5. Kiểm tra thông tin đăng nhập trong file `ppet/backend/src/main/resources/application-dev.yml`:
-   ```yaml
-   spring:
-     datasource:
-       url: jdbc:sqlserver://localhost:1433;databaseName=petcarehub;encrypt=true;trustServerCertificate=true
-       username: ${DB_USERNAME:sa}
-       password: ${DB_PASSWORD:1804}
-   ```
-   > Nếu tài khoản `sa` trên máy bạn có mật khẩu khác `1804`, bạn có thể sửa trực tiếp trong file trên hoặc đặt biến môi trường `$env:DB_PASSWORD="mat_khau_cua_ban"` trước khi chạy backend.
-
----
-
-### Bước 2: Khởi động Backend (Spring Boot)
-
-1. Mở một terminal mới tại thư mục gốc của dự án (`PetCare-Hub`).
-2. Di chuyển vào thư mục backend:
-   ```bash
-   cd ppet/backend
-   ```
-3. *(Tùy chọn)* Nếu máy bạn cài nhiều JDK và `java -version` không phải là JDK 17/21, hãy gán `JAVA_HOME`:
-   - **Windows PowerShell:**
-     ```powershell
-     $env:JAVA_HOME = "C:\Users\<Tên_User>\.jdks\ms-17.0.20.1"  # Hoặc đường dẫn JDK 17 trên máy bạn
-     $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-     ```
-   - **Linux / macOS:**
-     ```bash
-     export JAVA_HOME=/path/to/jdk-17
-     export PATH=$JAVA_HOME/bin:$PATH
-     ```
-4. Khởi chạy ứng dụng bằng Maven Wrapper:
-   - **Windows:**
-     ```powershell
-     .\mvnw.cmd spring-boot:run
-     ```
-   - **Linux / macOS:**
-     ```bash
-     ./mvnw spring-boot:run
-     ```
-5. Khi thấy thông báo:
-   ```text
-   Tomcat started on port 8081 (http) with context path '/'
-   Started PetCareHubApplication in ... seconds
-   ```
-   Backend đã sẵn sàng!
-   - **Cổng Backend:** `http://localhost:8081`
-   - **Tài liệu Swagger UI:** `http://localhost:8081/swagger-ui.html`
-
----
-
-### Bước 3: Khởi động Frontend (React / Vite)
-
-1. Mở một terminal **khác** tại thư mục gốc của dự án (`PetCare-Hub`).
-2. Di chuyển vào thư mục frontend:
-   ```bash
-   cd ppet/frontend
-   ```
-3. Cài đặt các gói phụ thuộc (chỉ cần làm ở lần đầu tiên):
-   ```bash
-   npm install
-   ```
-4. Khởi chạy máy chủ phát triển Vite:
-   ```bash
-   npm run dev
-   ```
-5. Mở trình duyệt và truy cập theo đường dẫn:
-   👉 **`http://localhost:5173/PetCare-Hub/`**
-
-   > **Lưu ý quan trọng về URL:** Do cấu hình `base: '/PetCare-Hub/'` trong `vite.config.ts`, bạn cần truy cập đúng đường dẫn `http://localhost:5173/PetCare-Hub/`.
-   > Trình duyệt sẽ tự động kết nối API với backend thông qua Vite Proxy (`/api` -> `http://localhost:8081`).
-
----
-
-## 👥 Tài khoản thử nghiệm (Mặc định)
-
-Tất cả các tài khoản mẫu dưới đây đều có mật khẩu mặc định là: **`admin123`**
-
-| Tên đăng nhập (Username) | Email | Vai trò (Role) | Chức năng chính |
-| :--- | :--- | :--- | :--- |
-| **`admin`** | `admin@petcarehub.com` | **ADMIN** | Quản trị toàn quyền hệ thống |
-| **`sales01`** | `sales@petcarehub.com` | **SALES_STAFF** | Tư vấn bán hàng, quản lý đơn hàng |
-| **`warehouse01`** | `warehouse@petcarehub.com` | **WAREHOUSE_STAFF** | Quản lý kho, tồn kho, xuất nhập |
-| **`vet01`** | `vet@petcarehub.com` | **VETERINARIAN** | Khám bệnh, lịch tiêm chủng, hồ sơ y tế |
-| **`customer01`** | `customer@gmail.com` | **CUSTOMER** | Mua sắm sản phẩm, đặt lịch dịch vụ, quản lý thú cưng |
-
----
-
-## 🔧 Xử lý sự cố thường gặp (Troubleshooting)
-
-1. **Lỗi `cannot find symbol` liên quan đến Getters/Setters khi chạy backend:**
-   - **Nguyên nhân:** Phiên bản Java mặc định trong terminal quá mới (ví dụ JDK 25 hoặc 27) chưa tương thích hoàn toàn với bộ xử lý annotation của Lombok.
-   - **Cách khắc phục:** Cài đặt JDK 17 (khuyên dùng Microsoft OpenJDK 17 hoặc Eclipse Temurin 17) và trỏ `JAVA_HOME` đến JDK 17 trước khi chạy `mvnw`.
-
-2. **Lỗi `SchemaManagementException: Schema-validation: missing table...`:**
-   - **Nguyên nhân:** File cấu hình `application-dev.yml` đang bật `ddl-auto: validate`, yêu cầu các bảng trong database phải tồn tại sẵn.
-   - **Cách khắc phục:** Chạy đầy đủ 2 file `schema-sqlserver.sql` và `data-sqlserver.sql` vào database `petcarehub` trước khi khởi động Spring Boot.
-
-3. **Lỗi kết nối SQL Server (`Login failed for user 'sa'` hoặc cổng 1433 không kết nối được):**
-   - Đảm bảo service **SQL Server (MSSQLSERVER)** đang chạy trong `services.msc`.
-   - Mở **SQL Server Configuration Manager** -> **SQL Server Network Configuration** -> **Protocols for MSSQLSERVER** -> Bật **TCP/IP** (Enabled: Yes) và đảm bảo cổng là 1433.
-   - Đảm bảo SQL Server đang ở chế độ **SQL Server and Windows Authentication mode**.
-   - Kiểm tra lại mật khẩu user `sa` trong `application-dev.yml`.
-
-4. **Trang web trắng tinh hoặc báo lỗi 404 khi mở `http://localhost:5173`:**
-   - Hãy kiểm tra xem bạn đã thêm tiền tố `/PetCare-Hub/` vào URL chưa: `http://localhost:5173/PetCare-Hub/`.
+- [Hướng dẫn vận hành](ppet/README.md)
+- [Kiến trúc](ppet/docs/architecture.md), [database](ppet/docs/database.md), [API](ppet/docs/api.md)
+- [JWT bắt buộc và xoay khóa](ppet/docs/critical-jwt-secret/REPORT.md)
+- [Báo cáo High lượt 3 và việc còn lại](ppet/docs/high-round-3/REPORT.md)

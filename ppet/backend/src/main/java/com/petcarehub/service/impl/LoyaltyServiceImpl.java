@@ -24,6 +24,13 @@ import java.util.stream.Collectors;
 @Service
 public class LoyaltyServiceImpl implements LoyaltyService {
 
+    // Per-operation safety limit; membership thresholds remain unchanged.
+    public static final int MAX_POINTS_PER_OPERATION = 1_000_000;
+    private void validatePoints(Integer points) {
+        if (points == null || points <= 0 || points > MAX_POINTS_PER_OPERATION)
+            throw new com.petcarehub.exception.BadRequestException("Điểm phải từ 1 đến " + MAX_POINTS_PER_OPERATION);
+    }
+
     private final LoyaltyAccountRepository accountRepository;
     private final LoyaltyTransactionRepository transactionRepository;
     private final UserRepository userRepository;
@@ -35,9 +42,11 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     private LoyaltyAccount getOrCreateAccount(Long userId) {
-        return accountRepository.findByCustomerId(userId).orElseGet(() -> {
-            User user = userRepository.findById(userId)
+        // Serialize on the stable parent even before the first loyalty account exists.
+        // Every caller holds this lock until its balance and ledger transaction commits.
+        User user = userRepository.findLockedById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userId));
+        return accountRepository.findByCustomerId(userId).orElseGet(() -> {
             LoyaltyAccount account = new LoyaltyAccount();
             account.setCustomer(user);
             account.setAvailablePoints(0);
@@ -48,6 +57,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     }
 
     @Override
+    @Transactional
     public LoyaltyAccountDTO getAccountByUserId(Long userId) {
         return mapToDTO(getOrCreateAccount(userId));
     }
@@ -55,8 +65,11 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     @Override
     @Transactional
     public LoyaltyAccountDTO addPoints(Long userId, Integer points, String description) {
-        if (points == null || points <= 0) throw new com.petcarehub.exception.BadRequestException("Điểm phải lớn hơn 0");
+        validatePoints(points);
         LoyaltyAccount account = getOrCreateAccount(userId);
+        if ((long) account.getAvailablePoints() + points > Integer.MAX_VALUE
+                || (long) account.getTotalPoints() + points > Integer.MAX_VALUE)
+            throw new com.petcarehub.exception.BadRequestException("Tổng điểm vượt giới hạn lưu trữ");
         account.setAvailablePoints(account.getAvailablePoints() + points);
         account.setTotalPoints(account.getTotalPoints() + points);
         
@@ -77,7 +90,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     @Override
     @Transactional
     public LoyaltyAccountDTO spendPoints(Long userId, Integer points, String description) {
-        if (points == null || points <= 0) throw new com.petcarehub.exception.BadRequestException("Điểm phải lớn hơn 0");
+        validatePoints(points);
         LoyaltyAccount account = getOrCreateAccount(userId);
         if (account.getAvailablePoints() < points) {
             throw new com.petcarehub.exception.BadRequestException("Không đủ điểm");

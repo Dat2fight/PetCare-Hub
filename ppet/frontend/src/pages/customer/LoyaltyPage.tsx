@@ -7,8 +7,8 @@ export const LoyaltyPage = () => {
   const { user } = useAuth(); const [account, setAccount] = useState<Account | null>(null); const [history, setHistory] = useState<Transaction[]>([]);
   const [page, setPage] = useState(0); const [error, setError] = useState(false); const [loading, setLoading] = useState(true); const [retry, setRetry] = useState(0);
   useEffect(() => { if (!user) return; const controller = new AbortController(); setLoading(true); setError(false);
-    (async () => { try { const {data} = await apiClient.get<Account>(`/loyalty/account/${user.id}`, {signal: controller.signal});
-      const tx = await apiClient.get<Transaction[]>(`/loyalty/account/${data.id}/transactions`, {params: {page, size:20}, signal: controller.signal});
+    (async () => { try { const {data} = await apiClient.get<Account>('/loyalty/account', {signal: controller.signal});
+      const tx = await apiClient.get<Transaction[]>('/loyalty/transactions', {params: {page, size:20}, signal: controller.signal});
       if (!controller.signal.aborted) { setAccount(data); setHistory(tx.data); }
     } catch { if (!controller.signal.aborted) setError(true); } finally { if (!controller.signal.aborted) setLoading(false); } })();
     return () => controller.abort();
