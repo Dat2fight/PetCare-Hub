@@ -47,10 +47,9 @@ public class PetMatchingServiceImpl implements PetMatchingService {
         quiz.setActivityLevel(request.getActivityLevel());
         quiz.setDailyCareHours(java.math.BigDecimal.valueOf(request.getAvailableCareTime())); // API unit: hours per day.
         quiz.setCustomer(userRepository.findById(userId).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản")));
-        quiz = quizRepository.save(quiz);
 
         List<Pet> availablePets = petRepository.findByAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.AVAILABLE, org.springframework.data.domain.Pageable.unpaged()).getContent();
-        List<MatchResultDTO> results = new ArrayList<>();
+        List<ScoredPet> scored = new ArrayList<>();
 
         for (Pet pet : availablePets) {
             double totalScore = 0;
@@ -60,22 +59,25 @@ public class PetMatchingServiceImpl implements PetMatchingService {
                 totalScore += strategy.calculateMatchScore(quiz, pet, explanation);
             }
 
-            PetMatchingResult resultEntity = new PetMatchingResult();
-            resultEntity.setQuiz(quiz);
-            resultEntity.setPet(pet);
-            resultEntity.setOverallScore((int) totalScore);
-            resultEntity.setExplanation(explanation.toString());
-            resultRepository.save(resultEntity);
-
-            PetDTO petDTO = com.petcarehub.mapper.PetMapper.toDTO(pet);
-            results.add(new MatchResultDTO(petDTO, totalScore, explanation.toString()));
+            scored.add(new ScoredPet(pet, totalScore, explanation.toString()));
         }
-
-        return results.stream()
-                .sorted(Comparator.comparing(MatchResultDTO::getScore).reversed())
-                .limit(10)
-                .collect(Collectors.toList());
+        // Stable ties make stored ranks and the returned top ten reproducible.
+        scored.sort(Comparator.comparingDouble(ScoredPet::score).reversed().thenComparing(s -> s.pet().getId()));
+        quiz = quizRepository.save(quiz);
+        List<PetMatchingResult> persisted = new ArrayList<>();
+        List<MatchResultDTO> results = new ArrayList<>();
+        for (int i = 0; i < scored.size(); i++) {
+            ScoredPet item = scored.get(i);
+            PetMatchingResult result = new PetMatchingResult();
+            result.setQuiz(quiz); result.setPet(item.pet()); result.setOverallScore((int) item.score());
+            result.setExplanation(item.explanation()); result.setRank(i + 1);
+            persisted.add(result);
+            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.mapper.PetMapper.toDTO(item.pet()), item.score(), item.explanation()));
+        }
+        resultRepository.saveAll(persisted);
+        return results;
     }
+    private record ScoredPet(Pet pet, double score, String explanation) {}
 }
 
 
