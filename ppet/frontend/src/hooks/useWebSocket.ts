@@ -21,7 +21,7 @@ export const useWebSocket = (onNotification: (notification: NotificationEvent) =
   const connect = useCallback(() => {
     if (!user?.id || clientRef.current?.active) return
     const client = new Client({
-      webSocketFactory: () => new SockJS('/ws'),
+      webSocketFactory: () => new SockJS(import.meta.env.VITE_WS_URL?.trim() || '/ws'),
       beforeConnect: async () => {
         const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
         if (!token) { await client.deactivate(); return }

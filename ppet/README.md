@@ -182,3 +182,13 @@ Chi tiết từng lỗi, ma trận quyền và checklist: [báo cáo audit](docs
 - Test SQL Server tùy chọn: Docker phải chạy, đặt `$env:RUN_SQLSERVER_TESTS='true'` rồi `.\mvnw.cmd -Dtest=SqlServerConstraintTest test`. Testcontainers tải image Microsoft SQL Server 2022 và chạy schema/migration hai lần trong container riêng; `acceptLicense()` là cấu hình test nên người vận hành cần đảm bảo đủ quyền dùng image. Test không kết nối SQL Server localhost. Không có Docker thì test bị skip, không phải PASS.
 - Seed pets: cấp `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `API_BASE_URL` qua môi trường rồi chạy `node seed_pets.js` từ `ppet`. `ADMIN_EMAIL` hiện phải chứa **username** của admin do contract login hiện tại dùng username. Không đưa giá trị thật vào script, lệnh lưu trong lịch sử hay Git. Thiếu biến thì script dừng; token không được log.
 - Giữ package gốc vì còn script seed/deploy; audit cả `ppet/` lẫn `ppet/frontend/`.
+
+
+## High #23 — cấu hình frontend/API khi triển khai
+
+- Local: sao chép `frontend/.env.example` thành `frontend/.env.local` nếu cần. Mặc định HTTP `/api/v1` và SockJS `/ws`; Vite dev proxy tới backend cổng **8081**. Khởi động lại Vite sau khi đổi môi trường.
+- Deploy: đặt `VITE_API_BASE_URL` là URL HTTPS đầy đủ kết thúc `/api/v1`, `VITE_WS_URL` là URL HTTPS SockJS kết thúc `/ws` (không dùng `wss://`). Ví dụ tên miền tài liệu `api.example.invalid` chỉ là chỗ giữ chỗ, phải thay bằng host của nhóm. Biến được nhúng lúc **build**, đổi biến trên server sau build không đổi bundle.
+- GitHub Pages: Settings → Secrets and variables → Actions → **Variables**, tạo hai biến trên rồi chạy workflow hiện tại. Workflow dừng nếu thiếu URL HTTPS; giữ bước copy `404.html` và base `/PetCare-Hub/`. Chưa chạy deploy từ phiên sửa này.
+- Backend: đặt `APP_CORS_ALLOWED_ORIGINS` bằng origin frontend chính xác (scheme + host + port, không path `/PetCare-Hub/`), nhiều origin phân cách dấu phẩy. HTTP và WebSocket dùng chung property; không dùng wildcard. Reverse proxy phải hỗ trợ `/ws` và nâng cấp WebSocket.
+- Tất cả `VITE_*` đều công khai trong bundle. Không đặt JWT_SECRET, mật khẩu database hoặc credential vào các biến này. JWT_SECRET vẫn chỉ được cấp cho tiến trình backend theo hướng dẫn Critical #1; không đổi profile mặc định.
+- Kiểm tra sau build/deploy: đăng nhập, gọi `/cart`, refresh `/orders/{id}`, nhận thông báo qua `/user/queue/notifications`; origin khác phải bị từ chối. CONNECT vẫn gửi Bearer token theo hook đã sửa ở lượt 1.
