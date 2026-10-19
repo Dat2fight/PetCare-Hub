@@ -192,3 +192,8 @@ Chi tiết từng lỗi, ma trận quyền và checklist: [báo cáo audit](docs
 - Backend: đặt `APP_CORS_ALLOWED_ORIGINS` bằng origin frontend chính xác (scheme + host + port, không path `/PetCare-Hub/`), nhiều origin phân cách dấu phẩy. HTTP và WebSocket dùng chung property; không dùng wildcard. Reverse proxy phải hỗ trợ `/ws` và nâng cấp WebSocket.
 - Tất cả `VITE_*` đều công khai trong bundle. Không đặt JWT_SECRET, mật khẩu database hoặc credential vào các biến này. JWT_SECRET vẫn chỉ được cấp cho tiến trình backend theo hướng dẫn Critical #1; không đổi profile mặc định.
 - Kiểm tra sau build/deploy: đăng nhập, gọi `/cart`, refresh `/orders/{id}`, nhận thông báo qua `/user/queue/notifications`; origin khác phải bị từ chối. CONNECT vẫn gửi Bearer token theo hook đã sửa ở lượt 1.
+
+
+## High #24 — bản vá và mật khẩu
+
+Backend dùng Spring Boot3.3.13 / Spring Security6.3.10 (Java target17). Register/tạo nhân viên: ít nhất8 ký tự, tối đa72 byte UTF-8; login cùng giới hạn trên. Không cắt mật khẩu. Người dùng có mật khẩu legacy vượt giới hạn cần đặt lại qua quy trình quản trị phù hợp. JWT_SECRET và profile giữ nguyên như Critical1. Boot3.3 đã hết OSS support; lên dòng được hỗ trợ là kế hoạch riêng. Kết quả, ma trận quyền và checklist đầy đủ: [High lượt3](docs/high-round-3/REPORT.md).

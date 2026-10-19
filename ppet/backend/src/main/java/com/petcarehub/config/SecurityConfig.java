@@ -46,7 +46,14 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder() {
+            @Override public boolean matches(CharSequence rawPassword, String encodedPassword) {
+                // Upstream permits legacy long-password verification. Our API policy is strict.
+                // Run BCrypt first so DAO dummy-hash timing mitigation is retained.
+                boolean matches = super.matches(rawPassword, encodedPassword);
+                return matches && rawPassword.toString().getBytes(java.nio.charset.StandardCharsets.UTF_8).length <= 72;
+            }
+        };
     }
 
     @Bean

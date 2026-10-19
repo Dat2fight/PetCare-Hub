@@ -19,6 +19,10 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (formData.password.length < 8 || new TextEncoder().encode(formData.password).length > 72) {
+      toast.error('Mật khẩu cần ít nhất 8 ký tự và tối đa 72 byte UTF-8.');
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
       toast.error('Mật khẩu không khớp!');
       return;
