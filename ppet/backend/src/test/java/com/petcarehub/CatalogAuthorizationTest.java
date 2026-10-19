@@ -27,10 +27,11 @@ class CatalogAuthorizationTest {
         boolean allowed = role == RoleType.ADMIN || role == RoleType.SALES_STAFF;
         for (String catalog : new String[]{"products", "categories", "promotions"}) {
             String path = "/api/v1/" + catalog;
+            String promotion = "{\"code\":\"TEST\",\"discountType\":\"PERCENTAGE\",\"discountValue\":10}";
             mvc.perform(post(path).with(user("caller").roles(role.name())).contentType("application/json")
-                    .content(catalog.equals("products") ? "{\"name\":\"Product\",\"price\":10,\"categoryId\":1}" : "{}"))
+                    .content(catalog.equals("products") ? "{\"name\":\"Product\",\"price\":10,\"categoryId\":1}" : catalog.equals("promotions") ? promotion : "{}"))
                     .andExpect(status().is(allowed ? (catalog.equals("promotions") ? 200 : 201) : 403));
-            mvc.perform(put(path + "/1").with(user("caller").roles(role.name())).contentType("application/json").content("{}"))
+            mvc.perform(put(path + "/1").with(user("caller").roles(role.name())).contentType("application/json").content(catalog.equals("promotions") ? promotion : "{}"))
                     .andExpect(status().is(allowed ? 200 : 403));
             mvc.perform(delete(path + "/1").with(user("caller").roles(role.name())))
                     .andExpect(status().is(allowed ? 204 : 403));

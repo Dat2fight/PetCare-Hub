@@ -18,7 +18,7 @@ public class PromotionController {
 
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
-    public ResponseEntity<PromotionDTO> createPromotion(@RequestBody PromotionCreateRequest request) {
+    public ResponseEntity<PromotionDTO> createPromotion(@jakarta.validation.Valid @RequestBody PromotionCreateRequest request) {
         return ResponseEntity.ok(promotionService.createPromotion(request));
     }
 
@@ -34,7 +34,7 @@ public class PromotionController {
 
     @PutMapping("/{id}")
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
-    public ResponseEntity<PromotionDTO> updatePromotion(@PathVariable Long id, @RequestBody PromotionCreateRequest request) {
+    public ResponseEntity<PromotionDTO> updatePromotion(@PathVariable Long id, @jakarta.validation.Valid @RequestBody PromotionCreateRequest request) {
         return ResponseEntity.ok(promotionService.updatePromotion(id, request));
     }
 
