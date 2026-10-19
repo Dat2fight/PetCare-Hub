@@ -68,6 +68,7 @@ function App() {
               <Route path="/pet-matching" element={<ProtectedRoute><PetMatchingPage /></ProtectedRoute>} />
               <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
               <Route path="/orders" element={<ProtectedRoute><OrdersPage /></ProtectedRoute>} />
+              <Route path="/orders/:id" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
               <Route path="/unauthorized" element={<div className="p-8">403 — Bạn không có quyền truy cập.</div>} />
               <Route path="*" element={<div className="p-8">404 — Không tìm thấy trang.</div>} />
             </Routes>

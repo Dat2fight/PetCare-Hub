@@ -75,6 +75,21 @@ class OrderFlowTest {
         assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createOrder(request));
         assertEquals(before,orders.count()); assertEquals(5,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
     }
+    @Test void checkoutResponseCanBeLoadedByItsRealId() throws Exception {
+        var response=mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsString(request)))
+                .andExpect(status().isOk()).andReturn();
+        long id=json.readTree(response.getResponse().getContentAsString()).get("id").asLong();
+        mvc.perform(get("/api/v1/orders/{id}",id).with(user(caller(owner,"CUSTOMER"))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id))
+                .andExpect(jsonPath("$.paymentMethod").value("COD"))
+                .andExpect(jsonPath("$.shippingAddress").value(request.getShippingAddress()))
+                .andExpect(jsonPath("$.items[0].productName").value("Food"));
+        long before=orders.count(); request.setShippingAddress(" ");
+        mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isBadRequest());
+        assertEquals(before,orders.count());
+    }
     @Test void missingOrderIs404AndUnsupportedPaymentIs400() throws Exception {
         mvc.perform(get("/api/v1/orders/9223372036854775807").with(user(caller(owner,"CUSTOMER")))).andExpect(status().isNotFound());
         request.setPaymentMethod("CARD");
