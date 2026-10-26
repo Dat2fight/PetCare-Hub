@@ -21,4 +21,13 @@
 - Quét mass assignment: ProfileUpdateRequest chỉ tên/email/phone; UserController gán từng field. Product/service/promotion active/price chỉ qua endpoint nhân viên; createMine pet ghi đè owner/price/health/availability. Không có endpoint người dùng tự sửa enabled/tier/points qua DTO profile.
 - **NEEDS DECISION:** muốn gỡ một admin phải có luồng quản trị riêng được tuần tự hóa và bảo vệ admin cuối cùng. Hiện chặn mọi lần hạ quyền một admin qua endpoint generic; tạo/cấp quyền ADMIN từ admin vẫn theo API sẵn có.
 
-Các kết quả test, commit và ma trận cuối được ghi sau từng bước.
+BUG-001: full Maven PASS, 193 test / 0 lỗi / 3 skip SQL Server; commit `4cced7d`.
+
+### BUG-002
+
+- **ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ** đối với phân quyền CRUD ba controller: ADMIN/SALES_STAFF; mọi role khác bị từ chối. GET storefront đã ép active=true; `/products/manage` có guard riêng.
+- Bổ sung lớp URL theo HTTP method cho catalogue/service, clinical, inventory, pet quản trị, review approve, loyalty earn và order transitions; giữ guard method hiện có. Auth public thu hẹp còn POST login/register.
+- Red: `CatalogAuthorizationTest.unauthorizedMalformedWritesAreRejectedBeforeDeserialization` trả 400 thay vì 403. Green: full Maven PASS. Anonymous POST/PUT/DELETE cả ba catalogue đều 401; matrix tất cả RoleType vẫn PASS.
+- **NEEDS DECISION:** giữ quyền SALES_STAFF quản lý promotion theo ma trận đã có; đổi thành ADMIN-only cần sửa đồng thời SecurityConfig, PromotionController và test matrix.
+- `EndpointSecurityMatrixTest` lập inventory tường minh mọi endpoint từ RequestMappingHandlerMapping; endpoint mới chưa khai báo làm test fail. Kiểm anonymous cho mọi route, CUSTOMER không gọi được write ngoài allowlist. Những write không có role annotation nhưng dành cho chủ tài khoản được giữ: cart, profile, pet cá nhân, notifications, quiz, booking/cancel, order/cancel, review, loyalty spend (xử lý tiếp ở BUG-007).
+- Không phát hiện controller quản trị nào ngoài danh sách trên còn cho CUSTOMER ghi; API order transition đã có guard service. Lớp URL bổ sung giúp từ chối trước validation.

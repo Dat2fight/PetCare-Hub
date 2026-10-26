@@ -41,6 +41,18 @@ class CatalogAuthorizationTest {
         for (String catalog : new String[]{"products", "categories", "promotions"}) {
             mvc.perform(get("/api/v1/" + catalog)).andExpect(status().isOk());
             mvc.perform(delete("/api/v1/" + catalog + "/1")).andExpect(status().isUnauthorized());
+            mvc.perform(post("/api/v1/" + catalog).contentType("application/json").content("{}"))
+                    .andExpect(status().isUnauthorized());
+            mvc.perform(put("/api/v1/" + catalog + "/1").contentType("application/json").content("{}"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+    @Test void unauthorizedMalformedWritesAreRejectedBeforeDeserialization() throws Exception {
+        for (String catalog : new String[]{"products", "categories", "promotions"}) {
+            mvc.perform(post("/api/v1/" + catalog).with(user("qa_customer").roles("CUSTOMER"))
+                    .contentType("application/json").content("{")) .andExpect(status().isForbidden());
+            mvc.perform(put("/api/v1/" + catalog + "/1").with(user("qa_vet").roles("VETERINARIAN"))
+                    .contentType("application/json").content("{")) .andExpect(status().isForbidden());
         }
     }
 }
