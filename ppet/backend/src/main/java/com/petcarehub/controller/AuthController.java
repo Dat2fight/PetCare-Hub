@@ -61,17 +61,17 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<?> register(@jakarta.validation.Valid @RequestBody RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            throw new com.petcarehub.exception.BadRequestException("Tên đăng nhập đã được sử dụng");
         }
 
         if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+            throw new com.petcarehub.exception.BadRequestException("Email đã được sử dụng");
         }
 
         User user = userFactory.createUser(registerRequest);
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        return ResponseEntity.ok("Đăng ký tài khoản thành công");
     }
 
     @GetMapping("/me")

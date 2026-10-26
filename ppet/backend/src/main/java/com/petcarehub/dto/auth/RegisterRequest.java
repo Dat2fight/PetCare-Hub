@@ -1,10 +1,10 @@
 package com.petcarehub.dto.auth;
 
-import com.petcarehub.enums.RoleType;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class RegisterRequest {
     @NotBlank(message="Tên đăng nhập không được trống") @Size(max=50, message="Tên đăng nhập tối đa 50 ký tự")
     private String username;
@@ -19,5 +19,4 @@ public class RegisterRequest {
     private String lastName;
     @Size(max=20, message="Số điện thoại tối đa 20 ký tự")
     private String phone;
-    private RoleType role;
 }

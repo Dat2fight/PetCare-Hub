@@ -1,6 +1,6 @@
 package com.petcarehub.service;
 
-import com.petcarehub.dto.auth.RegisterRequest;
+import com.petcarehub.dto.auth.StaffCreateRequest;
 import com.petcarehub.dto.auth.UserDTO;
 import com.petcarehub.enums.RoleType;
 import com.petcarehub.exception.BadRequestException;
@@ -21,7 +21,7 @@ public class StaffAccountService {
     private final RoleRepository roles;
 
     @Transactional @PreAuthorize("hasRole('ADMIN')")
-    public UserDTO createStaff(RegisterRequest request) {
+    public UserDTO createStaff(StaffCreateRequest request) {
         // This endpoint provisions employees only; admin promotion remains a separate admin action.
         if (request.getRole() == null || !Set.of(RoleType.SALES_STAFF, RoleType.WAREHOUSE_STAFF, RoleType.VETERINARIAN).contains(request.getRole()))
             throw new BadRequestException("Chọn vai trò nhân viên hợp lệ");

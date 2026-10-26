@@ -75,6 +75,7 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public User updateUserRole(Long userId, String role) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại với id: " + userId));
@@ -93,6 +94,11 @@ public class AdminServiceImpl implements AdminService {
         } catch (IllegalArgumentException e) {
             throw new BadRequestException("Role không hợp lệ: " + role);
         }
+
+        // NEEDS DECISION: admin removal needs a dedicated, serialized governance flow.
+        // Until then, no generic role change may remove an existing administrator.
+        if (roleType != RoleType.ADMIN && user.getRoles().stream().anyMatch(r -> r.getName() == RoleType.ADMIN))
+            throw new org.springframework.security.access.AccessDeniedException("Không thể hạ quyền quản trị viên qua chức năng này");
 
         Role roleEntity = roleRepository.findByName(roleType)
                 .orElseThrow(() -> new ResourceNotFoundException("Role không tồn tại: " + role));

@@ -22,7 +22,7 @@ public class AdminController {
 
     @PostMapping("/staff")
     public ResponseEntity<com.petcarehub.dto.auth.UserDTO> createStaff(
-            @jakarta.validation.Valid @RequestBody com.petcarehub.dto.auth.RegisterRequest request) {
+            @jakarta.validation.Valid @RequestBody com.petcarehub.dto.auth.StaffCreateRequest request) {
         return ResponseEntity.status(201).body(staffAccountService.createStaff(request));
     }
 
