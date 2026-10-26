@@ -106,4 +106,15 @@ class PrivatePetDataTest {
         mvc.perform(put("/api/v1/notifications/read-all").with(user(caller(other,"CUSTOMER")))).andExpect(status().isOk());
         assertFalse(notifications.findById(notice.getId()).orElseThrow().getRead());
     }
+    @Test void personalPetUpdatesCheckOwnershipAndIgnoreProtectedFields() throws Exception {
+        String body="{\"name\":\"qa_updated\",\"speciesId\":"+animal.getId()+",\"ownerId\":"+other.getId()
+                +",\"price\":999,\"healthStatus\":\"SICK\",\"availabilityStatus\":\"SOLD\"}";
+        mvc.perform(put("/api/v1/pets/my-pets/{id}",mine.getId()).with(user(caller(other,"CUSTOMER")))
+                .contentType("application/json").content(body)).andExpect(status().isNotFound());
+        mvc.perform(put("/api/v1/pets/my-pets/{id}",mine.getId()).with(user(caller(owner,"CUSTOMER")))
+                .contentType("application/json").content(body)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.ownerId").value(owner.getId())).andExpect(jsonPath("$.price").doesNotExist())
+                .andExpect(jsonPath("$.healthStatus").value("HEALTHY")).andExpect(jsonPath("$.availabilityStatus").value("AVAILABLE"));
+        org.junit.jupiter.api.Assertions.assertEquals(0,BigDecimal.ONE.compareTo(pets.findById(mine.getId()).orElseThrow().getPrice()));
+    }
 }

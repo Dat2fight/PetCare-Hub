@@ -79,15 +79,61 @@ class EndpointSecurityMatrixTest {
     @Test void customerCannotReachAnyNonAllowlistedWrite() throws Exception {
         for(String endpoint:STAFF_WRITES) assertEquals(403,perform(endpoint,true),"Customer: "+endpoint);
     }
+    @Test void everyStaffWriteChecksEveryRealRoleBeforeBinding() throws Exception {
+        for(var role:com.petcarehub.enums.RoleType.values()) for(String endpoint:STAFF_WRITES) {
+            boolean allowed=role==com.petcarehub.enums.RoleType.ADMIN;
+            if(endpoint.matches(".* /(products|categories|promotions|services|pets|orders)(/.*)?"))
+                allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
+            if(endpoint.matches(".* /(medical-records|vaccinations|treatments)(/.*)?"))
+                allowed |= role==com.petcarehub.enums.RoleType.VETERINARIAN;
+            if(endpoint.contains(" /inventory/")) allowed |= role==com.petcarehub.enums.RoleType.WAREHOUSE_STAFF;
+            // Malformed JSON prevents test data mutations after an allowed filter boundary.
+            // CatalogAuthorizationTest and flow tests exercise valid allowed requests as well.
+            int status=perform(endpoint,role.name(),true);
+            if(allowed) assertTrue(Set.of(200,201,204,400,404,409).contains(status),role+": "+endpoint+" -> "+status);
+            else assertEquals(403,status,role+": "+endpoint);
+        }
+    }
+    @Test void everyPrivateResourceIdHasANamedOwnershipRegression() throws Exception {
+        Map<String,String> evidence=new HashMap<>();
+        register(evidence,"PrivatePetDataTest#privatePetEndpointRequiresOwnerOrClinicalRole", "GET /pets/my-pets/{id}");
+        register(evidence,"PrivatePetDataTest#personalPetUpdatesCheckOwnershipAndIgnoreProtectedFields", "PUT /pets/my-pets/{id}");
+        register(evidence,"QaAppointmentScopeTest#customerCannotDiscoverOrCancelAnotherCustomersAppointment",
+                "GET /appointments/user/{userId}","GET /appointments/pet/{petId}","PUT /appointments/{id}/status");
+        register(evidence,"PrivatePetDataTest#clinicalDetailsAndHistoriesRejectOtherCustomersAndPreserveClinicalAccess",
+                "GET /medical-records/{id}","GET /medical-records/pet/{petId}","GET /vaccinations/{id}","GET /vaccinations/pet/{petId}");
+        register(evidence,"TreatmentFlowTest#veterinarianAndAdminCrudPersistsAllRequiredFields", "GET /treatments/{id}","GET /treatments/record/{recordId}");
+        register(evidence,"PrivatePetDataTest#notificationsStayStrictlyPerPrincipalIncludingAdmin", "GET /notifications/{userId}","PUT /notifications/{id}/read");
+        register(evidence,"OrderFlowTest#persistsServerPriceAndProtectedDetail", "GET /orders/{id}","POST /orders/{id}/cancel");
+        register(evidence,"CartMutationTest#foreignItemCannotBeUpdatedOrRemovedAndQueryIdCannotSelectOwner", "PUT /cart/items/{itemId}","DELETE /cart/items/{itemId}");
+        register(evidence,"LoyaltyOwnershipTest#customerCannotReadSpendOrAddForAnotherUser", "GET /loyalty/account/{userId}");
+        register(evidence,"QaLoyaltyBoundaryTest#historyResourceHidesAnotherCustomersAccount", "GET /loyalty/account/{accountId}/transactions");
+        register(evidence,"MatchingTransactionTest#legacyUrlCannotOverridePrincipalCustomer", "POST /pet-matching/submit/{userId}");
+        // Staff-only writes are covered by the role boundary matrix; public catalog IDs have no customer owner.
+        Set<String> resourceIds=new TreeSet<>();
+        for(var group:List.of(CUSTOMER_WRITES,PRIVATE_READS)) for(String endpoint:group)
+            if(endpoint.contains("{") && !endpoint.startsWith("GET /inventory/")) resourceIds.add(endpoint);
+        assertEquals(resourceIds,new TreeSet<>(evidence.keySet()),"Missing private resource ownership test; review before adding route");
+        for(String reference:new HashSet<>(evidence.values())) {
+            String[] parts=reference.split("#");
+            assertTrue(Arrays.stream(Class.forName("com.petcarehub."+parts[0]).getDeclaredMethods()).anyMatch(m->m.getName().equals(parts[1])),reference);
+        }
+    }
+    private static void register(Map<String,String> evidence,String test,String... endpoints) {
+        for(String endpoint:endpoints) evidence.put(endpoint,test);
+    }
     private int perform(String endpoint, boolean customer) throws Exception {
+        return perform(endpoint,customer ? "CUSTOMER" : null,false);
+    }
+    private int perform(String endpoint, String role, boolean malformed) throws Exception {
         String[] parts=endpoint.split(" ",2);
         String path="/api/v1"+parts[1].replaceAll("\\{[^}]+}","987654321");
-        var req=request(HttpMethod.valueOf(parts[0]),path).contentType("application/json").content("{}")
+        var req=request(HttpMethod.valueOf(parts[0]),path).contentType("application/json").content(malformed ? "{" : "{}")
                 .param("points","1").param("description","qa_test").param("role","CUSTOMER")
                 .param("productId","987654321").param("quantity","1").param("reason","qa_test")
                 .param("targetType","PRODUCT").param("targetId","987654321");
-        if(customer) req.with(user(new UserDetailsImpl(987654321L,"qa_matrix","qa_matrix@example.test","unused",
-                List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")))));
+        if(role!=null) req.with(user(new UserDetailsImpl(987654321L,"qa_matrix","qa_matrix@example.test","unused",
+                List.of(new SimpleGrantedAuthority("ROLE_"+role)))));
         return mvc.perform(req).andReturn().getResponse().getStatus();
     }
 }

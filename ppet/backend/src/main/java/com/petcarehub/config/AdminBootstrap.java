@@ -29,8 +29,11 @@ public class AdminBootstrap implements CommandLineRunner {
         String username = required("username");
         String email = required("email");
         String password = required("password");
-        if (password.length() < 12 || password.getBytes(StandardCharsets.UTF_8).length > 72)
-            throw new IllegalStateException("Bootstrap password must contain at least 12 characters and at most 72 UTF-8 bytes");
+        if (password.length() < 12 || password.getBytes(StandardCharsets.UTF_8).length > 72
+                || password.chars().noneMatch(Character::isUpperCase)
+                || password.chars().noneMatch(Character::isLowerCase)
+                || password.chars().noneMatch(Character::isDigit))
+            throw new IllegalStateException("Mật khẩu bootstrap phải có ít nhất 12 ký tự, tối đa 72 byte UTF-8, gồm chữ hoa, chữ thường và số");
         var existing = users.findByUsername(username);
         if (existing.isPresent()) {
             // Never reset credentials, enable a disabled account, or silently promote an existing customer.

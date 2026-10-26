@@ -11,8 +11,10 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @ConfigurationProperties(prefix = "app.jwt")
 public class JwtProperties {
-    // Provider validates without Spring binding errors echoing rejected secret values.
+    // Blank values are safe to report; byte length and exposed-key checks stay in the provider
+    // so Spring never echoes a rejected non-empty signing key.
     @lombok.ToString.Exclude
+    @jakarta.validation.constraints.NotBlank(message="Cần đặt JWT_SECRET (app.jwt.secret)")
     private String secret;
     @Positive
     private long expirationMs;

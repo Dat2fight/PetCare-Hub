@@ -25,7 +25,7 @@ class AdminBootstrapTest {
     AdminBootstrap bootstrap = new AdminBootstrap(users, roles, encoder, env);
 
     private String configured() {
-        String password = UUID.randomUUID().toString();
+        String password = UUID.randomUUID() + "Aa9!";
         env.withProperty("app.bootstrap.username", "operator").withProperty("app.bootstrap.email", "operator@example.test")
                 .withProperty("app.bootstrap.password", password);
         return password;

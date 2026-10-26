@@ -166,9 +166,9 @@ Chọn **một** cách seed:
 |---|---|---|---|
 | JWT_SECRET | Có, mọi profile chạy thật | Khóa ký JWT, ít nhất 32 byte UTF-8 | CHANGE_ME (cố ý không hợp lệ) |
 | SPRING_PROFILES_ACTIVE | Có cho quy trình local này | Bật cấu hình validate và Java seed dev | dev |
-| DB_USERNAME | Cấp rõ khi chạy dev | SQL login; dev hiện có default sa | CHANGE_ME |
-| DB_PASSWORD | Phải tự cấp trong quy trình này | Mật khẩu SQL login | CHANGE_ME |
-| SPRING_DATASOURCE_URL | Khi đổi host/database; nên cấp rõ | Override JDBC URL | jdbc:sqlserver://localhost:1433;databaseName=petcarehub;encrypt=true;trustServerCertificate=true |
+| DB_USERNAME | Có | Tài khoản SQL Server được cấp quyền phù hợp | Cấp qua môi trường |
+| DB_PASSWORD | Có | Mật khẩu SQL Server, không có fallback | Cấp qua môi trường |
+| DB_URL / SPRING_DATASOURCE_URL | Khi đổi host/database | JDBC URL; Spring override vẫn được hỗ trợ | Xem backend/.env.example |
 | APP_CORS_ALLOWED_ORIGINS | Khi frontend khác origin mặc định | Origin chính xác, phân cách dấu phẩy | http://localhost:5173 |
 | BOOTSTRAP_ADMIN_ENABLED | Không, mặc định false | Bật tạo admin khi khởi động | false |
 | BOOTSTRAP_ADMIN_USERNAME | Khi bật bootstrap | Username admin mới | CHANGE_ME |
@@ -181,7 +181,7 @@ Chọn **một** cách seed:
 | VITE_WS_URL | Không với proxy local | SockJS HTTP URL | /ws |
 | APP_PROFILE / DEMO_PASSWORD_HASH | Chỉ SQL demo | SQLCMD seed guard / hash do bạn cấp | dev / CHANGE_ME |
 
-Cấu hình DB hiện còn fallback mật khẩu legacy trong YAML; phiên tài liệu này không sửa nó. **Không dựa vào fallback hoặc sao chép nó**: cấp DB_PASSWORD rõ ràng. JWT không có fallback và không được thêm fallback.
+Mọi profile runtime bắt buộc cấp DB_USERNAME, DB_PASSWORD và JWT_SECRET. Không có mật khẩu fallback. Không sửa credential trực tiếp trong YAML; xem [hướng dẫn cấu hình và rotate](docs/qa-critical-001-007/SECRET-OPERATIONS.md).
 
 ### Khóa ký JWT bắt buộc
 
