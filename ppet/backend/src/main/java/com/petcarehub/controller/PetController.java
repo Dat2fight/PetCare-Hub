@@ -29,8 +29,8 @@ public class PetController {
     }
     @PutMapping("/my-pets/{id}")
     public ResponseEntity<PetDTO> updateMine(@PathVariable Long id, @Valid @RequestBody PetUpdateRequest request) {
+        ownership.ownedPet(id);
         PetDTO current = petService.getPetById(id);
-        if (!ownership.userId().equals(current.getOwnerId())) throw new org.springframework.security.access.AccessDeniedException("Bạn chỉ được sửa thú cưng của mình");
         request.setOwnerId(ownership.userId()); request.setPrice(null);
         request.setHealthStatus(current.getHealthStatus()); request.setAvailabilityStatus(current.getAvailabilityStatus());
         return ResponseEntity.ok(petService.updatePet(id, request));

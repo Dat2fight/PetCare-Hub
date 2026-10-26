@@ -88,10 +88,10 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Override
     @Transactional
     public AppointmentDTO updateAppointmentStatus(Long id, AppointmentUpdateRequest request) {
-        Appointment appointment = appointmentRepository.findLockedById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Appointment not found"));
-            
         Long currentUserId = ownership.userId();
+        Appointment appointment = appointmentRepository.findAccessibleLockedById(id, currentUserId,
+                ownership.hasRole("SALES_STAFF") || ownership.hasRole("VETERINARIAN"), ownership.hasRole("ADMIN"))
+            .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
         boolean staff = ownership.hasRole("ADMIN")
                 || ((ownership.hasRole("SALES_STAFF") || ownership.hasRole("VETERINARIAN"))
                     && appointment.getStaff() != null && appointment.getStaff().getId().equals(currentUserId));
@@ -115,7 +115,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     @Transactional(readOnly = true)
     @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF', 'VETERINARIAN')")
     public List<AppointmentDTO> getAllAppointments(org.springframework.data.domain.Pageable pageable) {
-        return appointmentRepository.findAll(pageable).stream()
+        var visible = ownership.hasRole("ADMIN") ? appointmentRepository.findAll(pageable)
+                : appointmentRepository.findByStaffId(ownership.userId(), pageable);
+        return visible.stream()
             .map(this::mapToDTO)
             .collect(Collectors.toList());
     }
@@ -135,8 +137,9 @@ public class AppointmentServiceImpl implements AppointmentService {
     public List<AppointmentDTO> getAppointmentsByPet(Long petId, org.springframework.data.domain.Pageable pageable) {
         ownership.requirePet(petId);
         // A pet may change owners; customers must not see a previous owner's appointments.
-        var appointments = ownership.hasRole("ADMIN") || ownership.hasRole("VETERINARIAN")
+        var appointments = ownership.hasRole("ADMIN")
                 ? appointmentRepository.findByPetId(petId, pageable)
+                : ownership.hasRole("VETERINARIAN") ? appointmentRepository.findByPetIdAndStaffId(petId, ownership.userId(), pageable)
                 : appointmentRepository.findByPetIdAndCustomerId(petId, ownership.userId(), pageable);
         return appointments.stream().map(this::mapToDTO).toList();
     }

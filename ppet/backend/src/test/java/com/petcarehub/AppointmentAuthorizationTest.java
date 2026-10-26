@@ -32,7 +32,10 @@ class AppointmentAuthorizationTest {
     Appointment appointment(long owner, long staff) {
         var a = Appointment.builder().customer(account(owner)).staff(account(staff)).appointmentDate(LocalDate.now().plusDays(1))
                 .startTime(LocalTime.of(10,0)).status(AppointmentStatus.SCHEDULED).build();
-        when(appointments.findLockedById(10L)).thenReturn(Optional.of(a));
+        when(appointments.findAccessibleLockedById(eq(10L), anyLong(), anyBoolean(), anyBoolean())).thenAnswer(call -> {
+            long id = call.getArgument(1); boolean isStaff = call.getArgument(2), isAdmin = call.getArgument(3);
+            return isAdmin || owner == id || (isStaff && staff == id) ? Optional.of(a) : Optional.empty();
+        });
         when(appointments.save(any())).thenAnswer(call -> call.getArgument(0));
         return a;
     }
@@ -42,16 +45,16 @@ class AppointmentAuthorizationTest {
         verifyNoInteractions(appointments);
     }
     @Test void petHistoryIsRestrictedToCurrentCustomersAppointments() throws Exception {
-        when(pets.findById(5L)).thenReturn(Optional.of(Pet.builder().owner(account(1)).build()));
+        when(pets.findByIdAndOwnerId(5L,1L)).thenReturn(Optional.of(Pet.builder().owner(account(1)).build()));
         when(appointments.findByPetIdAndCustomerId(eq(5L),eq(1L),any())).thenReturn(Page.empty());
         mvc.perform(get("/api/v1/appointments/pet/5").with(user(caller(1,"CUSTOMER")))).andExpect(status().isOk());
-        mvc.perform(get("/api/v1/appointments/pet/5").with(user(caller(2,"CUSTOMER")))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/appointments/pet/5").with(user(caller(2,"CUSTOMER")))).andExpect(status().isNotFound());
         verify(appointments,never()).findByPetId(any(),any());
     }
     @Test void customerMayOnlyCancelOwnFutureAppointment() throws Exception {
         appointment(1,3);
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(2,"CUSTOMER")))
-                .contentType("application/json").content("{\"status\":\"CANCELLED\"}")).andExpect(status().isForbidden());
+                .contentType("application/json").content("{\"status\":\"CANCELLED\"}")).andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(1,"CUSTOMER")))
                 .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isForbidden());
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(1,"CUSTOMER")))
@@ -61,9 +64,9 @@ class AppointmentAuthorizationTest {
     @Test void assignedIdDoesNotGrantBusinessPermissionAfterRoleRemoval() throws Exception {
         appointment(1,3);
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(3,"CUSTOMER")))
-                .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isForbidden());
+                .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(4,"VETERINARIAN")))
-                .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isForbidden());
+                .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/appointments/10/status").with(user(caller(3,"VETERINARIAN")))
                 .contentType("application/json").content("{\"status\":\"CONFIRMED\"}")).andExpect(status().isOk());
     }

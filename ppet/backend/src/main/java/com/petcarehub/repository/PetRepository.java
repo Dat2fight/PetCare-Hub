@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long>, JpaSpecificationExecutor<Pet> {
+    java.util.Optional<Pet> findByIdAndOwnerId(Long id, Long ownerId);
     Page<Pet> findByAvailabilityStatus(AvailabilityStatus status, Pageable pageable);
     List<Pet> findBySpeciesIdAndAvailabilityStatus(Long speciesId, AvailabilityStatus status);
     List<Pet> findByHealthStatus(HealthStatus healthStatus);

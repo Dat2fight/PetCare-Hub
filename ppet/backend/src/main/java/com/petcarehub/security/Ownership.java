@@ -17,6 +17,9 @@ public class Ownership {
         return principal.getId();
     }
     public void requireUser(Long id) { authorizedUserId(id); }
+    public void requireSelfUser(Long id) {
+        if (!userId().equals(id)) throw new AccessDeniedException("Bạn không có quyền truy cập dữ liệu này");
+    }
     public Long authorizedUserId(Long requestedId) {
         Long currentId = userId();
         if (currentId.equals(requestedId)) return currentId;
@@ -30,14 +33,12 @@ public class Ownership {
     // Booking and customer editing require actual ownership, without a clinical/admin override.
     public com.petcarehub.entity.Pet ownedPet(Long id) {
         Long currentId = userId();
-        var pet = pets.findById(id).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
-        if (pet.getOwner() == null || !currentId.equals(pet.getOwner().getId()))
-            throw new AccessDeniedException("Bạn chỉ được thao tác với thú cưng của mình");
-        return pet;
+        return pets.findByIdAndOwnerId(id, currentId)
+                .orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
     }
     public void requirePet(Long id) {
-        var pet = pets.findById(id).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
-        if (hasRole("ADMIN") || hasRole("VETERINARIAN")) return;
-        if (pet.getOwner() == null || !pet.getOwner().getId().equals(userId())) throw new AccessDeniedException("Bạn không có quyền truy cập hồ sơ này");
+        Long currentId = userId();
+        var pet = hasRole("ADMIN") || hasRole("VETERINARIAN") ? pets.findById(id) : pets.findByIdAndOwnerId(id, currentId);
+        pet.orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng"));
     }
 }

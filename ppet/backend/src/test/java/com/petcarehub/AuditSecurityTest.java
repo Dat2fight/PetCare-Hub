@@ -93,8 +93,7 @@ class AuditSecurityTest {
         mvc.perform(get("/api/v1/notifications/2").with(user(principal))).andExpect(status().isForbidden());
         var owner = new User(); owner.setId(2L);
         var notice = com.petcarehub.entity.Notification.builder().user(owner).build();
-        when(notifications.findById(10L)).thenReturn(Optional.of(notice));
-        mvc.perform(put("/api/v1/notifications/10/read").with(user(principal))).andExpect(status().isForbidden());
+        mvc.perform(put("/api/v1/notifications/10/read").with(user(principal))).andExpect(status().isNotFound());
         mvc.perform(put("/api/v1/users/me").with(user(principal)).contentType("application/json").content("{}"))
                 .andExpect(status().isBadRequest());
     }

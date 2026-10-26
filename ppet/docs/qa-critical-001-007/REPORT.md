@@ -31,3 +31,13 @@ BUG-001: full Maven PASS, 193 test / 0 lỗi / 3 skip SQL Server; commit `4cced7
 - **NEEDS DECISION:** giữ quyền SALES_STAFF quản lý promotion theo ma trận đã có; đổi thành ADMIN-only cần sửa đồng thời SecurityConfig, PromotionController và test matrix.
 - `EndpointSecurityMatrixTest` lập inventory tường minh mọi endpoint từ RequestMappingHandlerMapping; endpoint mới chưa khai báo làm test fail. Kiểm anonymous cho mọi route, CUSTOMER không gọi được write ngoài allowlist. Những write không có role annotation nhưng dành cho chủ tài khoản được giữ: cart, profile, pet cá nhân, notifications, quiz, booking/cancel, order/cancel, review, loyalty spend (xử lý tiếp ở BUG-007).
 - Không phát hiện controller quản trị nào ngoài danh sách trên còn cho CUSTOMER ghi; API order transition đã có guard service. Lớp URL bổ sung giúp từ chối trước validation.
+
+### BUG-003
+
+- Red: 5/6 ca trong `QaAppointmentScopeTest,PrivatePetDataTest` thất bại: staff xem hai lịch thay vì chỉ lịch được giao; truy cập pet/clinical/notification của người khác trả 403 thay vì 404. Base đã chặn đọc chéo CUSTOMER, chưa đúng phạm vi staff và hợp đồng che giấu tài nguyên.
+- Thêm truy vấn pet theo id+owner, notification theo id+user, order theo id+customer; khóa appointment/order được giới hạn người được phép trong query. Clinical dùng Ownership.requirePet để truy vấn chủ hoặc cho VETERINARIAN/ADMIN. Nhân viên chỉ liệt kê lịch của mình, ADMIN xem toàn bộ; bác sĩ xem lịch theo pet cũng bị giới hạn phân công.
+- Thêm `/appointments/me`, frontend bookingService có `getMyAppointments`; alias `/user/{userId}` còn tương thích, kiểm userId. Legacy quiz URL có ID khác principal nay 403 trước persistence.
+- `QaAppointmentScopeTest` dùng JWT thật cho hai CUSTOMER có lịch/pet riêng và hai bác sĩ; `PrivatePetDataTest` có hồ sơ/tiêm chủng/thông báo thật trong H2. Các test OrderFlow/TreatmentFlow/CartMutation bao phủ tài nguyên riêng tương ứng.
+- Cập nhật test cũ từ 403 sang 404 chỉ cho tài nguyên không thuộc người gọi; userId chéo vẫn 403. Mock repository được đổi theo query có ownership; không bỏ assertion nghiệp vụ.
+- Full Maven PASS sau sửa; frontend `tsc --noEmit`, lint, build PASS. Dependency được cài đúng lockfile audit qua npm ci, không sửa manifest. npm ci báo 1 advisory high có sẵn, ngoài phạm vi không cập nhật dependency.
+- **NEEDS DECISION:** lịch hẹn là dữ liệu theo người được phân công. Nếu sales cần toàn bộ lịch, cần quyền nghiệp vụ riêng; hiện giữ ADMIN là vai trò duy nhất xem toàn bộ.

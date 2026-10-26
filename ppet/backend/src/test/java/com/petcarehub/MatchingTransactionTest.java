@@ -66,6 +66,10 @@ class MatchingTransactionTest {
     @Test void legacyUrlCannotOverridePrincipalCustomer() throws Exception {
         mvc.perform(post("/api/v1/pet-matching/submit/9223372036854775807").with(user(UserDetailsImpl.build(customer)))
                 .contentType("application/json").content(json.writeValueAsString(request)))
+                .andExpect(status().isForbidden());
+        assertEquals(0,quizzes.count());
+        mvc.perform(post("/api/v1/pet-matching/submit").with(user(UserDetailsImpl.build(customer)))
+                .contentType("application/json").content(json.writeValueAsString(request)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(10));
         assertEquals(customer.getId(),quizzes.findAll().get(0).getCustomer().getId());
     }

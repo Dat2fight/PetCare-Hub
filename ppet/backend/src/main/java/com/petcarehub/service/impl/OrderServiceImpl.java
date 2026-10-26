@@ -54,8 +54,10 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderDTO getOrderById(Long id) {
-        Order order = orders.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        if (!ownership.hasRole("SALES_STAFF")) ownership.requireUser(order.getCustomer().getId());
+        Long currentId = ownership.userId();
+        Order order = (ownership.hasRole("ADMIN") || ownership.hasRole("SALES_STAFF")
+                ? orders.findById(id) : orders.findByIdAndCustomerId(id, currentId))
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
         return dto(order);
     }
     private void requireStaff() {
@@ -71,7 +73,10 @@ public class OrderServiceImpl implements OrderService {
         return dto(orders.save(o));
     }
     @Override public OrderDTO cancelOrder(Long id) {
-        Order o=locked(id); ownership.requireUser(o.getCustomer().getId()); state(o).cancel(o);
+        Long currentId = ownership.userId();
+        Order o = (ownership.hasRole("ADMIN") ? orders.findLockedById(id) : orders.findOwnedLockedById(id, currentId))
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        state(o).cancel(o);
         for (OrderItem item : o.getItems()) if (item.getProduct()!=null) {
             StockUpdateRequest stock = new StockUpdateRequest(); stock.setProductId(item.getProduct().getId()); stock.setQuantity(item.getQuantity()); stock.setReason("Hủy đơn " + o.getOrderNumber()); inventory.addStock(stock);
         }

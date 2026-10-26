@@ -49,8 +49,8 @@ class OrderFlowTest {
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(owner,"CUSTOMER"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].price").value(10))
                 .andExpect(jsonPath("$.shippingAddress").value(request.getShippingAddress())).andExpect(jsonPath("$.paymentStatus").value("PENDING"));
-        mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
-        mvc.perform(post("/api/v1/orders/{id}/cancel",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
+        mvc.perform(post("/api/v1/orders/{id}/cancel",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(other,"SALES_STAFF")))).andExpect(status().isOk());
     }
     @Test void transitionsAndPaidRevenueRemainConsistent() throws Exception {

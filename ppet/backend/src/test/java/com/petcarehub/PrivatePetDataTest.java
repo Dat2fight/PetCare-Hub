@@ -71,14 +71,15 @@ class PrivatePetDataTest {
     @Test void privatePetEndpointRequiresOwnerOrClinicalRole() throws Exception {
         String path = "/api/v1/pets/my-pets/"+mine.getId();
         mvc.perform(get(path)).andExpect(status().isUnauthorized());
-        mvc.perform(get(path).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
+        mvc.perform(get(path).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(get(path).with(user(caller(owner,"CUSTOMER")))).andExpect(status().isOk()).andExpect(jsonPath("$.ownerId").value(owner.getId()));
         for (String role : List.of("VETERINARIAN","ADMIN")) mvc.perform(get(path).with(user(caller(other,role)))).andExpect(status().isOk());
     }
     @Test void clinicalDetailsAndHistoriesRejectOtherCustomersAndPreserveClinicalAccess() throws Exception {
         for (String path : List.of("/api/v1/medical-records/"+record.getId(), "/api/v1/medical-records/pet/"+mine.getId(),
                 "/api/v1/vaccinations/"+vaccine.getId(), "/api/v1/vaccinations/pet/"+mine.getId())) {
-            mvc.perform(get(path).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
+            mvc.perform(get(path).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
+            mvc.perform(get(path)).andExpect(status().isUnauthorized());
             mvc.perform(get(path).with(user(caller(owner,"CUSTOMER")))).andExpect(status().isOk());
             for (String role : List.of("VETERINARIAN","ADMIN")) mvc.perform(get(path).with(user(caller(other,role)))).andExpect(status().isOk());
         }
@@ -88,7 +89,7 @@ class PrivatePetDataTest {
     @Test void notificationsStayStrictlyPerPrincipalIncludingAdmin() throws Exception {
         for (String role : List.of("CUSTOMER","ADMIN")) {
             mvc.perform(get("/api/v1/notifications/"+owner.getId()).with(user(caller(other,role)))).andExpect(status().isForbidden());
-            mvc.perform(put("/api/v1/notifications/"+notice.getId()+"/read").with(user(caller(other,role)))).andExpect(status().isForbidden());
+            mvc.perform(put("/api/v1/notifications/"+notice.getId()+"/read").with(user(caller(other,role)))).andExpect(status().isNotFound());
         }
         mvc.perform(get("/api/v1/notifications").with(user(caller(owner,"CUSTOMER"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.content[0].id").value(notice.getId()));

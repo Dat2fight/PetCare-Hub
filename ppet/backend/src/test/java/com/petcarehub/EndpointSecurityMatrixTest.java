@@ -52,7 +52,7 @@ class EndpointSecurityMatrixTest {
     static final Set<String> PRIVATE_READS = Set.of(
         "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
         "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage",
-        "GET /appointments", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
+        "GET /appointments", "GET /appointments/me", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
         "GET /medical-records/{id}", "GET /medical-records/pet/{petId}",
         "GET /vaccinations/{id}", "GET /vaccinations/pet/{petId}",
         "GET /treatments/{id}", "GET /treatments/record/{recordId}",

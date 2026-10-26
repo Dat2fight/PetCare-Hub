@@ -16,6 +16,10 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Appointment a where a.id = :id")
     java.util.Optional<Appointment> findLockedById(Long id);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Appointment a where a.id = :id and (:admin = true or a.customer.id = :userId or (:staff = true and a.staff.id = :userId))")
+    java.util.Optional<Appointment> findAccessibleLockedById(Long id, Long userId, boolean staff, boolean admin);
+    Page<Appointment> findByPetIdAndStaffId(Long petId, Long staffId, Pageable pageable);
     boolean existsByCustomerIdAndServiceIdAndStatus(Long customerId, Long serviceId, AppointmentStatus status);
     Page<Appointment> findByPetId(Long petId, Pageable pageable);
     Page<Appointment> findByPetIdAndCustomerId(Long petId, Long customerId, Pageable pageable);
