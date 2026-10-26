@@ -32,7 +32,7 @@ class PrivatePetDataTest {
     @Autowired VaccinationRepository vaccinations;
     @Autowired NotificationRepository notifications;
     User owner, other;
-    Pet mine, sale, unavailable;
+    Pet mine, sale, unavailable, reserved, sold;
     Species animal;
     MedicalRecord record;
     Vaccination vaccine;
@@ -53,6 +53,8 @@ class PrivatePetDataTest {
         mine = pets.save(Pet.builder().name("Private").species(animal).owner(owner).price(BigDecimal.ONE).build());
         sale = pets.save(Pet.builder().name("Sale").species(animal).price(BigDecimal.TEN).build());
         unavailable = pets.save(Pet.builder().name("Unavailable").species(animal).price(BigDecimal.ONE).availabilityStatus(AvailabilityStatus.UNAVAILABLE).build());
+        reserved = pets.save(Pet.builder().name("qa_Reserved").species(animal).price(BigDecimal.ONE).availabilityStatus(AvailabilityStatus.RESERVED).build());
+        sold = pets.save(Pet.builder().name("qa_Sold").species(animal).price(BigDecimal.ONE).availabilityStatus(AvailabilityStatus.SOLD).build());
         record = medical.save(MedicalRecord.builder().pet(mine).veterinarian(other).examinationDate(LocalDate.now()).findings("Private findings").build());
         vaccine = vaccinations.save(Vaccination.builder().pet(mine).veterinarian(other).vaccineName("Test vaccine").dateAdministered(LocalDate.now()).build());
         notice = notifications.save(Notification.builder().user(owner).title("Private").message("Private message").type(NotificationType.values()[0]).build());
@@ -64,9 +66,17 @@ class PrivatePetDataTest {
                 .andExpect(jsonPath("$.content[0].ownerId").doesNotExist()).andExpect(jsonPath("$.content[0].healthStatus").doesNotExist());
         mvc.perform(get("/api/v1/pets/"+sale.getId())).andExpect(status().isOk())
                 .andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.healthStatus").doesNotExist());
-        for (Pet p : List.of(mine,unavailable)) mvc.perform(get("/api/v1/pets/"+p.getId())).andExpect(status().isNotFound());
+        for (Pet p : List.of(mine,unavailable,sold)) mvc.perform(get("/api/v1/pets/"+p.getId())).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/pets").param("speciesId",animal.getId().toString()).param("availabilityStatus","UNAVAILABLE"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
+        mvc.perform(get("/api/v1/pets").param("speciesId",animal.getId().toString()).param("ownerId",owner.getId().toString())
+                .param("availability","SOLD").param("size","10000"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.size").value(100)).andExpect(jsonPath("$.totalElements").value(1));
+    }
+    @Test void reservedPetDetailIsPublicButNeverListedForSale() throws Exception {
+        mvc.perform(get("/api/v1/pets/"+reserved.getId())).andExpect(status().isOk())
+                .andExpect(jsonPath("$.availabilityStatus").value("RESERVED"))
+                .andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.healthStatus").doesNotExist());
     }
     @Test void privatePetEndpointRequiresOwnerOrClinicalRole() throws Exception {
         String path = "/api/v1/pets/my-pets/"+mine.getId();

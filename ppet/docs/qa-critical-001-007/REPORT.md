@@ -50,3 +50,11 @@ BUG-001: full Maven PASS, 193 test / 0 lỗi / 3 skip SQL Server; commit `4cced7
 - Test cũ tiêu điểm trực tiếp bằng CUSTOMER được cập nhật theo quyền ADMIN; test race dùng actor ADMIN để kiểm cơ chế khóa, không làm yếu kiểm dư/ledger.
 - **NEEDS DECISION:** endpoint spend cũ chỉ còn phục vụ điều chỉnh ADMIN, không tích hợp checkout vì chưa có chính sách tỷ giá/giảm giá/hủy đơn. Khi có chính sách, tạo workflow nội bộ checkout và cùng transaction, không mở lại tùy ý endpoint số dư cho khách.
 - **NEEDS DECISION dữ liệu:** không tự sửa lịch sử điểm cũ; cần đối soát REDEEM âm, số dư bất thường bằng truy vấn trong phụ lục trước khi điều chỉnh.
+
+### BUG-005
+
+- Base đã lọc owner=NULL + AVAILABLE tại query storefront và dùng PublicPetDTO; test thêm query ownerId/availability giả và size quá lớn đều giữ giới hạn. Chủ xem DTO riêng qua my-pets; tài khoản khác 404.
+- Phát hiện đường rò còn lại: quiz chọn mọi pet AVAILABLE dù có owner và trả PetDTO chứa healthStatus. Red: 3 ca fail (quiz vẫn xếp hạng pet có chủ, JSON có healthStatus, detail RESERVED bị 404).
+- Green: query quiz cũng ép owner NULL, MatchResultDTO.pet dùng PublicPetDTO; cập nhật TypeScript tương ứng. Không lưu xếp hạng pet đã có chủ. Chi tiết unowned RESERVED được xem với nhãn “Thú cưng đang được đặt”; danh sách vẫn chỉ AVAILABLE. SOLD/UNAVAILABLE/owned luôn 404 ở public detail.
+- **NEEDS DECISION:** enum thật là RESERVED, không có PENDING. Dùng RESERVED cho pet đang được đặt, không thêm enum/schema. Nhánh pet-purchase riêng phải giữ cùng quy tắc khi tích hợp; pet cá nhân owner khác null không bao giờ được public dù availability sai.
+- Full Maven và frontend tsc/lint/build PASS. Không sửa seed/schema. Chỉ đọc ID pet cần đối soát bằng SELECT, không thay đổi DB.

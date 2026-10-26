@@ -50,7 +50,7 @@ class MatchingTransactionTest {
                 if(stored.get(i-1).getOverallScore().equals(stored.get(i).getOverallScore()))
                     assertTrue(stored.get(i-1).getPet().getId()<stored.get(i).getPet().getId());
             }
-            if(i<10) assertEquals(stored.get(i).getPet().getId(),response.get(i).getPet().getId());
+            if(i<10) assertEquals(stored.get(i).getPet().getId(),response.get(i).getPet().id());
         }
     }
     @Test void resultFailureRollsBackQuizAndEvenAlreadyFlushedResult() {
@@ -72,5 +72,17 @@ class MatchingTransactionTest {
                 .contentType("application/json").content(json.writeValueAsString(request)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(10));
         assertEquals(customer.getId(),quizzes.findAll().get(0).getCustomer().getId());
+    }
+    @Test void matchingNeverRanksOrPersistsOwnedPetsEvenWhenAvailable() {
+        var owned=pets.findAll().get(0);owned.setOwner(customer);pets.saveAndFlush(owned);
+        service.matchPets(customer.getId(),request);
+        assertEquals(11,results.count());
+        assertTrue(results.findAll().stream().noneMatch(r->r.getPet().getId().equals(owned.getId())));
+    }
+    @Test void matchingUsesOnlyThePublicPetContract() throws Exception {
+        mvc.perform(post("/api/v1/pet-matching/submit").with(user(UserDetailsImpl.build(customer)))
+                .contentType("application/json").content(json.writeValueAsString(request)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$[0].pet.healthStatus").doesNotExist())
+                .andExpect(jsonPath("$[0].pet.ownerId").doesNotExist());
     }
 }

@@ -23,5 +23,6 @@ export const PetDetailPage = () => {
     <p className="my-4">{pet.speciesName} · {pet.breedName} · {pet.age == null ? 'Chưa có tuổi' : `${pet.age} tuổi`}</p>
     {pet.price != null && <p className="text-xl font-bold">{pet.price.toLocaleString('vi-VN')} ₫</p>}
     <p>{pet.description}</p>
+    {pet.availabilityStatus === 'RESERVED' && <p className="mt-4 font-semibold">Thú cưng đang được đặt</p>}
   </article>;
 };

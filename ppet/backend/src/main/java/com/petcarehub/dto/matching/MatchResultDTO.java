@@ -1,6 +1,6 @@
 package com.petcarehub.dto.matching;
 
-import com.petcarehub.dto.pet.PetDTO;
+import com.petcarehub.dto.pet.PublicPetDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MatchResultDTO {
-    private PetDTO pet;
+    private PublicPetDTO pet;
     private double score;
     private String explanation;
 }
