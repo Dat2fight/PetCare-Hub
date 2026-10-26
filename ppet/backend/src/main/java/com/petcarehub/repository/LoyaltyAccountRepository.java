@@ -7,5 +7,6 @@ import java.util.Optional;
 
 @Repository
 public interface LoyaltyAccountRepository extends JpaRepository<LoyaltyAccount, Long> {
+    Optional<LoyaltyAccount> findByIdAndCustomerId(Long id, Long customerId);
     Optional<LoyaltyAccount> findByCustomerId(Long customerId);
 }

@@ -41,3 +41,12 @@ BUG-001: full Maven PASS, 193 test / 0 lỗi / 3 skip SQL Server; commit `4cced7
 - Cập nhật test cũ từ 403 sang 404 chỉ cho tài nguyên không thuộc người gọi; userId chéo vẫn 403. Mock repository được đổi theo query có ownership; không bỏ assertion nghiệp vụ.
 - Full Maven PASS sau sửa; frontend `tsc --noEmit`, lint, build PASS. Dependency được cài đúng lockfile audit qua npm ci, không sửa manifest. npm ci báo 1 advisory high có sẵn, ngoài phạm vi không cập nhật dependency.
 - **NEEDS DECISION:** lịch hẹn là dữ liệu theo người được phân công. Nếu sales cần toàn bộ lịch, cần quyền nghiệp vụ riêng; hiện giữ ADMIN là vai trò duy nhất xem toàn bộ.
+
+### BUG-007
+
+- Base đã kiểm điểm dương/trần 1.000.000, chống tràn int, khóa `User` ổn định trong transaction trước đọc/tạo tài khoản điểm, ghi ledger cùng transaction. Hai lần trừ 80 từ 100 chỉ một thành công; dư 20, một EARN và một REDEEM. Đây là phần **ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ**.
+- Frontend LoyaltyPage chỉ GET account/history; checkout không gọi earn/spend. Không có redemption UI cần giữ. Các alias HTTP spend nay ADMIN-only giống add; guard cả filter/controller/service. CUSTOMER chỉ đọc tài khoản/lịch sử của mình. Giao dịch vẫn dùng số điểm dương, loại REDEEM biểu diễn chiều trừ.
+- Red `QaLoyaltyBoundaryTest`: 3/4 ca fail (CUSTOMER tự tiêu điểm, service bypass, history resource trả 403). Green full Maven PASS, cả concurrency. DTO request param thêm Positive/Max; service vẫn kiểm lại, số dư/ledger không đổi khi invalid hoặc thiếu điểm. History lọc accountId+customerId, trả 404 cho tài khoản điểm khác.
+- Test cũ tiêu điểm trực tiếp bằng CUSTOMER được cập nhật theo quyền ADMIN; test race dùng actor ADMIN để kiểm cơ chế khóa, không làm yếu kiểm dư/ledger.
+- **NEEDS DECISION:** endpoint spend cũ chỉ còn phục vụ điều chỉnh ADMIN, không tích hợp checkout vì chưa có chính sách tỷ giá/giảm giá/hủy đơn. Khi có chính sách, tạo workflow nội bộ checkout và cùng transaction, không mở lại tùy ý endpoint số dư cho khách.
+- **NEEDS DECISION dữ liệu:** không tự sửa lịch sử điểm cũ; cần đối soát REDEEM âm, số dư bất thường bằng truy vấn trong phụ lục trước khi điều chỉnh.

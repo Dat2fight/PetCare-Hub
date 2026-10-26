@@ -34,8 +34,7 @@ class EndpointSecurityMatrixTest {
         "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "PUT /appointments/{id}/status",
         "POST /reviews", "PUT /users/me", "POST /pets/my-pets", "PUT /pets/my-pets/{id}",
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
-        "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}",
-        "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
+        "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
         "POST /products", "PUT /products/{id}", "DELETE /products/{id}",
         "POST /categories", "PUT /categories/{id}", "DELETE /categories/{id}",
@@ -48,7 +47,7 @@ class EndpointSecurityMatrixTest {
         "POST /inventory/add", "POST /inventory/reduce", "POST /inventory/adjust",
         "PUT /reviews/{id}/approve", "POST /admin/staff", "PATCH /admin/users/{userId}/role",
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
-        "POST /loyalty/account/{userId}/add");
+        "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
         "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
         "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage",

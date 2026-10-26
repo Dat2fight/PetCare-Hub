@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
+@org.springframework.security.test.context.support.WithMockUser(roles="ADMIN")
 class LoyaltyLimitsTest {
     @Autowired MockMvc mvc;
     @Autowired LoyaltyService loyalty;
@@ -35,7 +36,7 @@ class LoyaltyLimitsTest {
     void invalidPointsReturn400WithoutMutation(int points) throws Exception {
         mvc.perform(post("/api/v1/loyalty/account/1/add").with(user(caller("ADMIN")))
                 .param("points",String.valueOf(points)).param("description","test")).andExpect(status().isBadRequest());
-        mvc.perform(post("/api/v1/loyalty/account/spend").with(user(caller("CUSTOMER")))
+        mvc.perform(post("/api/v1/loyalty/account/spend").with(user(caller("ADMIN")))
                 .param("points",String.valueOf(points)).param("description","test")).andExpect(status().isBadRequest());
         verifyNoInteractions(accounts, transactions);
     }
