@@ -23,14 +23,18 @@ public class OrderServiceImpl implements OrderService {
     private final UserRepository users;
     private final InventoryService inventory;
     private final Ownership ownership;
+    private final CartRepository carts;
 
     @Override
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
     public OrderDTO createOrder(OrderCreateRequest request) {
         Long customerId = ownership.userId();
+        if (request.getShippingAddress() == null || request.getShippingAddress().isBlank() || request.getShippingAddress().length() > 2000)
+            throw new BadRequestException("Thông tin giao hàng là bắt buộc, tối đa 2000 ký tự");
         if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
             throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
         if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
-        for (OrderItemDTO item : request.getItems()) if (item == null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
+        for (OrderItemDTO item : request.getItems()) if (item == null || item.getPetId() != null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ; phiên bản này chưa hỗ trợ mua thú cưng");
         Order order = Order.builder().customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
                 .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
                 .paymentMethod("COD").shippingAddress(request.getShippingAddress()).build();
@@ -39,13 +43,27 @@ public class OrderServiceImpl implements OrderService {
         for (OrderItemDTO item : request.getItems().stream().sorted(java.util.Comparator.comparing(OrderItemDTO::getProductId)).toList()) {
             if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
             Product product = products.findById(item.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
-            if (!Boolean.TRUE.equals(product.getActive())) throw new BadRequestException("Sản phẩm đã ngừng bán");
+            if (!Boolean.TRUE.equals(product.getActive())) throw new ResourceNotFoundException("Sản phẩm không tồn tại hoặc đã ngừng bán");
             inventory.reduceStock(product.getId(), item.getQuantity());
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
             total = total.add(subtotal);
         }
         order.setSubtotal(total); order.setTotalAmount(total);
+        // Keep the inventory -> customer lock order used by cart/stock mutations.
+        users.findLockedById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        carts.findByCustomerId(customerId).ifPresent(cart -> {
+            java.util.Map<Long, Long> purchased = new java.util.HashMap<>();
+            request.getItems().forEach(item -> purchased.merge(item.getProductId(), item.getQuantity().longValue(), Math::addExact));
+            for (CartItem item : new java.util.ArrayList<>(cart.getItems())) {
+                if (item.getProduct() == null) continue;
+                long quantity = purchased.getOrDefault(item.getProduct().getId(), 0L);
+                if (quantity == 0) continue;
+                if (quantity >= item.getQuantity()) cart.removeItem(item);
+                else item.setQuantity(item.getQuantity() - (int) quantity);
+            }
+            carts.saveAndFlush(cart);
+        });
         return dto(orders.save(order));
     }
     private Order locked(Long id) {

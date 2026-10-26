@@ -85,6 +85,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/v1/loyalty/account/spend", "/api/v1/loyalty/account/{userId}/spend").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/v1/orders/{id}/confirm", "/api/v1/orders/{id}/process", "/api/v1/orders/{id}/ship", "/api/v1/orders/{id}/deliver")
                             .hasAnyRole("ADMIN", "SALES_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/auth/me", "/api/v1/pets/my-pets", "/api/v1/pets/my-pets/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pets/**").permitAll()

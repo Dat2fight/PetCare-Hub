@@ -28,7 +28,8 @@ class CheckoutPersistenceTest {
     @Autowired OrderService service;
     @Test void persistsServerPriceReservesAndRestoresStock() {
         User customer = users.save(User.builder().username("checkout").email("checkout@example.test").passwordHash("unused").firstName("A").lastName("B").build());
-        var principal = UserDetailsImpl.build(customer);
+        var principal = new UserDetailsImpl(customer.getId(),customer.getUsername(),customer.getEmail(),"unused",
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_CUSTOMER")));
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
         try {
             var category = categories.save(ProductCategory.builder().name("Food").build());

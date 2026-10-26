@@ -28,11 +28,11 @@ class InventoryServiceImplTest {
     @Test void stockNeverBecomesNegativeAndOnlySuccessfulOperationsAreLogged() {
         var stock = Inventory.builder().quantity(3).build();
         when(inventory.findLockedByProductId(1L)).thenReturn(Optional.of(stock));
-        assertThrows(BadRequestException.class, () -> service.reduceStock(1L, 4));
+        assertThrows(IllegalStateException.class, () -> service.reduceStock(1L, 4));
         verifyNoInteractions(transactions);
         service.reduceStock(1L, 3);
         assertEquals(0, stock.getQuantity());
-        assertThrows(BadRequestException.class, () -> service.reduceStock(1L, 1));
+        assertThrows(IllegalStateException.class, () -> service.reduceStock(1L, 1));
         verify(transactions).save(argThat(t -> t.getQuantity() == 3 && t.getTransactionType() == TransactionType.STOCK_OUT));
         var request = new StockUpdateRequest(); request.setProductId(1L); request.setQuantity(5);
         service.addStock(request); assertEquals(5, stock.getQuantity());

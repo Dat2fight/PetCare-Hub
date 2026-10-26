@@ -4,6 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
 public class OrderCreateRequest {
     private Long userId;
     @jakarta.validation.Valid

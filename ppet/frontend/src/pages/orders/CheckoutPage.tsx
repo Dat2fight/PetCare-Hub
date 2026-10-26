@@ -9,7 +9,10 @@ export const CheckoutPage = () => {
  const submitting=useRef(false);const [submitError,setSubmitError]=useState('');
  useEffect(() => {const controller=new AbortController(); apiClient.get('/cart',{signal:controller.signal}).then(({data})=>setItems(data.items || [])).catch(()=>{if(!controller.signal.aborted)setError(true);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[]);
  const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(submitting.current || !items.length)return;submitting.current=true;setBusy(true);setSubmitError('');const data=new FormData(e.currentTarget);
-  try{const response=await apiClient.post('/orders',{shippingAddress:String(data.get('shippingAddress') || '').trim(),paymentMethod:data.get('paymentMethod'),items:items.map(i=>({productId:i.productId,quantity:i.quantity}))});toast.success('Đã đặt đơn hàng COD');navigate(`/orders/${response.data.id}`,{replace:true});}
+  try{const response=await apiClient.post('/orders',{shippingAddress:String(data.get('shippingAddress') || '').trim(),paymentMethod:data.get('paymentMethod'),items:items.map(i=>({productId:i.productId,quantity:i.quantity}))});
+   const orderId: unknown=response.data?.id;
+   if(typeof orderId!=='number' || !Number.isSafeInteger(orderId) || orderId<=0) throw new Error('Phản hồi đơn hàng không hợp lệ');
+   toast.success('Đã đặt đơn hàng COD');navigate(`/orders/${orderId}`,{replace:true});}
   catch(error){const message=isAxiosError(error) && typeof error.response?.data?.message==='string' ? error.response.data.message : 'Không đặt được đơn hàng. Kiểm tra danh sách đơn nếu kết nối bị gián đoạn trước khi thử lại.';setSubmitError(message);toast.error(message);}finally{submitting.current=false;setBusy(false);}
  };
  if(loading)return <p className="p-8">Đang tải giỏ hàng…</p>;if(error)return <div role="alert" className="p-8">Không tải được giỏ hàng. <Link to="/cart">Quay lại giỏ hàng</Link></div>;

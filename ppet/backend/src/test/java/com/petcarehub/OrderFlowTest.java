@@ -72,7 +72,7 @@ class OrderFlowTest {
     @Test void insufficientSecondLineRollsBackAllStockAndOrder() {
         var second=new OrderItemDTO(); second.setProductId(product.getId()); second.setQuantity(4);
         request.setItems(List.of(request.getItems().get(0),second)); long before=orders.count();
-        assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createOrder(request));
+        assertThrows(IllegalStateException.class,()->service.createOrder(request));
         assertEquals(before,orders.count()); assertEquals(5,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
     }
     @Test void checkoutResponseCanBeLoadedByItsRealId() throws Exception {

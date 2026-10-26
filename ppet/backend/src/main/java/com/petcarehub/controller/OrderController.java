@@ -25,6 +25,7 @@ public class OrderController {
     }
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<OrderDTO> createOrder(@jakarta.validation.Valid @RequestBody OrderCreateRequest request) {
         return ResponseEntity.ok(orderService.createOrder(request));
     }
