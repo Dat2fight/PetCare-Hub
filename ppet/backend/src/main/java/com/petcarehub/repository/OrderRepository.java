@@ -16,9 +16,9 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select o from Order o where o.id = :id and o.customer.id = :customerId")
     Optional<Order> findOwnedLockedById(Long id, Long customerId);
-    String REVENUE_FILTER = " o.paymentStatus = com.petcarehub.enums.PaymentStatus.COMPLETED and o.status <> com.petcarehub.enums.OrderStatus.CANCELLED and o.createdAt >= :from and o.createdAt < :to";
+    String REVENUE_FILTER = " o.paymentStatus = com.petcarehub.enums.PaymentStatus.COMPLETED and o.status <> com.petcarehub.enums.OrderStatus.CANCELLED and (o.paymentMethod is null or o.paymentMethod <> 'COD' or o.status = com.petcarehub.enums.OrderStatus.DELIVERED) and o.paidAt >= :from and o.paidAt < :to";
     interface RevenuePeriod { Integer getYear(); Integer getMonth(); java.math.BigDecimal getRevenue(); long getCount(); }
-    @org.springframework.data.jpa.repository.Query("select year(o.createdAt) as year, month(o.createdAt) as month, sum(o.totalAmount) as revenue, count(o) as count from Order o where" + REVENUE_FILTER + " group by year(o.createdAt), month(o.createdAt) order by year(o.createdAt), month(o.createdAt)")
+    @org.springframework.data.jpa.repository.Query("select year(o.paidAt) as year, month(o.paidAt) as month, coalesce(sum(o.totalAmount), 0) as revenue, count(o) as count from Order o where" + REVENUE_FILTER + " group by year(o.paidAt), month(o.paidAt) order by year(o.paidAt), month(o.paidAt)")
     java.util.List<RevenuePeriod> revenueByMonth(LocalDateTime from, LocalDateTime to);
     interface RevenueTotal { java.math.BigDecimal getRevenue(); long getCount(); }
     @org.springframework.data.jpa.repository.Query("select coalesce(sum(o.totalAmount), 0) as revenue, count(o) as count from Order o where" + REVENUE_FILTER)

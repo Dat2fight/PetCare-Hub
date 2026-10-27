@@ -45,3 +45,25 @@
 - ID không phải số nguyên dương an toàn trả màn 404, không request; reset theo route ID và AbortController chặn response cũ. API qua petManagementService (service hiện có, không tạo bản trùng petService). 404 không có retry; lỗi mạng/5xx có retry. Chỉ dùng PublicPetDTO.
 - Không có mockPets trong src. Public detail owned/SOLD vẫn404 theo BUG-005; RESERVED hiển thị đang đặt. NEEDS DECISION: mua pet chưa tích hợp, nút disabled aria-disabled và Sắp ra mắt; không xây order pet trong bug này.
 - BUG-008 commit `c2110b6`; backend 206 tests, 3 skipped, không lỗi. Một test bổ sung đã phát hiện ownerId chưa ignored (400), sửa DTO rồi toàn bộ PASS.
+
+## BUG-010
+
+- ĐÃ SỬA phần còn thiếu: SUM/COUNT SQL đã có từ audit, nhưng COD chưa giao vẫn được tính nếu payment COMPLETED; kỳ quá dài được nhận. 2 test FAIL trước. Thêm shared predicate paidAt, COD phải DELIVERED, payment COMPLETED, status khác CANCELLED. REFUNDED loại theo payment enum thật. Không có dữ liệu hoàn một phần.
+- Kỳ mặc định đầu tháng đến hôm nay Asia/Ho_Chi_Minh, inclusive tối đa366 ngày; query `[from,to+1)`; ngày đảo/sai/ngoài hỗ trợ400. ADMIN guard ở controller/filter/service. Dashboard totalOrders=lifetime; revenue-report totalOrders=đơn đủ tiêu chuẩn doanh thu trong kỳ.
+- Thêm nullable paid_at và migration004 riêng, KHÔNG chạy SQL. COD delivery ghi thời điểm thu tiền theo chính sách hiện có “giao đồng thời thu tiền”. NEEDS DECISION: triển khai migration trước ứng dụng; đối soát ngày thanh toán đơn cũ để backfill riêng. Không lấy created_at/updated_at giả làm ngày thanh toán; đơn legacy thiếu ngày chưa tính. Nếu cần xác nhận thu tiền riêng COD thì phải bổ sung workflow khác.
+- Test fixture paid100.25+49.75=150, pending/cancelled/refunded/out-of-period/legacy-null loại; ranh giới00:00 và23:59:59; kỳ rỗng0; hai báo cáo khớp. Có đơn item PET+PRODUCT để kiểm không NPE. RevenueRepositoryTest cũ bổ sung paidAt theo định nghĩa mới; lỗi fixture thiếu category đã sửa.
+- Không có frontend admin dashboard consumer để cập nhật. API docs mô tả rõ kỳ và định nghĩa.
+- SQL đối soát đề xuất (chỉ tài liệu, không chạy):
+
+```sql
+DECLARE @from datetime2 = '2026-10-01', @until datetime2 = '2026-11-01';
+SELECT COALESCE(SUM(total_amount),0) AS old_unfiltered FROM orders;
+SELECT COALESCE(SUM(total_amount),0) AS recognized, COUNT(*) AS recognized_orders
+FROM orders WHERE payment_status='COMPLETED' AND status<>'CANCELLED'
+AND (payment_method IS NULL OR payment_method<>'COD' OR status='DELIVERED')
+AND paid_at>=@from AND paid_at<@until;
+SELECT id, order_number, total_amount FROM orders
+WHERE payment_status='COMPLETED' AND paid_at IS NULL;
+```
+
+- BUG-009 commit `c6f5bc0`.

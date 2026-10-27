@@ -22,11 +22,11 @@ class RevenueRepositoryTest {
         int i = 0;
         for (PaymentStatus payment : PaymentStatus.values()) {
             Order order = Order.builder().customer(customer).orderNumber("REV-" + i++).status(OrderStatus.DELIVERED).paymentStatus(payment).subtotal(BigDecimal.TEN).totalAmount(BigDecimal.TEN).build();
-            em.persist(order);
+            order.setPaidAt(LocalDateTime.now()); em.persist(order);
         }
         em.persist(Order.builder().customer(customer).orderNumber("CANCELLED").status(OrderStatus.CANCELLED).paymentStatus(PaymentStatus.COMPLETED).subtotal(BigDecimal.TEN).totalAmount(BigDecimal.TEN).build());
         Order previous=Order.builder().customer(customer).orderNumber("PREVIOUS").status(OrderStatus.DELIVERED).paymentStatus(PaymentStatus.COMPLETED).subtotal(BigDecimal.ONE).totalAmount(BigDecimal.ONE).build();
-        em.persist(previous); em.flush();
+        previous.setPaidAt(LocalDateTime.now().minusMonths(2)); em.persist(previous); em.flush();
         var earlier=LocalDateTime.now().minusMonths(2);
         em.getEntityManager().createNativeQuery("update orders set created_at=:date where id=:id").setParameter("date",earlier).setParameter("id",previous.getId()).executeUpdate();
         var periods=orders.revenueByMonth(earlier.minusDays(1),LocalDateTime.now().plusDays(1));

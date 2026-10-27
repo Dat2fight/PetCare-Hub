@@ -87,7 +87,10 @@ public class OrderServiceImpl implements OrderService {
     @Override public OrderDTO deliverOrder(Long id) {
         requireStaff(); Order o=locked(id); state(o).deliver(o);
         // NEEDS DECISION: COD is collected on delivery; no online payment claim is made.
-        if ("COD".equals(o.getPaymentMethod())) o.setPaymentStatus(PaymentStatus.COMPLETED);
+        if ("COD".equals(o.getPaymentMethod())) {
+            o.setPaymentStatus(PaymentStatus.COMPLETED);
+            o.setPaidAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
+        }
         return dto(orders.save(o));
     }
     @Override public OrderDTO cancelOrder(Long id) {

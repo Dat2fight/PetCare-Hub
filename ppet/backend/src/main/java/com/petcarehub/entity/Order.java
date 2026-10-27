@@ -57,6 +57,10 @@ public class Order extends BaseEntity {
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
+    // Local business time in Asia/Ho_Chi_Minh; legacy unknown dates remain null.
+    @Column(name = "paid_at")
+    private java.time.LocalDateTime paidAt;
+
     @Column(columnDefinition = "TEXT")
     private String notes;
 

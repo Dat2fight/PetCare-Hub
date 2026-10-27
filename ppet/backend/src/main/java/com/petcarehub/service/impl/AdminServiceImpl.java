@@ -31,12 +31,14 @@ public class AdminServiceImpl implements AdminService {
     private final RoleRepository roleRepository;
 
     @Override
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public DashboardSummaryDTO getDashboardSummary(java.time.LocalDate from, java.time.LocalDate to) {
         long totalUsers = userRepository.count();
         long totalOrders = orderRepository.count();
         long totalPets = petRepository.count();
 
-        BigDecimal totalRevenue = revenue(from, to).getRevenue();
+        var period = period(from, to);
+        BigDecimal totalRevenue = orderRepository.summarizeRevenue(period.start(), period.end()).getRevenue();
 
         return DashboardSummaryDTO.builder()
                 .totalUsers(totalUsers)
@@ -47,25 +49,28 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to) {
-        var summary = revenue(from, to);
-        LocalDate end = to == null ? LocalDate.now() : to;
-        LocalDate start = from == null ? end.withDayOfMonth(1) : from;
+        var period = period(from, to);
+        var summary = orderRepository.summarizeRevenue(period.start(), period.end());
 
         return RevenueReportDTO.builder()
-                .reportDate(LocalDate.now())
-                .periods(orderRepository.revenueByMonth(start.atStartOfDay(), end.plusDays(1).atStartOfDay()))
+                .reportDate(LocalDate.now(REPORT_ZONE))
+                .periods(orderRepository.revenueByMonth(period.start(), period.end()))
                 .totalOrders(summary.getCount())
                 .totalRevenue(summary.getRevenue())
                 .build();
     }
 
-    private OrderRepository.RevenueTotal revenue(LocalDate from, LocalDate to) {
-        LocalDate end = to == null ? LocalDate.now() : to;
+    private static final java.time.ZoneId REPORT_ZONE = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
+    private record Period(java.time.LocalDateTime start, java.time.LocalDateTime end) {}
+    private Period period(LocalDate from, LocalDate to) {
+        LocalDate end = to == null ? LocalDate.now(REPORT_ZONE) : to;
         LocalDate start = from == null ? end.withDayOfMonth(1) : from;
         if (start.isAfter(end)) throw new BadRequestException("Ngày bắt đầu không được sau ngày kết thúc");
-        // NEEDS DECISION: no paidAt/partial refund fields; use createdAt and exclude fully refunded payments.
-        return orderRepository.summarizeRevenue(start.atStartOfDay(), end.plusDays(1).atStartOfDay());
+        if (java.time.temporal.ChronoUnit.DAYS.between(start, end) >= 366 || start.getYear() < 1 || end.getYear() > 9998)
+            throw new BadRequestException("Kỳ báo cáo tối đa 366 ngày, năm từ 1 đến 9998");
+        return new Period(start.atStartOfDay(), end.plusDays(1).atStartOfDay());
     }
 
     @Override
