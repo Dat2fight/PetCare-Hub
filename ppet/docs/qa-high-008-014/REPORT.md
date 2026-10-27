@@ -67,3 +67,13 @@ WHERE payment_status='COMPLETED' AND paid_at IS NULL;
 ```
 
 - BUG-009 commit `c6f5bc0`.
+
+## BUG-012
+
+- ĐÃ SỬA; Chrome headless đo 208 trường hợp trước/sau (11 trang × 8 viewport × guest/customer, thêm4 role ×8 viewport trên home). Chi tiết bảng tại RESPONSIVE.md và JSON before/after. Guest route bảo vệ chuyển login; customer render trang thật với API fixture; không gọi DB dev. Sau sửa 208/208 không tràn.
+- Nguyên nhân Header: cụm right icons/auth luôn hiện, logo shrink-0, tên/badge không giới hạn; 360px guest411, authenticated528, tablet768→852. Mobile giờ logo/cart/menu; search/auth/nav trong panel; tablet nav hàng riêng, desktop đủ chức năng. Bỏ badge giỏ hàng giả “3”. Search hoạt động theo keyword và đồng bộ ProductList khi URL đổi.
+- Menu aria-expanded/controls/label, Esc đóng/trả focus, focus đầu panel khi mở, đóng khi đổi route/chọn link/resize; không khóa body scroll. Target≥44px. Account menu desktop dùng details keyboard-accessible; tên truncate/badge99+.
+- Phép đo tìm thêm checkout select gây 320→334; giới hạn width/min-width tại nguyên nhân, không che overflow toàn trang. Input chung nối label/id để modal và các form truy cập được.
+- check-qa-ui.cjs PASS trên Chrome: menu/Esc/focus/navigation/touch, 404/invalid pet ID không gọi API, protected redirect, login401 giữ form, quick add chọn pet/giữ slot, slot failure không fallback. Browser data hoàn toàn fixture; chưa phải E2E với SQL Server.
+- Backend regression PASS; TypeScript/lint/build PASS. Có lỗi lint ở script mới do global window dư; đã xóa, 0 lỗi/0 cảnh báo.
+- BUG-010 commit `59f36bb`, backend210 tests/3 skipped; sửa fixture category/SKU bắt buộc, không thay logic để nới test.

@@ -16,6 +16,7 @@ export const ProductListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [searchTerm, setSearchTerm] = useState(searchParams.get('keyword') || '');
   const keyword = searchParams.get('keyword') || '';
+  useEffect(() => { setSearchTerm(keyword); }, [keyword]);
   const page = Math.max(0, Number(searchParams.get('page')) || 0);
   const [totalPages, setTotalPages] = useState(0);
   const [totalElements, setTotalElements] = useState(0);

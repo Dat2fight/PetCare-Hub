@@ -20,7 +20,7 @@ export const CheckoutPage = () => {
  {items.map(i=><p key={i.id}>{i.productName} × {i.quantity}: {(i.price*i.quantity).toLocaleString('vi-VN')} ₫</p>)}
  <p className="font-bold">Tổng: {items.reduce((sum,i)=>sum+i.price*i.quantity,0).toLocaleString('vi-VN')} ₫</p>
  <label>Người nhận, số điện thoại và địa chỉ giao hàng <textarea name="shippingAddress" required maxLength={2000} className="block border rounded w-full p-3"/></label>
- <label>Phương thức thanh toán <select name="paymentMethod" className="block border rounded p-3"><option value="COD">Thanh toán khi nhận hàng (COD)</option></select></label>
+ <label className="min-w-0">Phương thức thanh toán <select name="paymentMethod" className="block w-full min-w-0 max-w-full border rounded p-3"><option value="COD">Thanh toán khi nhận hàng (COD)</option></select></label>
  {submitError && <p role="alert" className="text-red-600">{submitError} <Link to="/orders">Xem đơn hàng</Link></p>}
  <button disabled={busy} className="bg-primary-600 text-white p-3 rounded-xl">{busy?'Đang đặt…':'Đặt hàng'}</button></form>}</div>;
 };
