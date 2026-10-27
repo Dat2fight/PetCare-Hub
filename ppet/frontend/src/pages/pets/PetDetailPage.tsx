@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import apiClient from '../../api/client';
-import { PublicPetDTO } from '../../services/petManagementService';
+import { PublicPetDTO, petManagementService } from '../../services/petManagementService';
 
 export const PetDetailPage = () => {
   const { id } = useParams();
@@ -9,14 +8,19 @@ export const PetDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
+  const [loadedId, setLoadedId] = useState(id);
+  const [notFound, setNotFound] = useState(false);
+  const validId = !!id && /^[1-9]\d*$/.test(id) && Number.isSafeInteger(Number(id));
   useEffect(() => {
-    const controller = new AbortController(); setPet(null); setError(''); setLoading(true);
-    apiClient.get<PublicPetDTO>(`/pets/${id}`, { signal: controller.signal }).then(({ data }) => setPet(data))
-      .catch(error => { if (!controller.signal.aborted) setError(error.response?.status === 404 ? 'Không tìm thấy thú cưng' : 'Không thể tải thông tin thú cưng'); })
+    const controller = new AbortController(); setPet(null); setError(''); setLoading(true); setNotFound(false); setLoadedId(id);
+    if (!validId) { setNotFound(true); setLoading(false); return () => controller.abort(); }
+    petManagementService.getPublicPet(Number(id), controller.signal).then(data => { if (!controller.signal.aborted) setPet(data); })
+      .catch(error => { if (!controller.signal.aborted) { if (error.response?.status === 404) setNotFound(true); else setError('Không thể tải thông tin thú cưng'); } })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [id, retry]);
-  if (loading) return <p className="p-8">Đang tải…</p>;
+  }, [id, retry, validId]);
+  if (!validId || (loadedId === id && notFound)) return <div role="alert" className="p-8">Không tìm thấy thú cưng. <Link to="/pets">Quay lại danh sách</Link></div>;
+  if (loading || loadedId !== id) return <p className="p-8">Đang tải…</p>;
   if (error || !pet) return <div role="alert" className="p-8">{error || 'Không tìm thấy thú cưng'} <button onClick={() => setRetry(retry + 1)}>Thử lại</button> <Link to="/pets">Danh sách thú cưng</Link></div>;
   return <article className="max-w-4xl mx-auto p-8 bg-white rounded-2xl my-8"><Link to="/pets">Thú cưng</Link><h1 className="text-3xl font-bold my-4">{pet.name}</h1>
     {pet.imageUrl && <img src={pet.imageUrl} alt={pet.name} className="w-full max-h-96 object-contain" />}
@@ -24,5 +28,9 @@ export const PetDetailPage = () => {
     {pet.price != null && <p className="text-xl font-bold">{pet.price.toLocaleString('vi-VN')} ₫</p>}
     <p>{pet.description}</p>
     {pet.availabilityStatus === 'RESERVED' && <p className="mt-4 font-semibold">Thú cưng đang được đặt</p>}
+    {/* NEEDS DECISION: integrate the pet purchase branch before enabling checkout. */}
+    <button disabled aria-disabled="true" className="mt-4 rounded-xl bg-gray-100 px-6 py-3 text-gray-600">
+      {pet.availabilityStatus === 'RESERVED' ? 'Đang được đặt' : pet.availabilityStatus === 'SOLD' ? 'Đã bán' : 'Đặt mua — Sắp ra mắt'}
+    </button>
   </article>;
 };

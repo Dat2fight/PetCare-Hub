@@ -48,6 +48,8 @@ export interface VaccinationDTO {
 }
 
 export const petManagementService = {
+    getPublicPet: async (id: number, signal?: AbortSignal): Promise<PublicPetDTO> =>
+        (await apiClient.get<PublicPetDTO>(`/pets/${id}`, { signal })).data,
     createMyPet: async (request: QuickPetCreateRequest): Promise<PetDTO> => (await apiClient.post<PetDTO>('/pets/my-pets', request)).data,
     getQuickPetSpecies: async (signal?: AbortSignal): Promise<QuickPetSpecies[]> => {
         const { data } = await apiClient.get<QuickPetSpecies[]>('/species', { signal });

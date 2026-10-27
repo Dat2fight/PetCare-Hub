@@ -38,3 +38,10 @@
 - Test H2 thật QaAppointmentScopeTest thêm: foreign/missing/store pet 404, thiếu petId 400, guest401, không ghi lịch khi thất bại; pet đúng chủ201, bỏ qua owner/customer giả. Test quick pet kiểm private storefront và cap.
 - API/DTO tài liệu cập nhật. Frontend TypeScript/lint/build PASS.
 - BUG-011 commit `f308893`.
+
+## BUG-009
+
+- ĐÃ SỬA phần còn thiếu; dữ liệu API thật và bỏ mock đã có. Test mới FAIL vì message 404 tiếng Anh; sửa tiếng Việt, full backend/frontend checks PASS.
+- ID không phải số nguyên dương an toàn trả màn 404, không request; reset theo route ID và AbortController chặn response cũ. API qua petManagementService (service hiện có, không tạo bản trùng petService). 404 không có retry; lỗi mạng/5xx có retry. Chỉ dùng PublicPetDTO.
+- Không có mockPets trong src. Public detail owned/SOLD vẫn404 theo BUG-005; RESERVED hiển thị đang đặt. NEEDS DECISION: mua pet chưa tích hợp, nút disabled aria-disabled và Sắp ra mắt; không xây order pet trong bug này.
+- BUG-008 commit `c2110b6`; backend 206 tests, 3 skipped, không lỗi. Một test bổ sung đã phát hiện ownerId chưa ignored (400), sửa DTO rồi toàn bộ PASS.
