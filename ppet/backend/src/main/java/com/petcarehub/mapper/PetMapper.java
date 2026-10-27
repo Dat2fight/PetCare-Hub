@@ -19,7 +19,7 @@ public final class PetMapper {
         dto.setAvailabilityStatus(pet.getAvailabilityStatus() == null ? null : pet.getAvailabilityStatus().name());
         dto.setOwnerId(pet.getOwner() == null ? null : pet.getOwner().getId());
         // NEEDS DECISION: prices are public only for unowned pets offered for sale.
-        dto.setPrice(pet.getOwner() == null && pet.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE ? pet.getPrice() : null);
+        dto.setPrice(pet.getOwner() == null && (pet.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE || pet.getAvailabilityStatus() == AvailabilityStatus.PENDING) ? pet.getPrice() : null);
         dto.setDescription(pet.getDescription()); dto.setImageUrl(pet.getImageUrl());
         dto.setCreatedAt(pet.getCreatedAt()); dto.setUpdatedAt(pet.getUpdatedAt());
         return dto;

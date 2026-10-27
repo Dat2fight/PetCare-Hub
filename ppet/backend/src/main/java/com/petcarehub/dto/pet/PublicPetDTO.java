@@ -8,8 +8,10 @@ public record PublicPetDTO(Long id, String name, Long speciesId, String speciesN
         Long breedId, String breedName, Integer age, LocalDate birthDate, BigDecimal price,
         String availabilityStatus, String description, String imageUrl) {
     public static PublicPetDTO from(PetDTO pet) {
-        // RESERVED is the existing enum for a pending reservation; owned/sold pets stay private.
         if (pet.getOwnerId() != null || !("AVAILABLE".equals(pet.getAvailabilityStatus()) || "RESERVED".equals(pet.getAvailabilityStatus())))
+        if ("SOLD".equals(pet.getAvailabilityStatus()))
+            return new PublicPetDTO(pet.getId(), "Thú cưng đã bán", null, null, null, null, null, null, null, "SOLD", null, null);
+        if (pet.getOwnerId() != null || !("AVAILABLE".equals(pet.getAvailabilityStatus()) || "PENDING".equals(pet.getAvailabilityStatus())))
             throw new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thú cưng đang bán");
         return new PublicPetDTO(pet.getId(), pet.getName(), pet.getSpeciesId(), pet.getSpeciesName(),
                 pet.getBreedId(), pet.getBreedName(), pet.getAge(), pet.getBirthDate(), pet.getPrice(),

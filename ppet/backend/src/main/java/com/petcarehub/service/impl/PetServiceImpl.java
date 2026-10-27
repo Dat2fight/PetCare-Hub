@@ -32,6 +32,35 @@ public class PetServiceImpl implements PetService {
     private final SpeciesRepository speciesRepository;
     private final BreedRepository breedRepository;
     private final com.petcarehub.repository.UserRepository userRepository;
+    private final com.petcarehub.security.Ownership ownership;
+    private final com.petcarehub.config.PersonalPetProperties personalPetProperties;
+
+    @Override
+    @Transactional
+    public PetDTO createMyPet(com.petcarehub.dto.pet.QuickPetCreateRequest request) {
+        Long ownerId = ownership.userId();
+        if (!ownership.hasRole("CUSTOMER") || java.util.stream.Stream.of("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN").anyMatch(ownership::hasRole))
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng được thêm thú cưng cá nhân");
+        if (request.getName() == null || request.getName().isBlank() || request.getName().length() > 100)
+            throw new com.petcarehub.exception.BadRequestException("name: Tên thú cưng phải có từ 1 đến 100 ký tự");
+        if (request.getAge() == null || request.getAge() < 0 || request.getAge() > 30)
+            throw new com.petcarehub.exception.BadRequestException("age: Tuổi phải từ 0 đến 30 năm");
+        if (request.getSpeciesId() == null) throw new com.petcarehub.exception.BadRequestException("speciesId: Vui lòng chọn loài");
+        Species species = speciesRepository.findById(request.getSpeciesId())
+                .orElseThrow(() -> new com.petcarehub.exception.BadRequestException("speciesId: Loài không hợp lệ"));
+        // Existing DB seeds use Dog/Cat or Chó (Dog)/Mèo (Cat). IDs are never fixed.
+        if (!java.util.Set.of("dog", "cat", "chó", "mèo", "chó (dog)", "mèo (cat)").contains(species.getName().strip().toLowerCase(java.util.Locale.ROOT)))
+            throw new com.petcarehub.exception.BadRequestException("speciesId: Chỉ hỗ trợ Chó hoặc Mèo");
+        // Lock the account before counting, so simultaneous requests cannot exceed the cap.
+        var owner = userRepository.findLockedById(ownerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        if (petRepository.countByOwnerId(ownerId) >= personalPetProperties.getMaxPersonalPets())
+            throw new IllegalStateException("Bạn đã đạt giới hạn " + personalPetProperties.getMaxPersonalPets() + " thú cưng cá nhân");
+        Pet pet = Pet.builder().name(request.getName().strip()).species(species).owner(owner)
+                .dateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()))
+                .price(java.math.BigDecimal.ZERO).healthStatus(com.petcarehub.enums.HealthStatus.HEALTHY)
+                .availabilityStatus(com.petcarehub.enums.AvailabilityStatus.UNAVAILABLE).build();
+        return mapToDTO(petRepository.save(pet));
+    }
 
     @Override
     @Transactional(readOnly = true)
@@ -102,8 +131,10 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public PetDTO updatePet(Long id, PetUpdateRequest request) {
-        Pet pet = petRepository.findById(id)
+        Pet pet = petRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + id));
+        if (pet.getReservedOrder() != null || pet.getAvailabilityStatus() == com.petcarehub.enums.AvailabilityStatus.PENDING)
+            throw new IllegalStateException("Thú cưng đang được giữ chỗ bởi đơn hàng");
 
         Species species = speciesRepository.findById(request.getSpeciesId())
                 .orElseThrow(() -> new ResourceNotFoundException("Species not found with id: " + request.getSpeciesId()));
@@ -137,8 +168,10 @@ public class PetServiceImpl implements PetService {
     @Override
     @Transactional
     public void deletePet(Long id) {
-        Pet pet = petRepository.findById(id)
+        Pet pet = petRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + id));
+        if (pet.getReservedOrder() != null || pet.getAvailabilityStatus() == com.petcarehub.enums.AvailabilityStatus.PENDING)
+            throw new IllegalStateException("Thú cưng đang được giữ chỗ bởi đơn hàng");
         petRepository.delete(pet);
     }
 

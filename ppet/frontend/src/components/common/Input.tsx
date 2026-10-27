@@ -14,6 +14,14 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       <div className="w-full">
         {label && (
           <label htmlFor={id} className="block text-sm font-medium text-gray-700 mb-1.5">
+  ({ label, error, icon, className = '', id, ...props }, ref) => {
+    const generatedId = useId();
+    const inputId = id || generatedId;
+    const errorId = `${inputId}-error`;
+    return (
+      <div className="w-full">
+        {label && (
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700 mb-1.5">
             {label}
           </label>
         )}
@@ -30,9 +38,12 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             } ${error ? 'border-red-300 text-red-900 placeholder-red-300 focus:ring-red-500 focus:border-red-500' : ''} ${className}`}
             {...props}
             id={id}
+            id={inputId}
+            aria-invalid={error ? true : props['aria-invalid']}
+            aria-describedby={[props['aria-describedby'], error ? errorId : null].filter(Boolean).join(' ') || undefined}
           />
         </div>
-        {error && <p className="mt-1.5 text-sm text-red-600">{error}</p>}
+        {error && <p id={errorId} className="mt-1.5 text-sm text-red-600">{error}</p>}
       </div>
     );
   }

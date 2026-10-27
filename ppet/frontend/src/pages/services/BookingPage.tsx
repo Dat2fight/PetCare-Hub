@@ -6,6 +6,7 @@ import { serviceService, Service } from '../../services/serviceService';
 import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
+import { QuickAddPetModal } from '../../components/pets/QuickAddPetModal';
 
 import { petManagementService, PetDTO } from '../../services/petManagementService';
 import { QuickAddPetModal } from '../../components/pets/QuickAddPetModal';
@@ -34,12 +35,23 @@ export const BookingPage: React.FC = () => {
       .finally(() => { if (!controller.signal.aborted) setPetsLoading(false); });
     return () => controller.abort();
   }, [petRetry]);
+  const [petsError, setPetsError] = useState(''); const [petsRetry, setPetsRetry] = useState(0);
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  useEffect(() => {
+    const controller = new AbortController(); setPetsLoading(true); setPetsError('');
+    petManagementService.getMyPets(controller.signal).then(data => {
+      if (!controller.signal.aborted) { setPets(data); setSelectedPet(current => data.find(pet => pet.id === current?.id) || data[0] || null); }
+    }).catch(() => { if (!controller.signal.aborted) setPetsError('Không tải được thú cưng của bạn.'); })
+      .finally(() => { if (!controller.signal.aborted) setPetsLoading(false); });
+    return () => controller.abort();
+  }, [petsRetry]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
+  const canAddPet = !!user?.roles.includes('CUSTOMER') && !user.roles.some(role => ['ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN'].includes(role));
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -75,7 +87,7 @@ export const BookingPage: React.FC = () => {
   }, [selectedDate, serviceId, retry]);
 
   const handleBooking = async () => {
-    if (!service || !selectedPet || !selectedTime || slotsLoading || slotError) return;
+    if (submitting || petsLoading || petsError || !service || !selectedPet || !selectedTime || slotsLoading || slotError) return;
     if (!isAuthenticated) {
       toast.error('Vui lòng đăng nhập để đặt lịch hẹn');
       navigate('/login');
@@ -119,6 +131,9 @@ export const BookingPage: React.FC = () => {
               {petsLoading ? <p>Đang tải thú cưng…</p> : petsError ? <p role="alert">Không tải được thú cưng. <Button onClick={() => setPetRetry(value => value + 1)}>Thử lại</Button></p> : pets.length === 0 ?
                 <div><p>Bạn chưa có thú cưng</p><Button onClick={() => setShowQuickAdd(true)}>Thêm nhanh thú cưng</Button></div> : null}
               <div className="flex gap-4 overflow-x-auto pb-2">
+              {petsLoading ? <p>Đang tải thú cưng…</p> : petsError ? <p role="alert">{petsError} <Button type="button" size="sm" variant="outline" onClick={() => setPetsRetry(value => value + 1)}>Thử lại</Button></p> : pets.length === 0 ?
+                <div className="space-y-3"><p>Bạn chưa có thú cưng</p>{canAddPet && <Button type="button" onClick={() => setQuickAddOpen(true)}>Thêm nhanh thú cưng</Button>}</div> : null}
+              {!petsLoading && !petsError && <div className="flex gap-4 overflow-x-auto pb-2">
                 {pets.map((pet) => (
                   <button
                     key={pet.id}
@@ -129,14 +144,17 @@ export const BookingPage: React.FC = () => {
                         : 'border-gray-200 hover:border-gray-300'
                     }`}
                   >
-                    <img src={pet.imageUrl} alt={pet.name} className="w-12 h-12 rounded-full object-cover mr-3" />
+                    {pet.imageUrl && <img src={pet.imageUrl} alt={pet.name} className="w-12 h-12 rounded-full object-cover mr-3" />}
                     <div>
                       <p className="font-bold text-gray-900">{pet.name}</p>
                       <p className="text-sm text-gray-500">{pet.breedName}</p>
                     </div>
                   </button>
                 ))}
-              </div>
+              </div>}
+              {quickAddOpen && <QuickAddPetModal onClose={() => setQuickAddOpen(false)} onCreated={pet => {
+                setPets(current => [...current, pet]); setSelectedPet(pet); setQuickAddOpen(false);
+              }} />}
             </div>
 
             {/* Date Selection */}
@@ -219,6 +237,7 @@ export const BookingPage: React.FC = () => {
                 </div>
                 
                 <Button onClick={handleBooking} disabled={submitting || petsLoading || petsError || slotsLoading || !selectedPet || !selectedTime || !!slotError} fullWidth>
+                <Button onClick={handleBooking} disabled={submitting || petsLoading || !!petsError || slotsLoading || !selectedPet || !selectedTime || !!slotError} fullWidth>
                   {submitting ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}
                 </Button>
                 <p className="text-xs text-gray-500 text-center mt-4">

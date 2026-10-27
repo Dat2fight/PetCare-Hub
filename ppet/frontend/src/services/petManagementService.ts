@@ -54,6 +54,13 @@ export const petManagementService = {
     getQuickPetSpecies: async (signal?: AbortSignal): Promise<QuickPetSpecies[]> => {
         const { data } = await apiClient.get<QuickPetSpecies[]>('/species', { signal });
         return data.filter(s => ['dog', 'cat', 'chó', 'mèo', 'chó (dog)', 'mèo (cat)'].includes(s.name.trim().toLowerCase()));
+    createMyPet: async (request: QuickPetCreateRequest): Promise<PetDTO> => {
+        return (await apiClient.post<PetDTO>('/pets/my-pets', { name: request.name, speciesId: request.speciesId, age: request.age })).data;
+    },
+    getQuickPetSpecies: async (signal?: AbortSignal): Promise<QuickPetSpecies[]> => {
+        const { data } = await apiClient.get<QuickPetSpecies[]>('/species', { signal });
+        // Match the existing SQL and Java seed names; never assume numeric IDs.
+        return data.filter(species => ['dog', 'cat', 'chó', 'mèo', 'chó (dog)', 'mèo (cat)'].includes(species.name.trim().toLowerCase()));
     },
     getMyPets: async (signal?: AbortSignal): Promise<PetDTO[]> => {
         const response = await apiClient.get<PetDTO[]>('/pets/my-pets', { signal });

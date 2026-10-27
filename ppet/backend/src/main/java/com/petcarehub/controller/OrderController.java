@@ -13,19 +13,15 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
-    private final com.petcarehub.repository.OrderRepository orders;
-    private final com.petcarehub.security.Ownership ownership;
 
     @GetMapping
     public org.springframework.data.domain.Page<OrderDTO> mine(org.springframework.data.domain.Pageable pageable) {
-        return orders.findByCustomerId(ownership.userId(), pageable).map(order -> {
-            OrderDTO dto = new OrderDTO(); dto.setId(order.getId()); dto.setUserId(order.getCustomer().getId());
-            dto.setStatus(order.getStatus().name()); dto.setTotalPrice(order.getTotalAmount().doubleValue()); return dto;
-        });
+        return orderService.getMyOrders(pageable);
     }
 
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
     public ResponseEntity<OrderDTO> createOrder(@jakarta.validation.Valid @RequestBody OrderCreateRequest request) {
         return ResponseEntity.ok(orderService.createOrder(request));
     }

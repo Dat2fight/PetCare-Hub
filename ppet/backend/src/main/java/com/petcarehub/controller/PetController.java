@@ -26,6 +26,9 @@ public class PetController {
     @PreAuthorize("hasRole('CUSTOMER')")
     public ResponseEntity<PetDTO> createMine(@Valid @RequestBody com.petcarehub.dto.pet.PersonalPetCreateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(personalPets.create(request));
+    @PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
+    public ResponseEntity<PetDTO> createMine(@Valid @RequestBody com.petcarehub.dto.pet.QuickPetCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(petService.createMyPet(request));
     }
     @PutMapping("/my-pets/{id}")
     public ResponseEntity<PetDTO> updateMine(@PathVariable Long id, @Valid @RequestBody PetUpdateRequest request) {
