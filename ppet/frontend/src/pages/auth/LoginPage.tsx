@@ -27,7 +27,9 @@ export const LoginPage: React.FC = () => {
       const res = await apiClient.post('/auth/login', { username, password });
       const token = res.data.token || res.data.accessToken;
       await login(token, res.data.user);
-      const from = location.state?.from;
+      let from = location.state?.from;
+      try { from ??= JSON.parse(sessionStorage.getItem('loginReturnTo') || 'null'); } catch { /* Ignore obsolete session data. */ }
+      sessionStorage.removeItem('loginReturnTo');
       navigate(from?.pathname && from.pathname.startsWith('/') && !from.pathname.startsWith('//') && !from.pathname.includes('\\') ? from.pathname + (from.search || '') : '/', { replace: true });
     } catch (err) {
       setError('Thông tin đăng nhập không chính xác');

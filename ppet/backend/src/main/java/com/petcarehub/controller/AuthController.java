@@ -43,7 +43,8 @@ public class AuthController {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
-        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        if (!(authentication.getPrincipal() instanceof UserDetailsImpl userDetails))
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Vui lòng đăng nhập");
         User user = userRepository.findByUsername(userDetails.getUsername()).orElseThrow();
         
         UserDTO userDTO = new UserDTO();

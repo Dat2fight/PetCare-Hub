@@ -31,6 +31,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private com.petcarehub.security.SecurityErrorHandler securityErrors;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -61,11 +64,9 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"status\":401,\"message\":\"Bạn cần đăng nhập\"}");
-                }))
+                .exceptionHandling(errors -> errors
+                    .authenticationEntryPoint((request, response, exception) -> securityErrors.unauthorized(request, response))
+                    .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
                     auth.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")

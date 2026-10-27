@@ -11,6 +11,6 @@ public record ErrorResponse(
         String correlationId
 ) {
     public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
-        this(timestamp, status, error, message, path, null);
+        this(timestamp, status, error, message, path, java.util.UUID.randomUUID().toString());
     }
 }

@@ -53,7 +53,8 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
+        if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl userPrincipal))
+            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Vui lòng đăng nhập");
 
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + properties.getExpirationMs());
