@@ -48,7 +48,7 @@ public class PetMatchingServiceImpl implements PetMatchingService {
         quiz.setDailyCareHours(java.math.BigDecimal.valueOf(request.getAvailableCareTime())); // API unit: hours per day.
         quiz.setCustomer(userRepository.findById(userId).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản")));
 
-        List<Pet> availablePets = petRepository.findByAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.AVAILABLE, org.springframework.data.domain.Pageable.unpaged()).getContent();
+        List<Pet> availablePets = petRepository.findByOwnerIsNullAndAvailabilityStatus(com.petcarehub.enums.AvailabilityStatus.AVAILABLE, org.springframework.data.domain.Pageable.unpaged()).getContent();
         List<ScoredPet> scored = new ArrayList<>();
 
         for (Pet pet : availablePets) {
@@ -72,7 +72,7 @@ public class PetMatchingServiceImpl implements PetMatchingService {
             result.setQuiz(quiz); result.setPet(item.pet()); result.setOverallScore((int) item.score());
             result.setExplanation(item.explanation()); result.setRank(i + 1);
             persisted.add(result);
-            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.mapper.PetMapper.toDTO(item.pet()), item.score(), item.explanation()));
+            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.dto.pet.PublicPetDTO.from(com.petcarehub.mapper.PetMapper.toDTO(item.pet())), item.score(), item.explanation()));
         }
         resultRepository.saveAll(persisted);
         return results;

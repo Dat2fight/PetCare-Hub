@@ -28,6 +28,12 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAllAppointments(pageable));
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<List<AppointmentDTO>> getMyAppointments(org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(appointmentService.getAppointmentsByUser(ownership.userId(), pageable));
+    }
+
+    /** Deprecated alias retained for existing clients; ownership is still mandatory. */
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AppointmentDTO>> getAppointmentsByUser(@PathVariable Long userId, org.springframework.data.domain.Pageable pageable) {
         ownership.requireUser(userId);

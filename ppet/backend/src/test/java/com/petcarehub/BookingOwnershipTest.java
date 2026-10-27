@@ -35,7 +35,7 @@ class BookingOwnershipTest {
     @Test void foreignPetCannotBeBookedEvenWithSpoofedCustomerId() throws Exception {
         var owner = new User(); owner.setId(2L);
         when(pets.findById(5L)).thenReturn(Optional.of(Pet.builder().owner(owner).build()));
-        mvc.perform(post("/api/v1/appointments").with(user(caller)).contentType("application/json").content(request())).andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/appointments").with(user(caller)).contentType("application/json").content(request())).andExpect(status().isNotFound());
         verify(users,never()).findById(2L); verifyNoInteractions(appointments);
         verify(pets,never()).findByOwnerId(any());
     }
@@ -45,7 +45,7 @@ class BookingOwnershipTest {
     }
     @Test void unownedStorePetCannotBeBooked() throws Exception {
         when(pets.findById(5L)).thenReturn(Optional.of(new Pet()));
-        mvc.perform(post("/api/v1/appointments").with(user(caller)).contentType("application/json").content(request())).andExpect(status().isForbidden());
+        mvc.perform(post("/api/v1/appointments").with(user(caller)).contentType("application/json").content(request())).andExpect(status().isNotFound());
         verifyNoInteractions(appointments);
     }
 }

@@ -66,7 +66,7 @@ public class InventoryServiceImpl implements InventoryService {
                 .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product: " + productId));
 
         if (inventory.getQuantity() < quantity) {
-            throw new BadRequestException("Không đủ tồn kho cho sản phẩm " + productId);
+            throw new IllegalStateException("Không đủ tồn kho cho sản phẩm " + productId);
         }
 
         inventory.setQuantity(inventory.getQuantity() - quantity);

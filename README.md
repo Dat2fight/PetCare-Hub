@@ -29,8 +29,6 @@ Không chạy script reset lên dữ liệu đang dùng. Không dùng mật kh�
 
 ## Kết quả kiểm chứng
 
-Ngày 19/10/2026, nhánh `fix/critical-jwt-secret`: backend và frontend chạy được; đăng ký/đăng nhập/me có token trả 200, me không token trả 401; trang sản phẩm hiển thị dữ liệu SQL Server. Maven: 172 test, 169 pass, 3 skip. Frontend build và lint pass.
-
 Có một thay đổi cấu hình Vite tối thiểu để SockJS chạy trong dev. Database hiện có chưa áp dụng migration 001–003; chưa kiểm chứng luồng đặt lịch qua UI. Chi tiết ở [báo cáo chạy local](ppet/docs/local-run-20261019.md).
 
 ## Tài liệu liên quan

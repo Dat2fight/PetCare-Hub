@@ -53,8 +53,8 @@ class TreatmentFlowTest {
         mvc.perform(put("/api/v1/treatments/{id}",id).with(user(caller(other,"ADMIN")))
                 .contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isOk()).andExpect(jsonPath("$.medicine").value("Updated"));
         mvc.perform(get("/api/v1/treatments/{id}",id).with(user(caller(owner,"CUSTOMER")))).andExpect(status().isOk());
-        mvc.perform(get("/api/v1/treatments/{id}",id).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
-        mvc.perform(get("/api/v1/treatments/record/{id}",record.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/treatments/{id}",id).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
+        mvc.perform(get("/api/v1/treatments/record/{id}",record.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(delete("/api/v1/treatments/{id}",id).with(user(caller(owner,"CUSTOMER")))).andExpect(status().isForbidden());
         mvc.perform(delete("/api/v1/treatments/{id}",id).with(user(caller(other,"ADMIN")))).andExpect(status().isNoContent());
         assertFalse(treatments.existsById(id));
@@ -64,7 +64,7 @@ class TreatmentFlowTest {
         var treatment=service.createTreatment(request);
         principal=caller(other,"CUSTOMER");SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal,null,principal.getAuthorities()));
         request.setMedicalRecordId(foreignRecord.getId());
-        assertThrows(org.springframework.security.access.AccessDeniedException.class,()->service.updateTreatment(treatment.getId(),request));
+        assertThrows(com.petcarehub.exception.ResourceNotFoundException.class,()->service.updateTreatment(treatment.getId(),request));
     }
     @Test void invalidDatesAndMissingRecordAreRejectedAndCustomerCannotCreate() throws Exception {
         mvc.perform(post("/api/v1/treatments").with(user(caller(owner,"CUSTOMER")))

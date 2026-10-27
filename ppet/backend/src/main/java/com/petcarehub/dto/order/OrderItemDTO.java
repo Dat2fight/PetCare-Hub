@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class OrderItemDTO {
     private Long productId;
+    @jakarta.validation.constraints.Null(message="Mua thú cưng chưa khả dụng trên phiên bản này")
     private Long petId;
     @jakarta.validation.constraints.NotNull(message="Số lượng là bắt buộc")
     @jakarta.validation.constraints.Positive(message="Số lượng phải lớn hơn 0")

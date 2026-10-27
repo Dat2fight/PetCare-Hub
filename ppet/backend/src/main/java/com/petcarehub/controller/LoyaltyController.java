@@ -13,6 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/loyalty")
 @RequiredArgsConstructor
+@org.springframework.validation.annotation.Validated
 public class LoyaltyController {
 
     private final LoyaltyService loyaltyService;
@@ -31,7 +32,8 @@ public class LoyaltyController {
     }
 
     @PostMapping("/account/spend")
-    public ResponseEntity<LoyaltyAccountDTO> spendMyPoints(@RequestParam Integer points, @RequestParam String description) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<LoyaltyAccountDTO> spendMyPoints(@RequestParam @jakarta.validation.constraints.Positive(message="Điểm phải lớn hơn 0") @jakarta.validation.constraints.Max(value=1_000_000, message="Điểm vượt giới hạn giao dịch") Integer points, @RequestParam String description) {
         return ResponseEntity.ok(loyaltyService.spendPoints(ownership.userId(), points, description));
     }
 
@@ -44,22 +46,25 @@ public class LoyaltyController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LoyaltyAccountDTO> addPoints(
             @PathVariable Long userId,
-            @RequestParam Integer points,
+            @RequestParam @jakarta.validation.constraints.Positive(message="Điểm phải lớn hơn 0") @jakarta.validation.constraints.Max(value=1_000_000, message="Điểm vượt giới hạn giao dịch") Integer points,
             @RequestParam String description) {
         return ResponseEntity.ok(loyaltyService.addPoints(userId, points, description));
     }
 
     @PostMapping("/account/{userId}/spend")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LoyaltyAccountDTO> spendPoints(
             @PathVariable Long userId,
-            @RequestParam Integer points,
+            @RequestParam @jakarta.validation.constraints.Positive(message="Điểm phải lớn hơn 0") @jakarta.validation.constraints.Max(value=1_000_000, message="Điểm vượt giới hạn giao dịch") Integer points,
             @RequestParam String description) {
         return ResponseEntity.ok(loyaltyService.spendPoints(ownership.authorizedUserId(userId), points, description));
     }
 
     @GetMapping("/account/{accountId}/transactions")
     public ResponseEntity<List<LoyaltyTransactionDTO>> getTransactions(@PathVariable Long accountId, org.springframework.data.domain.Pageable pageable) {
-        ownership.requireUser(accounts.findById(accountId).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản điểm")).getCustomer().getId());
+        Long currentId = ownership.userId();
+        (ownership.hasRole("ADMIN") ? accounts.findById(accountId) : accounts.findByIdAndCustomerId(accountId, currentId))
+                .orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy tài khoản điểm"));
         return ResponseEntity.ok(loyaltyService.getTransactions(accountId, pageable));
     }
 }

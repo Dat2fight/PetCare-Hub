@@ -8,7 +8,7 @@ public record PublicPetDTO(Long id, String name, Long speciesId, String speciesN
         Long breedId, String breedName, Integer age, LocalDate birthDate, BigDecimal price,
         String availabilityStatus, String description, String imageUrl) {
     public static PublicPetDTO from(PetDTO pet) {
-        // Sold detail is a status-only tombstone: never expose the new owner's private pet profile.
+        if (pet.getOwnerId() != null || !("AVAILABLE".equals(pet.getAvailabilityStatus()) || "RESERVED".equals(pet.getAvailabilityStatus())))
         if ("SOLD".equals(pet.getAvailabilityStatus()))
             return new PublicPetDTO(pet.getId(), "Thú cưng đã bán", null, null, null, null, null, null, null, "SOLD", null, null);
         if (pet.getOwnerId() != null || !("AVAILABLE".equals(pet.getAvailabilityStatus()) || "PENDING".equals(pet.getAvailabilityStatus())))

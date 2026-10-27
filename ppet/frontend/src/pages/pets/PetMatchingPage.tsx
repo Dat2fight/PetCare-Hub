@@ -1,9 +1,9 @@
 import { useState, FormEvent } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../api/client';
-import { PetDTO } from '../../services/petManagementService';
+import { PublicPetDTO } from '../../services/petManagementService';
 
-interface Match { pet: PetDTO; score: number; explanation: string }
+interface Match { pet: PublicPetDTO; score: number; explanation: string }
 export const PetMatchingPage = () => {
   const [home, setHome] = useState('APARTMENT');
   const [children, setChildren] = useState(false);

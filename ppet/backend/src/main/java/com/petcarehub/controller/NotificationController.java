@@ -33,8 +33,7 @@ public class NotificationController {
     @PutMapping("/{id}/read")
     @Transactional
     public void read(@PathVariable Long id, @AuthenticationPrincipal UserDetailsImpl user) {
-        Notification n = notificationRepository.findById(id).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thông báo"));
-        if (!n.getUser().getId().equals(user.getId())) throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền sửa thông báo này");
+        Notification n = notificationRepository.findByIdAndUserId(id, user.getId()).orElseThrow(() -> new com.petcarehub.exception.ResourceNotFoundException("Không tìm thấy thông báo"));
         n.setRead(true); notificationRepository.save(n);
     }
     @PutMapping("/read-all")

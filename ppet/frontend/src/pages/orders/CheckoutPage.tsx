@@ -10,6 +10,10 @@ export const CheckoutPage = () => {
  const submitting=useRef(false);const [submitError,setSubmitError]=useState('');
  useEffect(() => {const controller=new AbortController(); apiClient.get('/cart',{signal:controller.signal}).then(({data})=>setItems(data.items || [])).catch(()=>{if(!controller.signal.aborted)setError(true);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[]);
  const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(submitting.current || !items.length)return;submitting.current=true;setBusy(true);setSubmitError('');const data=new FormData(e.currentTarget);
+  try{const response=await apiClient.post('/orders',{shippingAddress:String(data.get('shippingAddress') || '').trim(),paymentMethod:data.get('paymentMethod'),items:items.map(i=>({productId:i.productId,quantity:i.quantity}))});
+   const orderId: unknown=response.data?.id;
+   if(typeof orderId!=='number' || !Number.isSafeInteger(orderId) || orderId<=0) throw new Error('Phản hồi đơn hàng không hợp lệ');
+   toast.success('Đã đặt đơn hàng COD');navigate(`/orders/${orderId}`,{replace:true});}
   try{const response=await orderService.create({shippingAddress:String(data.get('shippingAddress') || '').trim(),paymentMethod:'COD',items:items.map(i=>({productId:i.productId,quantity:i.quantity}))});toast.success('Đã đặt đơn hàng COD');navigate(`/orders/${response.id}`,{replace:true});}
   catch(error){const message=isAxiosError(error) && typeof error.response?.data?.message==='string' ? error.response.data.message : 'Không đặt được đơn hàng. Kiểm tra danh sách đơn nếu kết nối bị gián đoạn trước khi thử lại.';setSubmitError(message);toast.error(message);}finally{submitting.current=false;setBusy(false);}
  };
@@ -18,7 +22,7 @@ export const CheckoutPage = () => {
  {items.map(i=><p key={i.id}>{i.productName} × {i.quantity}: {(i.price*i.quantity).toLocaleString('vi-VN')} ₫</p>)}
  <p className="font-bold">Tổng: {items.reduce((sum,i)=>sum+i.price*i.quantity,0).toLocaleString('vi-VN')} ₫</p>
  <label>Người nhận, số điện thoại và địa chỉ giao hàng <textarea name="shippingAddress" required maxLength={2000} className="block border rounded w-full p-3"/></label>
- <label>Phương thức thanh toán <select name="paymentMethod" className="block border rounded p-3"><option value="COD">Thanh toán khi nhận hàng (COD)</option></select></label>
+ <label className="min-w-0">Phương thức thanh toán <select name="paymentMethod" className="block w-full min-w-0 max-w-full border rounded p-3"><option value="COD">Thanh toán khi nhận hàng (COD)</option></select></label>
  {submitError && <p role="alert" className="text-red-600">{submitError} <Link to="/orders">Xem đơn hàng</Link></p>}
  <button disabled={busy} className="bg-primary-600 text-white p-3 rounded-xl">{busy?'Đang đặt…':'Đặt hàng'}</button></form>}</div>;
 };

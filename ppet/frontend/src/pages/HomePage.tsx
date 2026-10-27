@@ -142,9 +142,10 @@ export const HomePage: React.FC = () => {
               <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-gray-100 hover:border-primary-200">
               <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 rounded-t-2xl p-2">
                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
-                <button className="absolute top-4 right-4 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-coral-500 transition-colors shadow-xs">
+                <span aria-disabled="true" title="Yêu thích — Sắp ra mắt" className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full flex items-center gap-1 px-2 py-1 text-gray-400 shadow-xs">
                   <FiHeart size={16} />
-                </button>
+                  <span className="text-xs">Sắp ra mắt</span>
+                </span>
                 <div className="absolute bottom-4 left-4">
                   <span className={`${pet.bg} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-xs`}>{pet.status}</span>
                 </div>

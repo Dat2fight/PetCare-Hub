@@ -20,11 +20,16 @@ export interface AppointmentCreateRequest {
 }
 
 export const bookingService = {
+    getMyAppointments: async (): Promise<Appointment[]> => {
+        const response = await apiClient.get<Appointment[]>('/appointments/me');
+        return response.data;
+    },
     getAllAppointments: async (): Promise<Appointment[]> => {
         const response = await apiClient.get<Appointment[]>('/appointments');
         return response.data;
     },
 
+    /** @deprecated Prefer getMyAppointments; this alias still enforces server ownership. */
     getAppointmentsByUser: async (userId: number): Promise<Appointment[]> => {
         const response = await apiClient.get<Appointment[]>(`/appointments/user/${userId}`);
         return response.data;

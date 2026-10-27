@@ -33,10 +33,10 @@ class LoyaltyOwnershipTest {
         when(loyalty.getAccountByUserId(1L)).thenReturn(account);
         mvc.perform(get("/api/v1/loyalty/account?userId=2").with(user(principal("CUSTOMER")))).andExpect(status().isOk());
         mvc.perform(get("/api/v1/loyalty/transactions?accountId=20").with(user(principal("CUSTOMER")))).andExpect(status().isOk());
-        mvc.perform(post("/api/v1/loyalty/account/spend?userId=2&points=1&description=test").with(user(principal("CUSTOMER")))).andExpect(status().isOk());
+        mvc.perform(post("/api/v1/loyalty/account/spend?userId=2&points=1&description=test").with(user(principal("CUSTOMER")))).andExpect(status().isForbidden());
         verify(loyalty, never()).getAccountByUserId(2L);
         verify(loyalty).getTransactions(eq(10L), any());
-        verify(loyalty).spendPoints(1L, 1, "test");
+        verify(loyalty, never()).spendPoints(any(), any(), any());
     }
     @Test void customerCannotReadSpendOrAddForAnotherUser() throws Exception {
         mvc.perform(get("/api/v1/loyalty/account/2").with(user(principal("CUSTOMER")))).andExpect(status().isForbidden());
@@ -47,7 +47,7 @@ class LoyaltyOwnershipTest {
     @Test void historyChecksAccountOwnerAndAllowsAdmin() throws Exception {
         var owner = new User(); owner.setId(2L);
         when(accounts.findById(20L)).thenReturn(Optional.of(LoyaltyAccount.builder().customer(owner).build()));
-        mvc.perform(get("/api/v1/loyalty/account/20/transactions").with(user(principal("CUSTOMER")))).andExpect(status().isForbidden());
+        mvc.perform(get("/api/v1/loyalty/account/20/transactions").with(user(principal("CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/loyalty/account/20/transactions").with(user(principal("ADMIN")))).andExpect(status().isOk());
         verify(loyalty, times(1)).getTransactions(eq(20L), any());
     }

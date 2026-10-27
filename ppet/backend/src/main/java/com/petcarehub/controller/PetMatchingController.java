@@ -19,8 +19,10 @@ public class PetMatchingController {
     }
 
     @PostMapping({"/submit", "/submit/{userId}"})
-    public ResponseEntity<List<MatchResultDTO>> submitQuiz(@org.springframework.security.core.annotation.AuthenticationPrincipal com.petcarehub.security.UserDetailsImpl principal, @jakarta.validation.Valid @RequestBody QuizSubmitRequest request) {
+    public ResponseEntity<List<MatchResultDTO>> submitQuiz(@PathVariable(required=false) Long userId, @org.springframework.security.core.annotation.AuthenticationPrincipal com.petcarehub.security.UserDetailsImpl principal, @jakarta.validation.Valid @RequestBody QuizSubmitRequest request) {
         if (principal == null) throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập");
+        // Deprecated alias: the path identity must agree with the authenticated account.
+        if (userId != null && !principal.getId().equals(userId)) throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền gửi thông tin cho tài khoản này");
         List<MatchResultDTO> results = petMatchingService.matchPets(principal.getId(), request);
         return ResponseEntity.ok(results);
     }

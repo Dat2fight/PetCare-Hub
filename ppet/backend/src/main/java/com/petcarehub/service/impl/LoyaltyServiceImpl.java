@@ -64,6 +64,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
 
     @Override
     @Transactional
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public LoyaltyAccountDTO addPoints(Long userId, Integer points, String description) {
         validatePoints(points);
         LoyaltyAccount account = getOrCreateAccount(userId);
@@ -89,7 +90,9 @@ public class LoyaltyServiceImpl implements LoyaltyService {
 
     @Override
     @Transactional
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
     public LoyaltyAccountDTO spendPoints(Long userId, Integer points, String description) {
+        // No customer redemption UI exists. Checkout redemption needs a separate trusted workflow.
         validatePoints(points);
         LoyaltyAccount account = getOrCreateAccount(userId);
         if (account.getAvailablePoints() < points) {

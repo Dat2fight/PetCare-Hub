@@ -41,7 +41,7 @@ class AppointmentServiceImplTest {
         org.springframework.security.core.context.SecurityContextHolder.getContext().setAuthentication(new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(principal,null,principal.getAuthorities()));
         try {
             Pet pet=new Pet(); pet.setOwner(customer);
-            when(users.findById(1L)).thenReturn(Optional.of(customer)); when(pets.findById(1L)).thenReturn(Optional.of(pet));
+            when(users.findById(1L)).thenReturn(Optional.of(customer)); when(pets.findByIdAndOwnerId(1L,1L)).thenReturn(Optional.of(pet));
             var treatment=ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).durationMinutes(60).build(); when(em.find(ServiceEntity.class,1L)).thenReturn(treatment);
             var request=new com.petcarehub.dto.appointment.AppointmentCreateRequest();request.setPetId(1L);request.setServiceId(1L);
             for(var time:List.of(LocalDateTime.now().minusDays(1),LocalDate.now().plusDays(1).atTime(8,0),LocalDate.now().plusDays(1).atTime(16,30))) {

@@ -1,0 +1,5562 @@
+[
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 320,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 360,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 375,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 390,
+    "scrollWidth": 411,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-3 ml-2"
+      },
+      {
+        "tag": "A",
+        "cls": "bg-primary-600 text-white px-5 py-2 rounded-full font-medium hover:bg-primary-700 transition-colors shadow-xs"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 412,
+    "scrollWidth": 412,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 768,
+    "scrollWidth": 768,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "GUEST",
+    "path": "/products",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/products/1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/pets/1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/login",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/register",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/services/booking?serviceId=1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/checkout",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/cart",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "GUEST",
+    "path": "/orders",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/products/1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/pets/1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/login",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/register",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/services/booking?serviceId=1",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/checkout",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/cart",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "CUSTOMER",
+    "path": "/orders",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": []
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "ADMIN",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "SALES_STAFF",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "WAREHOUSE_STAFF",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 320,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 360,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "A",
+        "cls": "text-gray-500 hover:text-primary-600 transition-colors p-2 rounded-full hover:bg-gray-50 relative"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "circle",
+        "cls": {}
+      },
+      {
+        "tag": "path",
+        "cls": {}
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 375,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-600 text-[10px] font-bold text-white"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 390,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 412,
+    "scrollWidth": 528,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "IMG",
+        "cls": "h-8 w-8 rounded-full border border-primary-100 object-cover"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 768,
+    "scrollWidth": 852,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "flex items-center space-x-5"
+      },
+      {
+        "tag": "DIV",
+        "cls": "relative group ml-2"
+      },
+      {
+        "tag": "BUTTON",
+        "cls": "flex items-center gap-2 focus:outline-hidden bg-gray-50 rounded-full pl-1 pr-3 py-1 border border-gray-100 hover:bg-gray-100 transition-colors"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "text-sm font-medium text-gray-700"
+      },
+      {
+        "tag": "svg",
+        "cls": {}
+      },
+      {
+        "tag": "polyline",
+        "cls": {}
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 origin-top-right"
+      },
+      {
+        "tag": "DIV",
+        "cls": "px-4 py-3 border-b border-gray-50 mb-2"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 1366,
+    "scrollWidth": 1366,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  },
+  {
+    "role": "VETERINARIAN",
+    "path": "/",
+    "width": 1920,
+    "scrollWidth": 1920,
+    "overflow": [
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      },
+      {
+        "tag": "SPAN",
+        "cls": "ml-auto text-xs text-gray-400 font-medium"
+      },
+      {
+        "tag": "P",
+        "cls": "text-gray-600 relative z-10 leading-relaxed"
+      },
+      {
+        "tag": "DIV",
+        "cls": "bg-white rounded-2xl shadow-card border border-gray-100 overflow-hidden p-6 bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0"
+      },
+      {
+        "tag": "DIV",
+        "cls": "absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none"
+      },
+      {
+        "tag": "DIV",
+        "cls": "flex items-start gap-4 mb-4 relative z-10"
+      }
+    ]
+  }
+]

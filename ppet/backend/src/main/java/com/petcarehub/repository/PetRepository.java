@@ -12,11 +12,14 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long>, JpaSpecificationExecutor<Pet> {
+    long countByOwnerId(Long ownerId);
+    java.util.Optional<Pet> findByIdAndOwnerId(Long id, Long ownerId);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.QueryHints(@jakarta.persistence.QueryHint(name = "jakarta.persistence.lock.timeout", value = "5000"))
     @org.springframework.data.jpa.repository.Query("select p from Pet p where p.id = :id")
     java.util.Optional<Pet> findByIdForUpdate(Long id);
     Page<Pet> findByAvailabilityStatus(AvailabilityStatus status, Pageable pageable);
+    Page<Pet> findByOwnerIsNullAndAvailabilityStatus(AvailabilityStatus status, Pageable pageable);
     List<Pet> findBySpeciesIdAndAvailabilityStatus(Long speciesId, AvailabilityStatus status);
     List<Pet> findByHealthStatus(HealthStatus healthStatus);
     List<Pet> findByOwnerId(Long ownerId);

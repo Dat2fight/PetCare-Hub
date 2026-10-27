@@ -54,7 +54,7 @@ class PetAuditTest {
         User customer=new User(); customer.setId(7L);
         when(users.findById(7L)).thenReturn(Optional.of(customer));
         when(quizzes.save(any())).thenAnswer(call->call.getArgument(0));
-        when(pets.findByAvailabilityStatus(eq(AvailabilityStatus.AVAILABLE),any())).thenReturn(org.springframework.data.domain.Page.empty());
+        when(pets.findByOwnerIsNullAndAvailabilityStatus(eq(AvailabilityStatus.AVAILABLE),any())).thenReturn(org.springframework.data.domain.Page.empty());
         var request=new com.petcarehub.dto.matching.QuizSubmitRequest();
         request.setPresenceOfChildren(true); request.setAvailableCareTime(4); request.setActivityLevel("HIGH"); request.setHouseSize("SMALL"); request.setLivingEnvironment("APARTMENT");
         assertTrue(service.matchPets(7L,request).isEmpty());

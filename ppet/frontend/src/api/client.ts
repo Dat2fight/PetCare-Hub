@@ -13,7 +13,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('accessToken') || localStorage.getItem('token')
-    if (token) {
+    if (token && !['/auth/login', '/auth/register'].includes(config.url || '')) {
       config.headers.Authorization = `Bearer ${token}`
     }
     return config
@@ -25,12 +25,15 @@ apiClient.interceptors.request.use(
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    if (error.response?.status === 401 && !['/auth/login', '/auth/register'].includes(error.config?.url || '')) {
       localStorage.removeItem('accessToken')
       localStorage.removeItem('token')
       localStorage.removeItem('refreshToken')
       const basePath = import.meta.env.BASE_URL.replace(/\/$/, '');
-      window.location.href = `${basePath}/login`
+      if (window.location.pathname !== `${basePath}/login`) {
+        sessionStorage.setItem('loginReturnTo', JSON.stringify({ pathname: window.location.pathname.slice(basePath.length) || '/', search: window.location.search }));
+        window.location.replace(`${basePath}/login`)
+      }
     }
     return Promise.reject(error)
   }

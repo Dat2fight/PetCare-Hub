@@ -76,7 +76,8 @@ public class GlobalExceptionHandler {
                 LocalDateTime.now(),
                 HttpStatus.UNAUTHORIZED.value(),
                 "Unauthorized",
-                "Tên đăng nhập hoặc mật khẩu không chính xác",
+                ex instanceof org.springframework.security.authentication.InsufficientAuthenticationException
+                        ? "Vui lòng đăng nhập" : "Tên đăng nhập hoặc mật khẩu không chính xác",
                 request.getDescription(false).replace("uri=", "")
         );
         return new ResponseEntity<>(error, HttpStatus.UNAUTHORIZED);

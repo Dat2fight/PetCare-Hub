@@ -62,7 +62,7 @@ export const RegisterPage: React.FC = () => {
           
           <div className="flex border-b border-gray-200 mb-8">
             <Link to="/login" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">Đăng nhập</Link>
-            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">Đăng ký</button>
+            <span aria-current="page" className="flex-1 pb-4 text-center text-primary-600 font-semibold border-b-2 border-primary-600">Đăng ký</span>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">

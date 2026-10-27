@@ -1,409 +1,140 @@
-# PetCare Hub REST API Specification
+# PetCare Hub — API và ma trận quyền hiện hành
 
-## 1. API Conventions
-- **Base URL**: `/api/v1`
-- **Content Type**: `application/json` for request/response bodies
-- **Standard HTTP status codes**: 200 (OK), 201 (Created), 400 (Bad Request), 401 (Unauthorized), 403 (Forbidden), 404 (Not Found), 500 (Internal Error)
-- **Pagination**: `page`, `size`, `sort` query params
-  - Response format: `{ "content": [], "page": 0, "size": 10, "totalElements": 100, "totalPages": 10 }`
-- **Error response format**:
-  ```json
-  {
-    "timestamp": "2023-10-01T12:00:00Z",
-    "status": 400,
-    "error": "Bad Request",
-    "message": "Invalid input data",
-    "path": "/api/v1/pets"
-  }
-  ```
-- **Authentication**: Bearer JWT token in Authorization header
-- **Date format**: ISO 8601
+Đối chiếu code trên `fix/qa-critical-001-007`, base `44027f8`, ngày 27/10/2026. Các endpoint bên dưới dùng tiền tố `/api/v1`. Role thật: `CUSTOMER`, `SALES_STAFF`, `WAREHOUSE_STAFF`, `VETERINARIAN`, `ADMIN`. “Đã đăng nhập” bao gồm mọi role thật nhưng thao tác cá nhân luôn bị giới hạn theo principal.
 
----
+- 401: thiếu đăng nhập; 403: sai vai trò hoặc userId URL khác principal; 404: tài nguyên riêng không thuộc người gọi; 400: input sai; 409: trạng thái/tồn kho/xung đột dữ liệu.
+- Trang mặc định 20, tối đa 100. `GET /orders`, pets/products và notifications trả Page; các danh sách clinical/appointment nhận Pageable nhưng trả mảng giới hạn theo trang.
+- JWT chỉ mang subject/thời gian; filter tải tài khoản và quyền hiện tại từ DB. Public register bỏ qua field lạ (kể cả role), luôn CUSTOMER. Admin tạo nhân viên dùng DTO riêng, chỉ SALES_STAFF/WAREHOUSE_STAFF/VETERINARIAN; endpoint role riêng không hạ quyền admin hiện hữu.
+- Inventory được lấy trực tiếp từ `EndpointSecurityMatrixTest`; thêm/xóa route mà chưa khai báo chính sách làm test fail. Test registry chỉ rõ ca ownership cho các ID riêng tư. Public catalog IDs không có chủ; các write nhân viên được kiểm ma trận role.
 
-## 2. Authentication API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/auth/register` | Register new customer | Public |
-| POST | `/api/v1/auth/login` | Login, returns JWT | Public |
-| POST | `/api/v1/auth/refresh` | Refresh token | Authenticated |
-| GET | `/api/v1/auth/me` | Get current user profile | Authenticated |
-| PUT | `/api/v1/auth/me` | Update profile | Authenticated |
-| PUT | `/api/v1/auth/change-password` | Change password | Authenticated |
+## Endpoint × quyền / sở hữu
 
-**Example Request (POST /register)**
-```json
-{
-  "firstName": "John",
-  "lastName": "Doe",
-  "email": "john.doe@example.com",
-  "password": "SecurePassword123",
-  "phoneNumber": "+1234567890"
-}
-```
+| Method và endpoint | Quyền và phạm vi thực tế |
+| --- | --- |
+| `DELETE /cart` | Đã đăng nhập; chỉ giỏ/item của principal, item lạ 404 |
+| `DELETE /cart/items/{itemId}` | Đã đăng nhập; chỉ giỏ/item của principal, item lạ 404 |
+| `DELETE /categories/{id}` | ADMIN, SALES_STAFF |
+| `DELETE /medical-records/{id}` | VETERINARIAN, ADMIN |
+| `DELETE /pets/{id}` | ADMIN, SALES_STAFF |
+| `DELETE /products/{id}` | ADMIN, SALES_STAFF |
+| `DELETE /promotions/{id}` | ADMIN, SALES_STAFF |
+| `DELETE /services/{id}` | ADMIN, SALES_STAFF |
+| `DELETE /treatments/{id}` | VETERINARIAN, ADMIN |
+| `DELETE /vaccinations/{id}` | VETERINARIAN, ADMIN |
+| `GET /admin/dashboard` | ADMIN; không được hạ quyền admin hiện hữu |
+| `GET /admin/revenue-report` | ADMIN; không được hạ quyền admin hiện hữu |
+| `GET /admin/users` | ADMIN; không được hạ quyền admin hiện hữu |
+| `GET /appointments` | ADMIN xem toàn bộ; SALES_STAFF/VETERINARIAN chỉ lịch được phân công |
+| `GET /appointments/me` | Đã đăng nhập; dữ liệu theo principal |
+| `GET /appointments/pet/{petId}` | Chủ pet chỉ lịch của mình; VETERINARIAN chỉ lịch được giao; ADMIN toàn bộ |
+| `GET /appointments/slots` | Đã đăng nhập; dữ liệu theo principal |
+| `GET /appointments/user/{userId}` | Chính userId hoặc ADMIN; alias cũ, userId khác 403 |
+| `GET /auth/me` | Đã đăng nhập; dữ liệu theo principal |
+| `GET /cart` | Đã đăng nhập; chỉ giỏ/item của principal, item lạ 404 |
+| `GET /categories` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /categories/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /health` | Đã đăng nhập; dữ liệu theo principal |
+| `GET /inventory/{inventoryId}/transactions` | ADMIN, WAREHOUSE_STAFF |
+| `GET /inventory/{productId}` | Đã đăng nhập (quyền đọc tồn kho hiện có) |
+| `GET /inventory/low-stock` | ADMIN, WAREHOUSE_STAFF |
+| `GET /loyalty/account` | Đã đăng nhập; chỉ điểm/lịch sử của principal |
+| `GET /loyalty/account/{accountId}/transactions` | Chủ tài khoản điểm hoặc ADMIN; người khác 404 |
+| `GET /loyalty/account/{userId}` | Chính userId hoặc ADMIN; userId khác trả 403 |
+| `GET /loyalty/transactions` | Đã đăng nhập; chỉ điểm/lịch sử của principal |
+| `GET /medical-records/{id}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /medical-records/pet/{petId}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /notifications` | Chỉ chủ thông báo, kể cả ADMIN; userId chéo 403, notificationId chéo 404 |
+| `GET /notifications/{userId}` | Chỉ chủ thông báo, kể cả ADMIN; userId chéo 403, notificationId chéo 404 |
+| `GET /notifications/unread-count` | Chỉ chủ thông báo, kể cả ADMIN; userId chéo 403, notificationId chéo 404 |
+| `GET /orders` | Đã đăng nhập; chỉ đơn của principal |
+| `GET /orders/{id}` | Chủ đơn, SALES_STAFF hoặc ADMIN; người khác 404 |
+| `GET /pets` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /pets/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /pets/my-pets` | Đã đăng nhập; chỉ pet của principal, server giữ owner/price/health/availability |
+| `GET /pets/my-pets/{id}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /products` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /products/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /products/manage` | ADMIN, SALES_STAFF, WAREHOUSE_STAFF |
+| `GET /promotions` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /promotions/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /promotions/validate/{code}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /reviews` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /reviews/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /services` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /services/{id}` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /species` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /species/{speciesId}/breeds` | Public (GET storefront chỉ dữ liệu công khai) |
+| `GET /treatments/{id}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /treatments/record/{recordId}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /vaccinations/{id}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `GET /vaccinations/pet/{petId}` | Chủ pet, VETERINARIAN hoặc ADMIN; người khác 404 |
+| `PATCH /admin/users/{userId}/role` | ADMIN; không được hạ quyền admin hiện hữu |
+| `POST /admin/staff` | ADMIN; không được hạ quyền admin hiện hữu |
+| `POST /appointments` | Đã đăng nhập; pet phải thuộc principal, không fallback pet khác |
+| `POST /auth/login` | Public (GET storefront chỉ dữ liệu công khai) |
+| `POST /auth/register` | Public (GET storefront chỉ dữ liệu công khai) |
+| `POST /cart/items` | Đã đăng nhập; chỉ giỏ/item của principal, item lạ 404 |
+| `POST /categories` | ADMIN, SALES_STAFF |
+| `POST /inventory/add` | ADMIN, WAREHOUSE_STAFF |
+| `POST /inventory/adjust` | ADMIN, WAREHOUSE_STAFF |
+| `POST /inventory/reduce` | ADMIN, WAREHOUSE_STAFF |
+| `POST /loyalty/account/{userId}/add` | ADMIN; points 1..1.000.000, khóa số dư và ghi ledger cùng transaction |
+| `POST /loyalty/account/{userId}/spend` | ADMIN; points 1..1.000.000, khóa số dư và ghi ledger cùng transaction |
+| `POST /loyalty/account/spend` | ADMIN; points 1..1.000.000, khóa số dư và ghi ledger cùng transaction |
+| `POST /medical-records` | VETERINARIAN, ADMIN |
+| `POST /orders` | CUSTOMER; khách lấy từ principal, giá/tổng do server tính |
+| `POST /orders/{id}/cancel` | Chủ đơn hoặc ADMIN; state machine kiểm trạng thái, người khác 404 |
+| `POST /orders/{id}/confirm` | ADMIN, SALES_STAFF; state machine kiểm trạng thái |
+| `POST /orders/{id}/deliver` | ADMIN, SALES_STAFF; state machine kiểm trạng thái |
+| `POST /orders/{id}/process` | ADMIN, SALES_STAFF; state machine kiểm trạng thái |
+| `POST /orders/{id}/ship` | ADMIN, SALES_STAFF; state machine kiểm trạng thái |
+| `POST /pet-matching/submit` | Đã đăng nhập; quiz của principal, alias userId chéo 403; kết quả PublicPetDTO |
+| `POST /pet-matching/submit/{userId}` | Đã đăng nhập; quiz của principal, alias userId chéo 403; kết quả PublicPetDTO |
+| `POST /pets` | ADMIN, SALES_STAFF |
+| `POST /pets/my-pets` | Đã đăng nhập; chỉ pet của principal, server giữ owner/price/health/availability |
+| `POST /products` | ADMIN, SALES_STAFF |
+| `POST /promotions` | ADMIN, SALES_STAFF |
+| `POST /reviews` | Đã đăng nhập; tác giả từ principal, cần mua/hoàn thành dịch vụ; approved do server |
+| `POST /services` | ADMIN, SALES_STAFF |
+| `POST /treatments` | VETERINARIAN, ADMIN |
+| `POST /vaccinations` | VETERINARIAN, ADMIN |
+| `PUT /appointments/{id}/status` | ADMIN hoặc SALES_STAFF/VETERINARIAN được phân công; chủ chỉ hủy lịch tương lai; ngoài phạm vi 404 |
+| `PUT /cart/items/{itemId}` | Đã đăng nhập; chỉ giỏ/item của principal, item lạ 404 |
+| `PUT /categories/{id}` | ADMIN, SALES_STAFF |
+| `PUT /medical-records/{id}` | VETERINARIAN, ADMIN |
+| `PUT /notifications/{id}/read` | Chỉ chủ thông báo, kể cả ADMIN; userId chéo 403, notificationId chéo 404 |
+| `PUT /notifications/read-all` | Chỉ chủ thông báo, kể cả ADMIN; userId chéo 403, notificationId chéo 404 |
+| `PUT /pets/{id}` | ADMIN, SALES_STAFF |
+| `PUT /pets/my-pets/{id}` | Đã đăng nhập; chỉ pet của principal, server giữ owner/price/health/availability |
+| `PUT /products/{id}` | ADMIN, SALES_STAFF |
+| `PUT /promotions/{id}` | ADMIN, SALES_STAFF |
+| `PUT /reviews/{id}/approve` | ADMIN |
+| `PUT /services/{id}` | ADMIN, SALES_STAFF |
+| `PUT /treatments/{id}` | VETERINARIAN, ADMIN |
+| `PUT /users/me` | Đã đăng nhập; dữ liệu theo principal |
+| `PUT /vaccinations/{id}` | VETERINARIAN, ADMIN |
 
-**Example Response (POST /login)**
-```json
-{
-  "accessToken": "eyJhbGciOiJIUzI1NiIsIn...",
-  "refreshToken": "dGVzdC1yZWZyZXNoLXRva2Vu...",
-  "expiresIn": 3600,
-  "tokenType": "Bearer"
-}
-```
+## Hợp đồng cần lưu ý
 
----
+- Register nhận username/email/password/firstName/lastName/phone; login trả `{token,user}`. Không có endpoint refresh/logout server trong inventory này.
+- `GET /pets`: query `healthStatus`, `availabilityStatus`, `speciesId`, `breedId`, page/size/sort. Điều kiện owner=NULL và AVAILABLE luôn áp dụng. PublicPetDTO chỉ có id/name/speciesId/speciesName/breedId/breedName/age/birthDate/price/availabilityStatus/description/imageUrl. Detail nhận thêm RESERVED chưa có chủ; SOLD hoặc có chủ 404.
+- `/appointments/me` thay cho URL có userId khi xem lịch cá nhân. Alias cũ giữ kiểm quyền. `/notifications` và `/loyalty/account`, `/loyalty/transactions` cũng lấy principal.
+- Product checkout nhận `{shippingAddress,paymentMethod:"COD",items:[{productId,quantity}]}`. ShippingAddress hiện gộp người nhận, SĐT và địa chỉ. Price/userId/total từ client không quyết định đơn; petId bị từ chối vì tính năng mua pet ở nhánh riêng chưa tích hợp.
+- Thành công checkout trả id/status/items/totalPrice/orderNumber/paymentStatus; status và paymentStatus đều PENDING ban đầu. Cập nhật tồn kho, đơn và phần giỏ đã mua cùng transaction. Thanh toán online/giảm giá/đổi điểm/idempotency chưa được thêm. Giao COD chỉ đánh dấu COMPLETED theo state machine hiện có.
+- Public GET products luôn active; muốn xem inactive dùng `/products/manage`. Khuyến mãi giữ quyền SALES_STAFF theo base, cần quyết định nếu đổi ADMIN-only.
+- API/DTO khác giữ nguyên từ base. Các route `/pets/{id}/medical-records`, `/product-categories`, auth refresh/logout từng ghi trong bản tài liệu cũ không tồn tại trong mapping hiện hành.
+- Ngoài controller inventory: Swagger/OpenAPI public; WebSocket handshake public nhưng STOMP CONNECT xác thực JWT và destination theo người dùng. Không cấp secret cho frontend bundle.
 
-## 3. Pet API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/pets` | List pets with filters | Public |
-| GET | `/api/v1/pets/{id}` | Get pet detail | Public |
-| POST | `/api/v1/pets` | Create pet | ADMIN, WAREHOUSE |
-| PUT | `/api/v1/pets/{id}` | Update pet | ADMIN, WAREHOUSE |
-| DELETE | `/api/v1/pets/{id}` | Soft delete pet | ADMIN |
-| GET | `/api/v1/pets/{id}/medical-records` | Get pet medical history | CUSTOMER(owner), VET, ADMIN |
-| GET | `/api/v1/pets/{id}/vaccinations` | Get pet vaccinations | CUSTOMER(owner), VET, ADMIN |
+Xem [báo cáo sửa lỗi](qa-critical-001-007/REPORT.md), [kiểm tra thủ công](qa-critical-001-007/MANUAL-CHECKS.md) và [cấu hình/rotate](qa-critical-001-007/SECRET-OPERATIONS.md).
+# QA high follow-up: personal pet creation and authentication
 
-**Query Parameters (GET /pets)**:
-`species`, `breed`, `minPrice`, `maxPrice`, `gender`, `healthStatus`, `availabilityStatus`, `ageMin`, `ageMax`, `page`, `size`, `sort`
+`GET /admin/dashboard` and `/admin/revenue-report` require ADMIN and accept ISO dates `from`, `to` (inclusive, at most 366 days). Default: first day of the ending month through today in Asia/Ho_Chi_Minh; if `to` is supplied it becomes the ending date. Revenue uses the half-open payment timestamp interval `[from 00:00, to+1 day 00:00)`. Only COMPLETED payment, non-CANCELLED order counts; COD additionally requires DELIVERED. REFUNDED payments and unknown `paid_at` never count. Partial-refund records do not exist in this schema. Dashboard `totalOrders` is lifetime order count; revenue-report `totalOrders` is the count of revenue-qualified orders in the requested period, not lifetime orders or all delivered orders. Monthly periods use the same predicate.
 
-**Example Request (POST /pets)**
-```json
-{
-  "name": "Bella",
-  "species": "DOG",
-  "breed": "Golden Retriever",
-  "gender": "FEMALE",
-  "dateOfBirth": "2023-01-15T00:00:00Z",
-  "price": 800.00,
-  "description": "Friendly and playful.",
-  "healthStatus": "HEALTHY",
-  "availabilityStatus": "AVAILABLE"
-}
-```
+Deployment prerequisite: manually review/apply `migrations/004_orders_paid_at.sql` before deploying the backend. No automatic migration or historical backfill is performed. COD delivery records `paid_at` in business time. Existing COMPLETED records need verified payment timestamps before inclusion; do not copy created_at/updated_at as payment evidence. There is no frontend admin dashboard consumer in this branch.
 
----
+`POST /api/v1/pets/my-pets` requires CUSTOMER. Send `name` (1–100), `speciesId` from `/species`, and integer `age` (0–30) for quick creation. The existing `birthDate`, `breedId`, `description`, `imageUrl` form remains supported; unknown age/date may be omitted. Identity, price and internal statuses are never accepted from the client. Result is an owned UNAVAILABLE pet; registration count is serialized under the owner lock and capped by `app.pets.max-personal-pets` (default 20), returning 409 at the cap. Invalid species/breed is rejected.
 
-## 4. Product API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/products` | List products with filters | Public |
-| GET | `/api/v1/products/{id}` | Get product detail | Public |
-| POST | `/api/v1/products` | Create product | ADMIN |
-| PUT | `/api/v1/products/{id}` | Update product | ADMIN |
-| DELETE | `/api/v1/products/{id}` | Soft delete product | ADMIN |
-| GET | `/api/v1/product-categories` | List categories | Public |
-| POST | `/api/v1/product-categories` | Create category | ADMIN |
+Personal routes including `/auth/me` and `/pets/my-pets/**` require authentication. Filter errors use the same ErrorResponse as controllers, including `correlationId`; 401 message is `Vui lòng đăng nhập`. Invalid bearer tokens receive 401.
 
-**Query Parameters (GET /products)**:
-`categoryId`, `minPrice`, `maxPrice`, `brand`, `inStock`, `page`, `size`, `sort`
+Booking requires `petId`, `serviceId`, `appointmentTime`; customer identity is taken from the principal. Foreign, unowned and missing pets return 404. `GET /appointments/pet/{petId}` retains owner/assigned-vet/admin scope. There is no customer rescheduling endpoint or staff-on-behalf booking flow.
 
-**Example Request (POST /products)**
-```json
-{
-  "name": "Premium Dog Food",
-  "categoryId": 1,
-  "brand": "HealthyPaws",
-  "price": 45.99,
-  "stockQuantity": 100,
-  "description": "High-quality dog food."
-}
-```
-
----
-
-## 5. Cart API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/cart` | Get current user's cart | CUSTOMER |
-| POST | `/api/v1/cart/items` | Add item to cart | CUSTOMER |
-| PUT | `/api/v1/cart/items/{itemId}` | Update cart item quantity | CUSTOMER |
-| DELETE | `/api/v1/cart/items/{itemId}` | Remove item from cart | CUSTOMER |
-| DELETE | `/api/v1/cart` | Clear cart | CUSTOMER |
-
-**Example Request (POST /cart/items)**
-```json
-{
-  "productId": 123,
-  "quantity": 2
-}
-```
-
----
-
-## 6. Order API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/orders` | Create order from cart | CUSTOMER |
-| GET | `/api/v1/orders` | List orders (own for customer, all for staff) | Authenticated |
-| GET | `/api/v1/orders/{id}` | Get order detail | Authenticated |
-| PUT | `/api/v1/orders/{id}/status` | Update order status | SALES, ADMIN |
-| PUT | `/api/v1/orders/{id}/cancel` | Cancel order | CUSTOMER, SALES, ADMIN |
-| POST | `/api/v1/orders/{id}/apply-promotion` | Apply promotion code | CUSTOMER |
-
-**Example Request (POST /orders)**
-```json
-{
-  "shippingAddressId": 45,
-  "paymentMethod": "CREDIT_CARD",
-  "notes": "Please leave at front door."
-}
-```
-
-**Example Response (GET /orders/{id})**
-```json
-{
-  "id": 1001,
-  "status": "PROCESSING",
-  "totalAmount": 91.98,
-  "items": [
-    { "productId": 123, "quantity": 2, "price": 45.99 }
-  ],
-  "createdAt": "2023-10-01T12:00:00Z"
-}
-```
-
----
-
-## 7. Service & Appointment API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/services` | List available services | Public |
-| GET | `/api/v1/services/{id}` | Get service detail | Public |
-| POST | `/api/v1/services` | Create service | ADMIN |
-| PUT | `/api/v1/services/{id}` | Update service | ADMIN |
-| GET | `/api/v1/appointments` | List appointments | Authenticated |
-| POST | `/api/v1/appointments` | Book appointment | CUSTOMER |
-| GET | `/api/v1/appointments/{id}` | Get appointment detail | Authenticated |
-| PUT | `/api/v1/appointments/{id}/status` | Update appointment status | VET, SALES, ADMIN |
-| PUT | `/api/v1/appointments/{id}/cancel` | Cancel appointment | CUSTOMER, ADMIN |
-| GET | `/api/v1/appointments/available-slots` | Get available time slots | CUSTOMER |
-
-**Example Request (POST /appointments)**
-```json
-{
-  "serviceId": 5,
-  "petId": 12,
-  "appointmentDate": "2023-10-15T14:30:00Z",
-  "notes": "Routine checkup."
-}
-```
-
----
-
-## 8. Medical Records API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/medical-records` | Create medical record | VET |
-| GET | `/api/v1/medical-records/{id}` | Get medical record | VET, ADMIN, CUSTOMER(pet owner) |
-| PUT | `/api/v1/medical-records/{id}` | Update medical record | VET |
-| POST | `/api/v1/vaccinations` | Record vaccination | VET |
-| GET | `/api/v1/vaccinations/{id}` | Get vaccination record | VET, ADMIN, CUSTOMER(pet owner) |
-| POST | `/api/v1/treatments` | Create treatment | VET |
-| PUT | `/api/v1/treatments/{id}` | Update treatment | VET |
-| PUT | `/api/v1/pets/{id}/health-status` | Update pet health status | VET |
-
-**Example Request (POST /medical-records)**
-```json
-{
-  "petId": 12,
-  "vetId": 3,
-  "diagnosis": "Healthy",
-  "notes": "General checkup completed. No issues found.",
-  "weight": 25.4,
-  "temperature": 38.5
-}
-```
-
----
-
-## 9. Inventory API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/inventory` | List inventory | WAREHOUSE, ADMIN |
-| GET | `/api/v1/inventory/{id}` | Get inventory item | WAREHOUSE, ADMIN |
-| PUT | `/api/v1/inventory/{id}` | Update inventory settings | WAREHOUSE, ADMIN |
-| POST | `/api/v1/inventory/stock-in` | Record stock in | WAREHOUSE |
-| POST | `/api/v1/inventory/stock-out` | Record stock out | WAREHOUSE |
-| GET | `/api/v1/inventory/low-stock` | Get low-stock items | WAREHOUSE, ADMIN |
-| GET | `/api/v1/inventory/transactions` | List inventory transactions | WAREHOUSE, ADMIN |
-
-**Example Request (POST /inventory/stock-in)**
-```json
-{
-  "productId": 123,
-  "quantity": 50,
-  "supplierId": 10,
-  "costPrice": 30.00,
-  "notes": "Monthly restock."
-}
-```
-
----
-
-## 10. Review API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/reviews` | Create review | CUSTOMER |
-| GET | `/api/v1/reviews` | List reviews (filterable by type, item) | Public |
-| PUT | `/api/v1/reviews/{id}` | Update own review | CUSTOMER |
-| DELETE | `/api/v1/reviews/{id}` | Delete own review | CUSTOMER, ADMIN |
-| PUT | `/api/v1/reviews/{id}/approve` | Approve review | SALES, ADMIN |
-
-**Example Request (POST /reviews)**
-```json
-{
-  "targetType": "PRODUCT",
-  "targetId": 123,
-  "rating": 5,
-  "comment": "My dog loves this food!"
-}
-```
-
----
-
-## 11. Loyalty API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/loyalty/account` | Get own loyalty account | CUSTOMER |
-| GET | `/api/v1/loyalty/transactions` | Get own loyalty transactions | CUSTOMER |
-| POST | `/api/v1/loyalty/redeem` | Redeem points | CUSTOMER |
-| GET | `/api/v1/loyalty/tiers` | Get tier information | Public |
-
-**Example Request (POST /loyalty/redeem)**
-```json
-{
-  "points": 500,
-  "rewardId": 2
-}
-```
-
----
-
-## 12. Promotion API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/promotions` | List promotions | SALES, ADMIN |
-| POST | `/api/v1/promotions` | Create promotion | SALES, ADMIN |
-| PUT | `/api/v1/promotions/{id}` | Update promotion | SALES, ADMIN |
-| DELETE | `/api/v1/promotions/{id}` | Deactivate promotion | ADMIN |
-| POST | `/api/v1/promotions/validate` | Validate promotion code | CUSTOMER |
-
-**Example Request (POST /promotions)**
-```json
-{
-  "code": "SUMMER20",
-  "discountPercentage": 20,
-  "startDate": "2023-06-01T00:00:00Z",
-  "endDate": "2023-08-31T23:59:59Z",
-  "usageLimit": 1000
-}
-```
-
----
-
-## 13. Pet Matching API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| POST | `/api/v1/pet-matching/quiz` | Submit matching quiz | CUSTOMER |
-| GET | `/api/v1/pet-matching/results/{quizId}` | Get matching results | CUSTOMER |
-| GET | `/api/v1/pet-matching/history` | Get quiz history | CUSTOMER |
-
-**Example Request (POST /pet-matching/quiz)**
-```json
-{
-  "livingSpace": "APARTMENT",
-  "activityLevel": "LOW",
-  "experienceLevel": "BEGINNER",
-  "hasChildren": false,
-  "hasOtherPets": true
-}
-```
-
----
-
-## 14. Notification API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/notifications` | Get own notifications | Authenticated |
-| PUT | `/api/v1/notifications/{id}/read` | Mark as read | Authenticated |
-| PUT | `/api/v1/notifications/read-all` | Mark all as read | Authenticated |
-| GET | `/api/v1/notifications/unread-count` | Get unread count | Authenticated |
-
-**Example Response (GET /notifications)**
-```json
-{
-  "content": [
-    {
-      "id": 1,
-      "type": "ORDER_UPDATE",
-      "title": "Order Shipped",
-      "message": "Your order #1001 has been shipped.",
-      "isRead": false,
-      "createdAt": "2023-10-02T10:00:00Z"
-    }
-  ],
-  "page": 0,
-  "size": 20,
-  "totalElements": 1,
-  "totalPages": 1
-}
-```
-
----
-
-## 15. Admin API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/admin/users` | List all users | ADMIN |
-| GET | `/api/v1/admin/users/{id}` | Get user detail | ADMIN |
-| PUT | `/api/v1/admin/users/{id}` | Update user | ADMIN |
-| PUT | `/api/v1/admin/users/{id}/roles` | Update user roles | ADMIN |
-| PUT | `/api/v1/admin/users/{id}/toggle-status` | Enable/disable user | ADMIN |
-| GET | `/api/v1/admin/reports/revenue` | Revenue report | ADMIN |
-| GET | `/api/v1/admin/reports/orders` | Order statistics | ADMIN |
-| GET | `/api/v1/admin/reports/inventory` | Inventory report | ADMIN |
-| GET | `/api/v1/admin/dashboard` | Dashboard summary | ADMIN |
-| GET | `/api/v1/admin/config` | Get system config | ADMIN |
-| PUT | `/api/v1/admin/config` | Update system config | ADMIN |
-
----
-
-## 16. WebSocket Endpoints
-- **Connection**: `ws://host/ws` (with JWT auth)
-- **Subscribe (Personal)**: `/user/queue/notifications`
-- **Subscribe (Sales Staff)**: `/topic/orders`
-- **Subscribe (Warehouse Staff)**: `/topic/inventory/alerts`
-- **Message format**:
-  ```json
-  {
-    "type": "NOTIFICATION",
-    "title": "Low Stock Alert",
-    "message": "Product Premium Dog Food is running low.",
-    "data": { "productId": 123 },
-    "timestamp": "2023-10-01T12:00:00Z"
-  }
-  ```
-
----
-
-## 17. Care Package API
-| Method | Endpoint | Description | Auth |
-|--------|----------|-------------|------|
-| GET | `/api/v1/care-packages` | List packages | Public |
-| GET | `/api/v1/care-packages/{id}` | Get package detail | Public |
-| POST | `/api/v1/care-packages` | Create package | ADMIN |
-| PUT | `/api/v1/care-packages/{id}` | Update package | ADMIN |
-| POST | `/api/v1/care-packages/subscribe` | Subscribe to package | CUSTOMER |
-| GET | `/api/v1/care-packages/subscriptions` | Get own subscriptions | CUSTOMER |
-| PUT | `/api/v1/care-packages/subscriptions/{id}/cancel` | Cancel subscription | CUSTOMER |
-
-**Example Request (POST /care-packages/subscribe)**
-```json
-{
-  "packageId": 3,
-  "frequency": "MONTHLY",
-  "shippingAddressId": 45
-}
-```

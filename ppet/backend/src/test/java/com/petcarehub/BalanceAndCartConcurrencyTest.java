@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(properties="spring.datasource.url=jdbc:h2:mem:balances;DB_CLOSE_DELAY=-1;LOCK_TIMEOUT=10000")
 @ActiveProfiles("test")
+@org.springframework.security.test.context.support.WithMockUser(roles="ADMIN")
 class BalanceAndCartConcurrencyTest {
     @Autowired UserRepository users;
     @Autowired ProductRepository products;
@@ -63,7 +64,8 @@ class BalanceAndCartConcurrencyTest {
     private int race(User user, Runnable first, Runnable second) throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(2);
         CountDownLatch ready = new CountDownLatch(2), start = new CountDownLatch(1);
-        var principal = UserDetailsImpl.build(user);
+        var principal = new UserDetailsImpl(user.getId(), user.getUsername(), user.getEmail(), "unused",
+                List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_ADMIN")));
         java.util.function.Function<Runnable, Callable<Boolean>> task = action -> () -> {
             ready.countDown(); assertTrue(start.await(10, TimeUnit.SECONDS));
             SecurityContextHolder.getContext().setAuthentication(

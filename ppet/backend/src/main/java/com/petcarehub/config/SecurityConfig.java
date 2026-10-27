@@ -31,6 +31,9 @@ public class SecurityConfig {
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    @Autowired
+    private com.petcarehub.security.SecurityErrorHandler securityErrors;
+
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
@@ -61,14 +64,32 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .exceptionHandling(errors -> errors.authenticationEntryPoint((request, response, exception) -> {
-                    response.setStatus(401);
-                    response.setContentType("application/json;charset=UTF-8");
-                    response.getWriter().write("{\"status\":401,\"message\":\"Bạn cần đăng nhập\"}");
-                }))
-                .authorizeHttpRequests(auth -> auth
+                .exceptionHandling(errors -> errors
+                    .authenticationEntryPoint((request, response, exception) -> securityErrors.unauthorized(request, response))
+                    .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
+                .authorizeHttpRequests(auth -> {
+                    // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
+                    auth.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/products/manage").hasAnyRole("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF");
+                    for (HttpMethod method : new HttpMethod[]{HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE}) {
+                        auth.requestMatchers(method, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**", "/api/v1/services/**")
+                            .hasAnyRole("ADMIN", "SALES_STAFF");
+                        auth.requestMatchers(method, "/api/v1/medical-records/**", "/api/v1/vaccinations/**", "/api/v1/treatments/**")
+                            .hasAnyRole("ADMIN", "VETERINARIAN");
+                        auth.requestMatchers(method, "/api/v1/inventory/**").hasAnyRole("ADMIN", "WAREHOUSE_STAFF");
+                    }
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/pets/my-pets").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/pets").hasAnyRole("ADMIN", "SALES_STAFF")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/pets/{id}").hasAnyRole("ADMIN", "SALES_STAFF")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/pets/{id}").hasAnyRole("ADMIN", "SALES_STAFF")
+                        .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/{id}/approve").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/loyalty/account/{userId}/add").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/loyalty/account/spend", "/api/v1/loyalty/account/{userId}/spend").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders/{id}/confirm", "/api/v1/orders/{id}/process", "/api/v1/orders/{id}/ship", "/api/v1/orders/{id}/deliver")
+                            .hasAnyRole("ADMIN", "SALES_STAFF")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/orders").hasRole("CUSTOMER")
                         .requestMatchers("/api/v1/auth/me", "/api/v1/pets/my-pets", "/api/v1/pets/my-pets/**").authenticated()
-                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/pets/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/products/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/services/**").permitAll()
@@ -81,7 +102,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/reviews/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                        .anyRequest().authenticated());
+                        .anyRequest().authenticated();
+                });
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);

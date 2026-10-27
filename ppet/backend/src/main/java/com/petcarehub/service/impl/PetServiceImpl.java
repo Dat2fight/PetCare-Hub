@@ -91,7 +91,7 @@ public class PetServiceImpl implements PetService {
     @Transactional(readOnly = true)
     public PetDTO getPetById(Long id) {
         Pet pet = petRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Pet not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng"));
         return mapToDTO(pet);
     }
 
