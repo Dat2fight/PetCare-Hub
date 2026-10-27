@@ -63,7 +63,7 @@ export const LoginPage: React.FC = () => {
           </div>
           
           <div className="flex border-b border-gray-200 mb-8">
-            <button className="flex-1 pb-4 text-primary-600 font-semibold border-b-2 border-primary-600">Đăng nhập</button>
+            <span aria-current="page" className="flex-1 pb-4 text-center text-primary-600 font-semibold border-b-2 border-primary-600">Đăng nhập</span>
             <Link to="/register" className="flex-1 pb-4 text-center text-gray-400 font-medium hover:text-gray-600 transition-colors">Đăng ký</Link>
           </div>
 
@@ -96,7 +96,7 @@ export const LoginPage: React.FC = () => {
                 <input type="checkbox" className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-gray-300" />
                 <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
               </label>
-              <span aria-disabled="true">Quên mật khẩu — Sắp ra mắt</span>
+              <span aria-disabled="true">Quên mật khẩu? (Sắp ra mắt)</span>
             </div>
 
             <Button type="submit" fullWidth isLoading={isLoading} className="mt-8">

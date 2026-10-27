@@ -1,5 +1,40 @@
 # QA BUG-008–014 — 2026-10-27
 
+## Kết quả tổng hợp
+
+| Bug | Trạng thái | Nguyên nhân còn lại / kiểm chứng | Commit |
+|---|---|---|---|
+|008|ĐÃ SỬA|Ownership đã có; thêm nhanh thiếu DTO/cap/role và pet loading/error; 2 test đỏ rồi xanh, booking H2 + UI PASS|c2110b6|
+|009|ĐÃ SỬA|API thật đã có; thiếu ID validation, trạng thái mua và 404 tiếng Việt; 1 test đỏ rồi xanh, UI PASS|c6f5bc0|
+|010|ĐÃ SỬA; triển khai NEEDS DECISION|COD/kỳ/date chưa đủ; 2 test đỏ rồi xanh, hai báo cáo150 đúng tính tay; migration004 chưa chạy|59f36bb|
+|011|ĐÃ SỬA|401 đã có nhưng JSON/correlationId và interceptor chưa đủ; 2 test đỏ rồi xanh|f308893|
+|012|ĐÃ SỬA|Cụm Header không co, tên/badge dài; 134/208 case tràn trước →0/208 sau|af22d09|
+|013|ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ (thêm test hồi quy), hoàn thiện nút khác|Quên mật khẩu đã disabled; scanner3 nút chưa xử lý →PASS|HEAD, fix(BUG-013): clarify unavailable actions and record final QA evidence|
+|014|ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ (thêm test hồi quy)|Config đã có; npm ci sạch/lint0, probe deliberate violation exit1 rồi hoàn tác|d20ceb1|
+
+Cuối cùng: `mvnw.cmd clean test`: **49 suites, 210 tests, 207 pass, 3 SQL Server opt-in skipped, 0 failures/errors**. `npx tsc --noEmit`, lint (0 lỗi/0 cảnh báo), build PASS. Lint probe và action scanner PASS. Browser UI scenarios PASS; responsive 208/208 PASS. Chi tiết và hướng dẫn tại MANUAL-CHECKS.md, RESPONSIVE.md. Không xác nhận SQL Server integration vì không chạy container test trong nhiệm vụ này.
+
+Thay đổi nguồn theo bug (đường dẫn tương đối `ppet/`; Git show của từng commit là danh sách đầy đủ, bao gồm docs):
+
+- 014: frontend/tools/check-lint.cjs.
+- 011: backend SecurityConfig, SecurityErrorHandler, JwtAuthenticationFilter, JwtTokenProvider, AuthController, ErrorResponse, GlobalExceptionHandler; QaPersonalAuthenticationTest; frontend api/client, AuthContext, LoginPage.
+- 008: backend PersonalPetProperties, PersonalPetCreateRequest, PersonalPetService, PetController, PetRepository, SecurityConfig, AppointmentCreateRequest; QaQuickPetTest/QaAppointmentScopeTest; frontend Modal, QuickAddPetModal, BookingPage, petManagementService.
+- 009: backend PetServiceImpl/QaPublicPetDetailTest; frontend PetDetailPage/petManagementService.
+- 010: backend Order, OrderRepository, OrderServiceImpl, AdminServiceImpl, migrations/004_orders_paid_at.sql, QaRevenueWindowTest/RevenueRepositoryTest.
+- 012: frontend Header, Input, ProductListPage, CheckoutPage; tools/check-responsive.cjs, check-qa-ui.cjs; bảng/JSON responsive.
+- 013: frontend LoginPage, RegisterPage, HomePage, ProductDetailPage, tools/check-actions.cjs; báo cáo/hướng dẫn/quét cuối.
+
+### Endpoint cá nhân trước/sau BUG-011
+
+| Endpoint | Trước trên nhánh nền | Sau |
+|---|---|---|
+|GET auth/me, pets/my-pets, pets/my-pets/{id}|401, không có correlationId ở filter|401 JSON thống nhất, message Vui lòng đăng nhập, correlationId|
+|GET appointments/me, orders, cart|401 ở filter|401 cùng schema|
+|GET notifications, notifications/unread-count|401 ở filter|401 cùng schema|
+|GET loyalty/account, loyalty/transactions|401 ở filter|401 cùng schema|
+|PUT users/me, POST pets/my-pets, PUT pets/my-pets/{id}|401 ở filter|401 cùng schema; POST còn yêu cầu CUSTOMER|
+|Các endpoint private còn lại|Đã được bảo vệ|EndpointSecurityMatrixTest kiểm đủ102 endpoint, không500 với anonymous|
+
 ## Bước 0
 
 - Workspace thực tế: `D:/visual studio/PetCare-Hub`; đường dẫn trong yêu cầu là tham chiếu cũ.
@@ -77,3 +112,18 @@ WHERE payment_status='COMPLETED' AND paid_at IS NULL;
 - check-qa-ui.cjs PASS trên Chrome: menu/Esc/focus/navigation/touch, 404/invalid pet ID không gọi API, protected redirect, login401 giữ form, quick add chọn pet/giữ slot, slot failure không fallback. Browser data hoàn toàn fixture; chưa phải E2E với SQL Server.
 - Backend regression PASS; TypeScript/lint/build PASS. Có lỗi lint ở script mới do global window dư; đã xóa, 0 lỗi/0 cảnh báo.
 - BUG-010 commit `59f36bb`, backend210 tests/3 skipped; sửa fixture category/SKU bắt buộc, không thay logic để nới test.
+
+## BUG-013
+
+- Quên mật khẩu ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ: không href#, đã aria-disabled. Không starter-mail/JavaMailSender/SMTP/reset token/route reset. Giữ nhãn `Quên mật khẩu? (Sắp ra mắt)`, không dựng reset giả.
+- Hoàn thiện quét nút: check-actions.cjs FAIL3 trước (tab Login, tab Register, wishlist ProductDetail). Tab chuyển span aria-current; wishlist disabled/Sắp ra mắt. Wishlist Home nằm trong Link trước đó, chuyển thành nhãn chưa hỗ trợ để không giả làm nút. Google/Facebook, AppStore/GooglePlay đã disabled từ trước; các nút trong Link/form có hành động thật. Quét href# trong src:0. Script hồi quy sau sửa PASS.
+- Không tìm thấy email/điện thoại hỗ trợ thật trong frontend, không bịa liên hệ. NEEDS DECISION: reset đầy đủ cần SMTP/provider, base URL và migration token hash riêng; SecureRandom≥32byte, TTL30phút, một lần, thu hồi token cũ, response chung chống dò email, rate-limit email/IP, kiểm mật khẩu/BCrypt, cơ chế revoke JWT nếu cần. Chưa thêm thư viện/schema reset/route giả.
+- Lint/TypeScript/build PASS. Thêm hướng dẫn MANUAL-CHECKS.md và công cụ quét action (phân tích TSX với TypeScript đã có).
+- BUG-012 commit `af22d09`.
+
+## Quét cuối và giới hạn
+
+- `mockPets` không còn trong frontend/src; các đề cập trong tài liệu lịch sử không chạy. `href="#"` không còn trong src. `mockImages` là ảnh marketing; Home còn card pet/dịch vụ/testimonial/brand quảng bá tĩnh, không dùng làm fallback booking/detail. NEEDS DECISION: chuyển dữ liệu quảng bá Home sang API riêng. `data/mockProducts.ts` không có nơi import (file legacy, ngoài phạm vi booking/pet detail).
+- `findAll()` còn5 vị trí: AdminServiceImpl.getAllUsers (ADMIN danh sách user); ProductCategoryServiceImpl (catalog category); PromotionServiceImpl (catalog promotion); ServiceManagementServiceImpl (catalog service); SpeciesServiceImpl (catalog species). Không còn trong booking chọn pet hay tính doanh thu. Phân trang các catalog lớn là phạm vi khác.
+- `getPrincipal()` còn trong AuthController/JwtTokenProvider/Ownership (instanceof kiểm trước), ReviewServiceImpl (instanceof kiểm trước cast và quyền review). Hai cast STOMP nhận kiểu do UserDetailsServiceImpl trả về, không principal anonymous. Không có cast anonymous ở endpoint cá nhân.
+- Không push, merge, rebase hoặc rewrite history. Không chạy SQL reset/mutation DB dev. Playwright cài TEMP, không thay package/lock. Năm file bảo vệ so với f8b2192 không đổi; ban đầu không có Đợt G chưa commit để giữ.
