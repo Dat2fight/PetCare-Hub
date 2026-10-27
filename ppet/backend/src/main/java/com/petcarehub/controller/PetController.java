@@ -21,11 +21,11 @@ public class PetController {
 
     private final PetService petService;
     private final com.petcarehub.security.Ownership ownership;
+    private final com.petcarehub.service.PersonalPetService personalPets;
     @PostMapping("/my-pets")
-    public ResponseEntity<PetDTO> createMine(@Valid @RequestBody PetCreateRequest request) {
-        request.setOwnerId(ownership.userId()); request.setPrice(java.math.BigDecimal.ZERO);
-        request.setHealthStatus("HEALTHY"); request.setAvailabilityStatus("UNAVAILABLE");
-        return ResponseEntity.status(HttpStatus.CREATED).body(petService.createPet(request));
+    @PreAuthorize("hasRole('CUSTOMER')")
+    public ResponseEntity<PetDTO> createMine(@Valid @RequestBody com.petcarehub.dto.pet.PersonalPetCreateRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(personalPets.create(request));
     }
     @PutMapping("/my-pets/{id}")
     public ResponseEntity<PetDTO> updateMine(@PathVariable Long id, @Valid @RequestBody PetUpdateRequest request) {

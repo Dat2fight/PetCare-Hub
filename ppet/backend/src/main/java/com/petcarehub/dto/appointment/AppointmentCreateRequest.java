@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"ownerId", "customerId", "userId"})
 public class AppointmentCreateRequest {
     @NotNull
     private Long petId;

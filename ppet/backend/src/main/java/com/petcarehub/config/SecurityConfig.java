@@ -78,7 +78,8 @@ public class SecurityConfig {
                             .hasAnyRole("ADMIN", "VETERINARIAN");
                         auth.requestMatchers(method, "/api/v1/inventory/**").hasAnyRole("ADMIN", "WAREHOUSE_STAFF");
                     }
-                    auth.requestMatchers(HttpMethod.POST, "/api/v1/pets").hasAnyRole("ADMIN", "SALES_STAFF")
+                    auth.requestMatchers(HttpMethod.POST, "/api/v1/pets/my-pets").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/pets").hasAnyRole("ADMIN", "SALES_STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/pets/{id}").hasAnyRole("ADMIN", "SALES_STAFF")
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/pets/{id}").hasAnyRole("ADMIN", "SALES_STAFF")
                         .requestMatchers(HttpMethod.PUT, "/api/v1/reviews/{id}/approve").hasRole("ADMIN")

@@ -28,3 +28,13 @@
 - AuthController và JwtTokenProvider bỏ cast principal không kiểm kiểu. Ownership đã instanceof; ReviewServiceImpl đã kiểm instanceof; hai cast STOMP lấy từ UserDetailsServiceImpl (kiểu trả về nội bộ xác định), không từ anonymous principal.
 - ProtectedRoute đã có state.from; MyPetsPage đã tách loading/error/retry/empty. Interceptor bỏ qua login/register, tránh redirect loop tại login, lưu đường dẫn quay lại trong sessionStorage; LoginPage đọc và kiểm đường dẫn nội bộ; bỏ console error khi khôi phục phiên thất bại.
 - BUG-014 commit `d20ceb1`; backend baseline PASS (201 tests, 3 SQL Server opt-in skipped).
+
+## BUG-008
+
+- Ownership đã sửa trước; BookingOwnershipTest 3/3 PASS ngay. Hai test QaQuickPetTest FAIL trước (201→400, staff 403→400). Tái sử dụng UI modal từ `27fb305`, native dialog từ `e609a39`, cấu hình cap từ `7fe4d3c`; không merge nhánh.
+- POST my-pets dùng DTO cá nhân, CUSTOMER-only ở filter/controller/service, identity từ Ownership, bỏ qua trường đặc quyền, giá 0/UNAVAILABLE; cap 20 cấu hình được và khóa owner trước COUNT. Giữ tương thích form cũ birthDate/ghi chú/giống; tuổi có thể chưa biết. Loài backend chấp nhận danh mục DB hợp lệ; modal lọc tên Chó/Mèo theo dữ liệu seed, không hardcode ID. NEEDS DECISION: đổi catalog sang mã loài ổn định nếu đổi tên đa ngôn ngữ.
+- Booking pets có loading/error/retry/empty; chỉ auto-select nếu 1 pet; modal lưu chọn pet mới, giữ nguyên dịch vụ/ngày/giờ. Slot đã có AbortController và tách lỗi/rỗng, không mock. Booking nằm trong ProtectedRoute.
+- POST appointments dùng ownedPet; GET appointments/pet/{petId} dùng requirePet + lọc customer/assigned staff; PUT appointments/{id}/status không nhận petId, truy vấn scoped locked. Không có reschedule API. NEEDS DECISION: chưa thêm đặt hộ khách.
+- Test H2 thật QaAppointmentScopeTest thêm: foreign/missing/store pet 404, thiếu petId 400, guest401, không ghi lịch khi thất bại; pet đúng chủ201, bỏ qua owner/customer giả. Test quick pet kiểm private storefront và cap.
+- API/DTO tài liệu cập nhật. Frontend TypeScript/lint/build PASS.
+- BUG-011 commit `f308893`.

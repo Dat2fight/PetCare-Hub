@@ -52,6 +52,19 @@ class QaAppointmentScopeTest {
         mvc.perform(get("/api/v1/appointments").header("Authorization",token(admin)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
     }
+    @Test void bookingUsesOnlyOwnedPetAndAuthenticatedCustomer() throws Exception {
+        long before=appointments.count();
+        var unowned=pets.save(Pet.builder().name("qa_sale").species(petA.getSpecies()).price(BigDecimal.TEN).availabilityStatus(AvailabilityStatus.AVAILABLE).build());
+        String template="{\"petId\":%s,\"serviceId\":"+apA.getService().getId()+",\"staffId\":"+staff.getId()+",\"customerId\":"+b.getId()+",\"ownerId\":"+b.getId()+",\"appointmentTime\":\""+LocalDate.now().plusDays(2)+"T10:00:00\"}";
+        for(Long id:List.of(petB.getId(),unowned.getId(),Long.MAX_VALUE))
+            mvc.perform(post("/api/v1/appointments").header("Authorization",token(a)).contentType("application/json").content(template.formatted(id))).andExpect(status().isNotFound());
+        mvc.perform(post("/api/v1/appointments").header("Authorization",token(a)).contentType("application/json").content(template.formatted("null"))).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/appointments").contentType("application/json").content(template.formatted(petA.getId()))).andExpect(status().isUnauthorized());
+        org.junit.jupiter.api.Assertions.assertEquals(before,appointments.count());
+        mvc.perform(post("/api/v1/appointments").header("Authorization",token(a)).contentType("application/json").content(template.formatted(petA.getId())))
+            .andExpect(status().isCreated()).andExpect(jsonPath("$.petId").value(petA.getId())).andExpect(jsonPath("$.customerId").value(a.getId()));
+        org.junit.jupiter.api.Assertions.assertEquals(before+1,appointments.count());
+    }
     @Test void customerCannotDiscoverOrCancelAnotherCustomersAppointment() throws Exception {
         mvc.perform(get("/api/v1/appointments/user/{id}",b.getId()).header("Authorization",token(a))).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/appointments/pet/{id}",petB.getId()).header("Authorization",token(a)))

@@ -12,6 +12,7 @@ import java.util.List;
 
 @Repository
 public interface PetRepository extends JpaRepository<Pet, Long>, JpaSpecificationExecutor<Pet> {
+    long countByOwnerId(Long ownerId);
     java.util.Optional<Pet> findByIdAndOwnerId(Long id, Long ownerId);
     Page<Pet> findByAvailabilityStatus(AvailabilityStatus status, Pageable pageable);
     Page<Pet> findByOwnerIsNullAndAvailabilityStatus(AvailabilityStatus status, Pageable pageable);

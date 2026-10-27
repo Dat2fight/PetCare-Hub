@@ -126,3 +126,11 @@
 - Ngoài controller inventory: Swagger/OpenAPI public; WebSocket handshake public nhưng STOMP CONNECT xác thực JWT và destination theo người dùng. Không cấp secret cho frontend bundle.
 
 Xem [báo cáo sửa lỗi](qa-critical-001-007/REPORT.md), [kiểm tra thủ công](qa-critical-001-007/MANUAL-CHECKS.md) và [cấu hình/rotate](qa-critical-001-007/SECRET-OPERATIONS.md).
+# QA high follow-up: personal pet creation and authentication
+
+`POST /api/v1/pets/my-pets` requires CUSTOMER. Send `name` (1–100), `speciesId` from `/species`, and integer `age` (0–30) for quick creation. The existing `birthDate`, `breedId`, `description`, `imageUrl` form remains supported; unknown age/date may be omitted. Identity, price and internal statuses are never accepted from the client. Result is an owned UNAVAILABLE pet; registration count is serialized under the owner lock and capped by `app.pets.max-personal-pets` (default 20), returning 409 at the cap. Invalid species/breed is rejected.
+
+Personal routes including `/auth/me` and `/pets/my-pets/**` require authentication. Filter errors use the same ErrorResponse as controllers, including `correlationId`; 401 message is `Vui lòng đăng nhập`. Invalid bearer tokens receive 401.
+
+Booking requires `petId`, `serviceId`, `appointmentTime`; customer identity is taken from the principal. Foreign, unowned and missing pets return 404. `GET /appointments/pet/{petId}` retains owner/assigned-vet/admin scope. There is no customer rescheduling endpoint or staff-on-behalf booking flow.
+
