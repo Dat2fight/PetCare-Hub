@@ -1,9 +1,6 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { PublicPetDTO, petManagementService } from '../../services/petManagementService';
 import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
-import apiClient from '../../api/client';
-import { PublicPetDTO } from '../../services/petManagementService';
+import { PublicPetDTO, petManagementService } from '../../services/petManagementService';
 import { useAuth } from '../../contexts/AuthContext';
 import { Button } from '../../components/common/Button';
 import { PetPurchaseModal } from '../../components/pets/PetPurchaseModal';
