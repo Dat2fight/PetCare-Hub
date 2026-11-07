@@ -4,8 +4,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-@com.fasterxml.jackson.annotation.JsonIgnoreProperties(ignoreUnknown = true)
-@com.fasterxml.jackson.annotation.JsonIgnoreProperties({"userId", "customerId", "ownerId", "price", "totalAmount", "availability"})
+@com.fasterxml.jackson.annotation.JsonIgnoreProperties(value = {"userId", "customerId", "ownerId", "price", "totalAmount", "availability"}, ignoreUnknown = true)
 public class OrderCreateRequest {
     @jakarta.validation.Valid
     @jakarta.validation.constraints.NotEmpty(message="Đơn hàng phải có sản phẩm")
