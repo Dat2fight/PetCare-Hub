@@ -144,6 +144,7 @@ export const ProductListPage: React.FC = () => {
             </div>
             <input
               type="text"
+              aria-label="Tìm kiếm sản phẩm"
               className="block w-full rounded-full border border-gray-200 py-3 pl-12 pr-4 text-gray-900 focus:ring-2 focus:ring-primary-500 bg-white shadow-xs"
               placeholder="Tìm kiếm hạt Royal Canin, vòng cổ..."
               value={searchTerm}

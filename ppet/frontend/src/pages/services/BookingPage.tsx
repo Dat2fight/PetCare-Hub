@@ -9,14 +9,16 @@ import toast from 'react-hot-toast';
 
 import { petManagementService, PetDTO } from '../../services/petManagementService';
 import { QuickAddPetModal } from '../../components/pets/QuickAddPetModal';
+import { getBusinessDate } from '../../utils/businessDate';
 
 export const BookingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const serviceId = searchParams.get('serviceId');
+  const today = getBusinessDate();
   
   const [service, setService] = useState<Service | null>(null);
   const [selectedPet, setSelectedPet] = useState<PetDTO | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(today);
   const [selectedTime, setSelectedTime] = useState('');
   const [pets, setPets] = useState<PetDTO[]>([]);
   const [slotError, setSlotError] = useState<string | null>(null);
@@ -155,7 +157,7 @@ export const BookingPage: React.FC = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+                min={today}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>

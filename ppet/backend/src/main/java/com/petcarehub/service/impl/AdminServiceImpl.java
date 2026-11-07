@@ -19,7 +19,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
+import com.petcarehub.dto.admin.AdminUserDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 @Service
 @RequiredArgsConstructor
@@ -74,8 +78,18 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    @Transactional(readOnly = true)
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    public Page<AdminUserDTO> getAllUsers(Pageable pageable) {
+        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by("id");
+        for (Sort.Order order : sort) {
+            if (!java.util.Set.of("id", "username", "email", "firstName", "lastName", "enabled").contains(order.getProperty()))
+                throw new BadRequestException("Trường sắp xếp người dùng không hợp lệ");
+        }
+        if (sort.getOrderFor("id") == null) sort = sort.and(Sort.by("id"));
+        Pageable bounded = pageable.isUnpaged() ? PageRequest.of(0, 20, sort)
+                : PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), sort);
+        return userRepository.findAll(bounded).map(AdminUserDTO::from);
     }
 
     @Override

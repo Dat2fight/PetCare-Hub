@@ -23,7 +23,7 @@
 | `DELETE /vaccinations/{id}` | VETERINARIAN, ADMIN |
 | `GET /admin/dashboard` | ADMIN; không được hạ quyền admin hiện hữu |
 | `GET /admin/revenue-report` | ADMIN; không được hạ quyền admin hiện hữu |
-| `GET /admin/users` | ADMIN; không được hạ quyền admin hiện hữu |
+| `GET /admin/users` | ADMIN; phân trang tại DB, mặc định 20/tối đa 100 |
 | `GET /appointments` | ADMIN xem toàn bộ; SALES_STAFF/VETERINARIAN chỉ lịch được phân công |
 | `GET /appointments/me` | Đã đăng nhập; dữ liệu theo principal |
 | `GET /appointments/pet/{petId}` | Chủ pet chỉ lịch của mình; VETERINARIAN chỉ lịch được giao; ADMIN toàn bộ |
@@ -115,6 +115,8 @@
 | `PUT /vaccinations/{id}` | VETERINARIAN, ADMIN |
 
 ## Hợp đồng cần lưu ý
+
+- `GET /admin/users?page=0&size=20&sort=id,asc` trả đối tượng Page (`content`, `number`, `size`, `totalElements`, `totalPages`, `first`, `last`), không còn mảng entity. Trang tính từ 0; mặc định 20, tối đa 100. Mỗi dòng chỉ có `id`, `username`, `email`, `firstName`, `lastName`, `enabled`, `roles` (tên vai trò). Sort cho phép các trường đơn này trừ `roles`, thêm `id` để thứ tự ổn định. Không tìm thấy consumer frontend quản trị trong repo; client bên ngoài cần đọc `content` và gửi tham số trang.
 
 - Register nhận username/email/password/firstName/lastName/phone; login trả `{token,user}`. Không có endpoint refresh/logout server trong inventory này.
 - `GET /pets`: query `healthStatus`, `availabilityStatus`, `speciesId`, `breedId`, page/size/sort. Điều kiện owner=NULL và AVAILABLE luôn áp dụng. PublicPetDTO chỉ có id/name/speciesId/speciesName/breedId/breedName/age/birthDate/price/availabilityStatus/description/imageUrl. Detail chỉ nhận AVAILABLE/RESERVED chưa có chủ; PENDING/SOLD/UNAVAILABLE, trạng thái khác hoặc có chủ luôn 404. RESERVED không xuất hiện trong danh sách bán.
