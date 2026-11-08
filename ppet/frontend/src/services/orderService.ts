@@ -1,8 +1,7 @@
 import apiClient from '../api/client';
 import { Order, Page } from '../types';
 
-export type OrderItemRequest = { productId: number; petId?: never; quantity: number }
-  | { petId: number; productId?: never; quantity: 1 };
+export type OrderItemRequest = { productId: number; petId?: never; quantity: number };
 export interface OrderCreateRequest {
   items: OrderItemRequest[];
   shippingAddress: string;
@@ -11,9 +10,10 @@ export interface OrderCreateRequest {
 }
 export const orderService = {
   create: async (request: OrderCreateRequest): Promise<Order> => {
+    if (request.items.some(item => item.petId != null)) throw new Error('Mua thú cưng chưa khả dụng trên phiên bản này');
     const { data } = await apiClient.post<Order>('/orders', {
       shippingAddress: request.shippingAddress, paymentMethod: request.paymentMethod, notes: request.notes,
-      items: request.items.map(item => item.petId != null ? { petId: item.petId, quantity: 1 } : { productId: item.productId, quantity: item.quantity })
+      items: request.items.map(item => ({ productId: item.productId, quantity: item.quantity }))
     });
     return data;
   },

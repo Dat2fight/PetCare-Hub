@@ -23,7 +23,7 @@
 | `DELETE /vaccinations/{id}` | VETERINARIAN, ADMIN |
 | `GET /admin/dashboard` | ADMIN; không được hạ quyền admin hiện hữu |
 | `GET /admin/revenue-report` | ADMIN; không được hạ quyền admin hiện hữu |
-| `GET /admin/users` | ADMIN; không được hạ quyền admin hiện hữu |
+| `GET /admin/users` | ADMIN; phân trang tại DB, mặc định 20/tối đa 100 |
 | `GET /appointments` | ADMIN xem toàn bộ; SALES_STAFF/VETERINARIAN chỉ lịch được phân công |
 | `GET /appointments/me` | Đã đăng nhập; dữ liệu theo principal |
 | `GET /appointments/pet/{petId}` | Chủ pet chỉ lịch của mình; VETERINARIAN chỉ lịch được giao; ADMIN toàn bộ |
@@ -116,10 +116,12 @@
 
 ## Hợp đồng cần lưu ý
 
+- `GET /admin/users?page=0&size=20&sort=id,asc` trả đối tượng Page (`content`, `number`, `size`, `totalElements`, `totalPages`, `first`, `last`), không còn mảng entity. Trang tính từ 0; mặc định 20, tối đa 100. Mỗi dòng chỉ có `id`, `username`, `email`, `firstName`, `lastName`, `enabled`, `roles` (tên vai trò). Sort cho phép các trường đơn này trừ `roles`, thêm `id` để thứ tự ổn định. Không tìm thấy consumer frontend quản trị trong repo; client bên ngoài cần đọc `content` và gửi tham số trang.
+
 - Register nhận username/email/password/firstName/lastName/phone; login trả `{token,user}`. Không có endpoint refresh/logout server trong inventory này.
-- `GET /pets`: query `healthStatus`, `availabilityStatus`, `speciesId`, `breedId`, page/size/sort. Điều kiện owner=NULL và AVAILABLE luôn áp dụng. PublicPetDTO chỉ có id/name/speciesId/speciesName/breedId/breedName/age/birthDate/price/availabilityStatus/description/imageUrl. Detail nhận thêm RESERVED chưa có chủ; SOLD hoặc có chủ 404.
+- `GET /pets`: query `healthStatus`, `availabilityStatus`, `speciesId`, `breedId`, page/size/sort. Điều kiện owner=NULL và AVAILABLE luôn áp dụng. PublicPetDTO chỉ có id/name/speciesId/speciesName/breedId/breedName/age/birthDate/price/availabilityStatus/description/imageUrl. Detail chỉ nhận AVAILABLE/RESERVED chưa có chủ; PENDING/SOLD/UNAVAILABLE, trạng thái khác hoặc có chủ luôn 404. RESERVED không xuất hiện trong danh sách bán.
 - `/appointments/me` thay cho URL có userId khi xem lịch cá nhân. Alias cũ giữ kiểm quyền. `/notifications` và `/loyalty/account`, `/loyalty/transactions` cũng lấy principal.
-- Product checkout nhận `{shippingAddress,paymentMethod:"COD",items:[{productId,quantity}]}`. ShippingAddress hiện gộp người nhận, SĐT và địa chỉ. Price/userId/total từ client không quyết định đơn; petId bị từ chối vì tính năng mua pet ở nhánh riêng chưa tích hợp.
+- Product checkout nhận `{shippingAddress,paymentMethod:"COD",items:[{productId,quantity}]}`. ShippingAddress hiện gộp người nhận, SĐT và địa chỉ. Price/userId/total từ client không quyết định đơn. Theo quyết định H-01 phương án A, mua pet trực tuyến đóng: frontend không mở modal mua, DTO/service từ chối petId (kể cả đơn hỗn hợp) mà không thay đổi đơn, kho, giỏ hoặc giữ chỗ. Các đơn pet đã tồn tại vẫn giữ luồng xử lý/hủy/giao hiện có.
 - Thành công checkout trả id/status/items/totalPrice/orderNumber/paymentStatus; status và paymentStatus đều PENDING ban đầu. Cập nhật tồn kho, đơn và phần giỏ đã mua cùng transaction. Thanh toán online/giảm giá/đổi điểm/idempotency chưa được thêm. Giao COD chỉ đánh dấu COMPLETED theo state machine hiện có.
 - Public GET products luôn active; muốn xem inactive dùng `/products/manage`. Khuyến mãi giữ quyền SALES_STAFF theo base, cần quyết định nếu đổi ADMIN-only.
 - API/DTO khác giữ nguyên từ base. Các route `/pets/{id}/medical-records`, `/product-categories`, auth refresh/logout từng ghi trong bản tài liệu cũ không tồn tại trong mapping hiện hành.

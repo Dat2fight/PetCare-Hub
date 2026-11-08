@@ -9,7 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import com.petcarehub.dto.admin.AdminUserDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 
 @RestController
 @RequestMapping("/api/v1/admin")
@@ -37,8 +40,8 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(adminService.getAllUsers());
+    public ResponseEntity<Page<AdminUserDTO>> getAllUsers(@PageableDefault(size = 20, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(adminService.getAllUsers(pageable));
     }
 
     @PatchMapping("/users/{userId}/role")

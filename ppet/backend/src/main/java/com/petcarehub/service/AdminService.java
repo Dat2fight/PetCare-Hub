@@ -4,11 +4,13 @@ import com.petcarehub.dto.admin.DashboardSummaryDTO;
 import com.petcarehub.dto.admin.RevenueReportDTO;
 import com.petcarehub.entity.User;
 
-import java.util.List;
+import com.petcarehub.dto.admin.AdminUserDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface AdminService {
     DashboardSummaryDTO getDashboardSummary(java.time.LocalDate from, java.time.LocalDate to);
     RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to);
-    List<User> getAllUsers();
+    Page<AdminUserDTO> getAllUsers(Pageable pageable);
     User updateUserRole(Long userId, String role);
 }

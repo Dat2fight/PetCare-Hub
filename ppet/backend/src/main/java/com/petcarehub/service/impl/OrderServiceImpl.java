@@ -30,17 +30,14 @@ public class OrderServiceImpl implements OrderService {
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
     public OrderDTO createOrder(OrderCreateRequest request) {
         Long customerId = ownership.userId();
+        if (!ownership.hasRole("CUSTOMER") || java.util.stream.Stream.of("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN").anyMatch(ownership::hasRole))
+            throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng được đặt mua");
         if (request.getShippingAddress() == null || request.getShippingAddress().isBlank() || request.getShippingAddress().length() > 2000)
             throw new BadRequestException("Thông tin giao hàng là bắt buộc, tối đa 2000 ký tự");
         if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
             throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
         if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
         for (OrderItemDTO item : request.getItems()) if (item == null || item.getPetId() != null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ; phiên bản này chưa hỗ trợ mua thú cưng");
-        if (!ownership.hasRole("CUSTOMER") || java.util.stream.Stream.of("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN").anyMatch(ownership::hasRole))
-            throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng được đặt mua");
-        if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
-            throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
-        if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
         java.util.Set<Long> petIds = new java.util.TreeSet<>();
         for (int index = 0; index < request.getItems().size(); index++) {
             OrderItemDTO item = request.getItems().get(index);
@@ -87,7 +84,6 @@ public class OrderServiceImpl implements OrderService {
             }
             carts.saveAndFlush(cart);
         });
-        return dto(orders.save(order));
         Order saved = orders.saveAndFlush(order);
         for (Pet pet : reservedPets) {
             pet.setAvailabilityStatus(AvailabilityStatus.PENDING); pet.setReservedOrder(saved); pets.save(pet);
@@ -148,9 +144,6 @@ public class OrderServiceImpl implements OrderService {
         Long currentId = ownership.userId();
         Order o = (ownership.hasRole("ADMIN") ? orders.findLockedById(id) : orders.findOwnedLockedById(id, currentId))
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
-        state(o).cancel(o);
-        for (OrderItem item : o.getItems()) if (item.getProduct()!=null) {
-        Order o=locked(id); ownership.requireUser(o.getCustomer().getId());
         // Keep legacy product-only cancellation behavior; pet retries never release another order's reservation.
         if (o.getStatus() == OrderStatus.CANCELLED && o.getItems().stream().anyMatch(item -> item.getPet() != null)) return dto(o);
         if (o.getStatus() == OrderStatus.DELIVERED) throw new InvalidStateTransitionException("Không thể hủy đơn đã giao");

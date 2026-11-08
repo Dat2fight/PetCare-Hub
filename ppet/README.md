@@ -338,16 +338,12 @@ Frontend:
 
 ```powershell
 Set-Location D:\PetCare-Hub\ppet\frontend
-try {
-    npm run build
-    if ($LASTEXITCODE -ne 0) { throw 'Frontend build thất bại' }
-} finally {
-    git restore -- tsconfig.app.tsbuildinfo
-}
+npm run build
+if ($LASTEXITCODE -ne 0) { throw 'Frontend build thất bại' }
 npm run lint
 ```
 
-Build gồm tsc -b và Vite, output ở dist. Build/lint pass; đã chạy lại sau thay đổi cấu hình Vite. Sau **mỗi** build luôn restore tsconfig.app.tsbuildinfo. Không commit dist/log/.env thật.
+Script build vẫn là `tsc -b && vite build`, output ở `dist`. Cache TypeScript của app và cấu hình Vite được tự sinh tại `node_modules/.tmp/tsconfig.app.tsbuildinfo` và `node_modules/.tmp/tsconfig.node.tsbuildinfo`. Cache và thư mục output được Git bỏ qua; build không cần restore file nào. Hai file `.tsbuildinfo` cũ ở thư mục frontend không còn được Git theo dõi và không còn được build sử dụng; bản đang có trên đĩa được giữ nguyên. Không commit cache/dist/log/.env thật.
 
 ## 10. Khắc phục sự cố
 

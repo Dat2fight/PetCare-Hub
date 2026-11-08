@@ -78,6 +78,24 @@ class PrivatePetDataTest {
                 .andExpect(jsonPath("$.availabilityStatus").value("RESERVED"))
                 .andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.healthStatus").doesNotExist());
     }
+    @Test void publicDetailChecksOwnershipBeforeEveryAvailabilityStatus() throws Exception {
+        for (AvailabilityStatus state : AvailabilityStatus.values()) {
+            for (boolean owned : List.of(false, true)) {
+                sale.setAvailabilityStatus(state); sale.setOwner(owned ? owner : null); pets.saveAndFlush(sale);
+                boolean visible = !owned && (state == AvailabilityStatus.AVAILABLE || state == AvailabilityStatus.RESERVED);
+                var response = mvc.perform(get("/api/v1/pets/" + sale.getId()));
+                if (visible) response.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(sale.getId()))
+                        .andExpect(jsonPath("$.name").value(sale.getName())).andExpect(jsonPath("$.availabilityStatus").value(state.name()))
+                        .andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.healthStatus").doesNotExist())
+                        .andExpect(jsonPath("$.reservedOrder").doesNotExist());
+                else response.andExpect(status().isNotFound()).andExpect(jsonPath("$.id").doesNotExist())
+                        .andExpect(jsonPath("$.name").doesNotExist()).andExpect(jsonPath("$.description").doesNotExist())
+                        .andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.availabilityStatus").doesNotExist());
+                mvc.perform(get("/api/v1/pets").param("speciesId", animal.getId().toString()))
+                        .andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(!owned && state == AvailabilityStatus.AVAILABLE ? 1 : 0));
+            }
+        }
+    }
     @Test void privatePetEndpointRequiresOwnerOrClinicalRole() throws Exception {
         String path = "/api/v1/pets/my-pets/"+mine.getId();
         mvc.perform(get(path)).andExpect(status().isUnauthorized());

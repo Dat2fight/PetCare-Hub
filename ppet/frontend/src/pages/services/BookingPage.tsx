@@ -6,41 +6,34 @@ import { serviceService, Service } from '../../services/serviceService';
 import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
 import toast from 'react-hot-toast';
-import { QuickAddPetModal } from '../../components/pets/QuickAddPetModal';
 
 import { petManagementService, PetDTO } from '../../services/petManagementService';
 import { QuickAddPetModal } from '../../components/pets/QuickAddPetModal';
+import { getBusinessDate } from '../../utils/businessDate';
 
 export const BookingPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const serviceId = searchParams.get('serviceId');
+  const today = getBusinessDate();
   
   const [service, setService] = useState<Service | null>(null);
   const [selectedPet, setSelectedPet] = useState<PetDTO | null>(null);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(today);
   const [selectedTime, setSelectedTime] = useState('');
   const [pets, setPets] = useState<PetDTO[]>([]);
   const [slotError, setSlotError] = useState<string | null>(null);
   const [slotsLoading, setSlotsLoading] = useState(false);
   const [retry, setRetry] = useState(0);
   const [petsLoading, setPetsLoading] = useState(true);
-  const [petsError, setPetsError] = useState(false);
-  const [petRetry, setPetRetry] = useState(0);
-  const [showQuickAdd, setShowQuickAdd] = useState(false);
-  useEffect(() => {
-    const controller = new AbortController(); setPetsLoading(true); setPetsError(false);
-    petManagementService.getMyPets(controller.signal).then(data => {
-      if (!controller.signal.aborted) { setPets(data); setSelectedPet(data.length === 1 ? data[0] : null); }
-    }).catch(() => { if (!controller.signal.aborted) setPetsError(true); })
-      .finally(() => { if (!controller.signal.aborted) setPetsLoading(false); });
-    return () => controller.abort();
-  }, [petRetry]);
   const [petsError, setPetsError] = useState(''); const [petsRetry, setPetsRetry] = useState(0);
   const [quickAddOpen, setQuickAddOpen] = useState(false);
   useEffect(() => {
     const controller = new AbortController(); setPetsLoading(true); setPetsError('');
     petManagementService.getMyPets(controller.signal).then(data => {
-      if (!controller.signal.aborted) { setPets(data); setSelectedPet(current => data.find(pet => pet.id === current?.id) || data[0] || null); }
+      if (!controller.signal.aborted) {
+        setPets(data);
+        setSelectedPet(current => data.find(pet => pet.id === current?.id) || (data.length === 1 ? data[0] : null));
+      }
     }).catch(() => { if (!controller.signal.aborted) setPetsError('Không tải được thú cưng của bạn.'); })
       .finally(() => { if (!controller.signal.aborted) setPetsLoading(false); });
     return () => controller.abort();
@@ -128,9 +121,6 @@ export const BookingPage: React.FC = () => {
             {/* Pet Selection */}
             <div>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center">Chọn thú cưng</h3>
-              {petsLoading ? <p>Đang tải thú cưng…</p> : petsError ? <p role="alert">Không tải được thú cưng. <Button onClick={() => setPetRetry(value => value + 1)}>Thử lại</Button></p> : pets.length === 0 ?
-                <div><p>Bạn chưa có thú cưng</p><Button onClick={() => setShowQuickAdd(true)}>Thêm nhanh thú cưng</Button></div> : null}
-              <div className="flex gap-4 overflow-x-auto pb-2">
               {petsLoading ? <p>Đang tải thú cưng…</p> : petsError ? <p role="alert">{petsError} <Button type="button" size="sm" variant="outline" onClick={() => setPetsRetry(value => value + 1)}>Thử lại</Button></p> : pets.length === 0 ?
                 <div className="space-y-3"><p>Bạn chưa có thú cưng</p>{canAddPet && <Button type="button" onClick={() => setQuickAddOpen(true)}>Thêm nhanh thú cưng</Button>}</div> : null}
               {!petsLoading && !petsError && <div className="flex gap-4 overflow-x-auto pb-2">
@@ -167,7 +157,7 @@ export const BookingPage: React.FC = () => {
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+                min={today}
                 className="w-full px-4 py-3 rounded-xl border border-gray-300 focus:ring-primary-500 focus:border-primary-500"
               />
             </div>
@@ -236,7 +226,6 @@ export const BookingPage: React.FC = () => {
                   <span className="font-bold text-xl text-primary-600">{service.price.toLocaleString('vi-VN')} đ</span>
                 </div>
                 
-                <Button onClick={handleBooking} disabled={submitting || petsLoading || petsError || slotsLoading || !selectedPet || !selectedTime || !!slotError} fullWidth>
                 <Button onClick={handleBooking} disabled={submitting || petsLoading || !!petsError || slotsLoading || !selectedPet || !selectedTime || !!slotError} fullWidth>
                   {submitting ? 'Đang xử lý...' : 'Xác nhận đặt lịch'}
                 </Button>
@@ -248,7 +237,6 @@ export const BookingPage: React.FC = () => {
           </div>
 
         </div>
-        {showQuickAdd && <QuickAddPetModal onClose={() => setShowQuickAdd(false)} onCreated={pet => { setPets(current => [...current, pet]); setSelectedPet(pet); setShowQuickAdd(false); }} />}
       </div>
     </div>
   );
