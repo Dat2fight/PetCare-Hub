@@ -17,7 +17,9 @@ class ReviewAuditTest {
     @Test void targetPurchaseDuplicateAndModerationChecks() {
         var reviews = mock(ReviewRepository.class); var users = mock(UserRepository.class); var orders = mock(OrderRepository.class);
         var em = mock(EntityManager.class);
-        var service = new ReviewServiceImpl(reviews, users, orders, mock(AppointmentRepository.class), em, mock(ApplicationEventPublisher.class));
+        var ownership = mock(com.petcarehub.security.Ownership.class);
+        when(ownership.userId()).thenReturn(1L);
+        var service = new ReviewServiceImpl(reviews, users, orders, mock(AppointmentRepository.class), em, ownership, mock(ApplicationEventPublisher.class));
         User account = User.builder().username("audit").build(); account.setId(1L);
         var principal = UserDetailsImpl.build(account);
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));

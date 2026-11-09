@@ -146,3 +146,6 @@ Các phản hồi đơn hàng có thêm expiresAt và expiredAt (giờ Việt Na
 POST /api/v1/orders/quote (CUSTOMER) nhận items, promotionCode, pointsToUse. Kết quả gồm subtotal, discount, pointsApplied, pointsDiscount, shippingFee, total, availablePoints, maxRedeemablePoints. POST /orders hỗ trợ checkoutKey UUID cùng phạm vi khách, dùng lại khi gửi lại cùng payload.
 
 POST /cart/items (CUSTOMER) nhận đúng một trong hai trường productId hoặc petId. Với pet, quantity = 1. Lặp lại thao tác thêm cùng pet giữ một dòng trong giỏ. POST /orders nhận cả hai loại dòng trong cùng đơn COD. Cart chỉ xóa những mặt hàng vừa đặt.
+
+### Đánh giá
+`GET /reviews` và `/reviews/summary` nhận `targetType` và `targetId`. Khách đã mua hoặc đã dùng dịch vụ kiểm tra `/reviews/eligibility`, đăng đánh giá và quản lý qua `/reviews/me`. Sửa nội dung sẽ chuyển về chờ duyệt. Nhân viên bán hàng và quản trị xem `/reviews/pending`, dùng PUT `/{id}/approve`, `/{id}/reject` (gửi `reason`) hoặc `/{id}/hide` dưới `/reviews`.

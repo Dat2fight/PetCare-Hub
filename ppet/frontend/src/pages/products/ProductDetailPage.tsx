@@ -1,3 +1,4 @@
+import { Reviews } from '../../components/customer/Reviews';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productService, Product } from '../../services/productService';
@@ -184,6 +185,7 @@ export const ProductDetailPage: React.FC = () => {
         </div>
 
       </div>
+      <Reviews type="PRODUCT" id={product.id}/>
     </div>
   );
 };

@@ -12,5 +12,6 @@ public class ReviewDTO {
     private String targetType;
     private Long targetId;
     private String status;
+    private String moderationReason;
     private LocalDateTime createdAt;
 }

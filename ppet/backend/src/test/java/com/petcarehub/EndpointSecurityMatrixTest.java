@@ -27,12 +27,12 @@ class EndpointSecurityMatrixTest {
         "GET /products", "GET /products/{id}", "GET /categories", "GET /categories/{id}",
         "GET /services", "GET /services/{id}", "GET /species", "GET /species/{speciesId}/breeds",
         "GET /promotions", "GET /promotions/{id}", "GET /promotions/validate/{code}",
-        "GET /reviews", "GET /reviews/{id}");
+        "GET /reviews/summary", "GET /reviews", "GET /reviews/{id}");
     // Customer operations must obtain identity from the principal and enforce resource ownership.
     static final Set<String> CUSTOMER_WRITES = Set.of(
         "POST /cart/items", "PUT /cart/items/{itemId}", "DELETE /cart/items/{itemId}", "DELETE /cart",
         "POST /orders/quote", "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "PUT /appointments/{id}/status",
-        "POST /reviews", "PUT /users/me", "POST /pets/my-pets", "PUT /pets/my-pets/{id}",
+        "PUT /reviews/me/{id}", "DELETE /reviews/me/{id}", "POST /reviews", "PUT /users/me", "POST /pets/my-pets", "PUT /pets/my-pets/{id}",
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
@@ -45,11 +45,11 @@ class EndpointSecurityMatrixTest {
         "POST /vaccinations", "PUT /vaccinations/{id}", "DELETE /vaccinations/{id}",
         "POST /treatments", "PUT /treatments/{id}", "DELETE /treatments/{id}",
         "POST /inventory/add", "POST /inventory/reduce", "POST /inventory/adjust",
-        "PUT /reviews/{id}/approve", "POST /admin/staff", "PATCH /admin/users/{userId}/role",
+        "PUT /reviews/{id}/reject", "PUT /reviews/{id}/hide", "PUT /reviews/{id}/approve", "POST /admin/staff", "PATCH /admin/users/{userId}/role",
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
-        "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
+        "GET /reviews/me", "GET /reviews/pending", "GET /reviews/eligibility", "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
         "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage",
         "GET /appointments", "GET /appointments/me", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
         "GET /medical-records/{id}", "GET /medical-records/pet/{petId}",
@@ -82,7 +82,7 @@ class EndpointSecurityMatrixTest {
     @Test void everyStaffWriteChecksEveryRealRoleBeforeBinding() throws Exception {
         for(var role:com.petcarehub.enums.RoleType.values()) for(String endpoint:STAFF_WRITES) {
             boolean allowed=role==com.petcarehub.enums.RoleType.ADMIN;
-            if(endpoint.matches(".* /(products|categories|promotions|services|pets|orders)(/.*)?"))
+            if(endpoint.matches(".* /(products|categories|promotions|services|pets|orders|reviews)(/.*)?"))
                 allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
             if(endpoint.matches(".* /(medical-records|vaccinations|treatments)(/.*)?"))
                 allowed |= role==com.petcarehub.enums.RoleType.VETERINARIAN;
@@ -109,6 +109,7 @@ class EndpointSecurityMatrixTest {
         register(evidence,"LoyaltyOwnershipTest#customerCannotReadSpendOrAddForAnotherUser", "GET /loyalty/account/{userId}");
         register(evidence,"QaLoyaltyBoundaryTest#historyResourceHidesAnotherCustomersAccount", "GET /loyalty/account/{accountId}/transactions");
         register(evidence,"MatchingTransactionTest#legacyUrlCannotOverridePrincipalCustomer", "POST /pet-matching/submit/{userId}");
+        register(evidence,"PhaseThreeOwnershipTest#foreignReview", "PUT /reviews/me/{id}", "DELETE /reviews/me/{id}");
         // Staff-only writes are covered by the role boundary matrix; public catalog IDs have no customer owner.
         Set<String> resourceIds=new TreeSet<>();
         for(var group:List.of(CUSTOMER_WRITES,PRIVATE_READS)) for(String endpoint:group)

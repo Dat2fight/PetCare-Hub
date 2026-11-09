@@ -31,26 +31,13 @@ public class ReviewServiceImpl implements ReviewService {
     private final com.petcarehub.repository.OrderRepository orders;
     private final com.petcarehub.repository.AppointmentRepository appointments;
     private final jakarta.persistence.EntityManager entityManager;
+    private final com.petcarehub.security.Ownership ownership;
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional
     public ReviewDTO createReview(ReviewCreateRequest request) {
-        // Zero Trust: Always extract authenticated user from SecurityContextHolder
-        User customer = null;
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getPrincipal())) {
-            if (authentication.getPrincipal() instanceof UserDetailsImpl) {
-                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
-                customer = userRepository.findById(userDetails.getId())
-                        .orElseThrow(() -> new ResourceNotFoundException("User not found with id " + userDetails.getId()));
-            } else {
-                customer = userRepository.findByUsername(authentication.getName())
-                        .orElseThrow(() -> new ResourceNotFoundException("User not found with username " + authentication.getName()));
-            }
-        } else {
-            throw new org.springframework.security.authentication.InsufficientAuthenticationException("Bạn cần đăng nhập để gửi đánh giá");
-        }
+        User customer = userRepository.findLockedById(ownership.userId()).orElseThrow();
         String type = request.getTargetType().toUpperCase(java.util.Locale.ROOT);
         Class<?> target = switch (type) {
             case "PRODUCT" -> com.petcarehub.entity.Product.class;
@@ -59,19 +46,17 @@ public class ReviewServiceImpl implements ReviewService {
             default -> throw new BadRequestException("Loại đánh giá không hợp lệ");
         };
         if (entityManager.find(target, request.getTargetId()) == null) throw new ResourceNotFoundException("Không tìm thấy đối tượng đánh giá");
-        userRepository.findLockedById(customer.getId()).orElseThrow(); // Serialize duplicate submissions by this customer.
-        boolean eligible = type.equals("SERVICE") ? appointments.existsByCustomerIdAndServiceIdAndStatus(customer.getId(), request.getTargetId(), com.petcarehub.enums.AppointmentStatus.COMPLETED)
-                : orders.hasDeliveredTarget(customer.getId(), type, request.getTargetId());
+        boolean eligible = purchased(customer.getId(), type, request.getTargetId());
         if (!eligible) throw new org.springframework.security.access.AccessDeniedException("Bạn cần hoàn thành giao dịch trước khi đánh giá");
         if (reviewRepository.existsByCustomerIdAndReviewableTypeAndReviewableId(customer.getId(), type, request.getTargetId())) throw new IllegalStateException("Bạn đã đánh giá đối tượng này");
 
         Review review = Review.builder()
                 .customer(customer)
                 .rating(request.getRating())
-                .comment(request.getComment())
+                .comment(request.getComment().strip())
                 .reviewableType(type)
                 .reviewableId(request.getTargetId())
-                .approved(false) // NEEDS DECISION: pending until an administrator approves.
+                .approved(false)
                 .build();
 
         review = reviewRepository.save(review);
@@ -104,8 +89,65 @@ public class ReviewServiceImpl implements ReviewService {
     @Override
     @Transactional
     public ReviewDTO approveReview(Long id) {
-        Review review = reviewRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
-        review.setApproved(true); return mapToDTO(reviewRepository.save(review));
+        return moderate(id, "APPROVED", null);
+    }
+
+    private boolean purchased(Long customer, String type, Long target) {
+        return "SERVICE".equals(type)
+                ? appointments.existsByCustomerIdAndServiceIdAndStatus(customer, target, com.petcarehub.enums.AppointmentStatus.COMPLETED)
+                : orders.hasDeliveredTarget(customer, type, target);
+    }
+
+    public boolean eligible(String type, Long id) {
+        Long customer = ownership.userId();
+        return purchased(customer, type, id) && !reviewRepository.existsByCustomerIdAndReviewableTypeAndReviewableId(customer, type, id);
+    }
+
+    public org.springframework.data.domain.Page<ReviewDTO> mine(Pageable pageable) {
+        return reviewRepository.findByCustomerId(ownership.userId(), pageable).map(this::mapToDTO);
+    }
+
+    public org.springframework.data.domain.Page<ReviewDTO> pending(Pageable pageable) {
+        return reviewRepository.pending(pageable).map(this::mapToDTO);
+    }
+
+    public com.petcarehub.dto.review.ReviewStats stats(String type, Long id) {
+        return reviewRepository.stats(type, id);
+    }
+
+    private Review locked(Long id) {
+        return reviewRepository.locked(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đánh giá"));
+    }
+
+    private Review owned(Long id) {
+        var review = locked(id);
+        if (!review.getCustomer().getId().equals(ownership.userId())) throw new ResourceNotFoundException("Không tìm thấy đánh giá");
+        return review;
+    }
+
+    @Transactional
+    public ReviewDTO moderate(Long id, String action, String reason) {
+        var review = locked(id);
+        review.setApproved("APPROVED".equals(action));
+        review.setModerationState(action);
+        review.setModerationReason(reason);
+        return mapToDTO(review);
+    }
+
+    @Transactional
+    public ReviewDTO edit(Long id, com.petcarehub.dto.review.ReviewChanges change) {
+        var review = owned(id);
+        review.setComment(change.comment().strip());
+        review.setRating(change.rating());
+        review.setApproved(false);
+        review.setModerationState("PENDING");
+        review.setModerationReason(null);
+        return mapToDTO(review);
+    }
+
+    @Transactional
+    public void remove(Long id) {
+        reviewRepository.delete(owned(id));
     }
 
     private ReviewDTO mapToDTO(Review review) {
@@ -116,7 +158,10 @@ public class ReviewServiceImpl implements ReviewService {
         dto.setComment(review.getComment());
         dto.setTargetType(review.getReviewableType());
         dto.setTargetId(review.getReviewableId());
-        dto.setStatus(review.getApproved() ? "APPROVED" : "PENDING");
+        dto.setStatus(review.getApproved() ? "APPROVED" : java.util.Objects.requireNonNullElse(review.getModerationState(), "PENDING"));
+        dto.setModerationReason(review.getModerationReason());
+        dto.setCreatedAt(review.getCreatedAt());
         return dto;
     }
 }
+

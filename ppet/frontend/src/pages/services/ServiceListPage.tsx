@@ -66,6 +66,7 @@ export const ServiceListPage: React.FC = () => {
                   <p className="text-primary-600 font-bold mb-3">{service.price.toLocaleString('vi-VN')} đ <span className="text-sm text-gray-500 font-normal">/ {service.durationMinutes} phút</span></p>
                   <p className="text-gray-600 mb-6 flex-1">{service.description}</p>
                   
+                  <Link className="underline mb-2" to={`/services/${service.id}`}>Chi tiết và đánh giá</Link>
                   <Link to={`/services/booking?serviceId=${service.id}`}>
                     <Button fullWidth variant={idx === 0 ? 'primary' : 'outline'}>
                       Đặt lịch ngay

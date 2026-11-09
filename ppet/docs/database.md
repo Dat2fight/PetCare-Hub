@@ -478,3 +478,5 @@ Migration 005_order_expiry.sql thêm orders.expires_at, expired_at và chỉ m�
 006_checkout_pricing.sql thêm snapshot ưu đãi, phí giao hàng, khóa checkout duy nhất theo khách và giới hạn mã theo khách.
 
 Dòng PET dùng cart_items.pet_id và order_items.pet_id hiện có. Hạn trên orders áp dụng cho toàn bộ đơn hỗn hợp, bắt đầu khi tạo đơn. Job nhả pet và hoàn sản phẩm, voucher, điểm trong cùng transaction.
+
+Chạy `007_reviews.sql` trên SQL Server sau migration 006 để bổ sung trạng thái và lý do kiểm duyệt. Đánh giá cũ giữ nguyên trạng thái công khai.
