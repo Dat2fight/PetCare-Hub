@@ -97,6 +97,7 @@ public class PromotionServiceImpl implements PromotionService {
             throw new BadRequestException("Promotion end date must not precede start date");
         if (request.getMaxUses() != null && request.getMaxUses() <= 0)
             throw new BadRequestException("Maximum uses must be positive");
+        promotion.setMaxUsesPerCustomer(request.getMaxUsesPerCustomer());
         promotion.setCode(request.getCode()); promotion.setDescription(request.getDescription());
         promotion.setDiscountType(request.getDiscountType()); promotion.setDiscountValue(request.getDiscountValue());
         promotion.setMinOrderAmount(request.getMinOrderAmount()); promotion.setMaxUses(request.getMaxUses());
@@ -110,6 +111,7 @@ public class PromotionServiceImpl implements PromotionService {
         dto.setId(promotion.getId()); dto.setCode(promotion.getCode()); dto.setDescription(promotion.getDescription());
         dto.setDiscountType(promotion.getDiscountType()); dto.setDiscountValue(promotion.getDiscountValue());
         dto.setMinOrderAmount(promotion.getMinOrderAmount()); dto.setMaxUses(promotion.getMaxUses());
+        dto.setMaxUsesPerCustomer(promotion.getMaxUsesPerCustomer());
         dto.setCurrentUses(promotion.getCurrentUses()); dto.setActive(promotion.getActive());
         dto.setStartDate(promotion.getStartDate()); dto.setEndDate(promotion.getEndDate());
         return dto;

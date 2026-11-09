@@ -7,11 +7,15 @@ export interface OrderCreateRequest {
   shippingAddress: string;
   paymentMethod?: 'COD';
   notes?: string;
+  checkoutKey?: string;
+  promotionCode?: string;
+  pointsToUse?: number;
 }
 export const orderService = {
   create: async (request: OrderCreateRequest): Promise<Order> => {
     if (request.items.some(item => item.petId != null)) throw new Error('Mua thú cưng chưa khả dụng trên phiên bản này');
     const { data } = await apiClient.post<Order>('/orders', {
+      checkoutKey: request.checkoutKey, promotionCode: request.promotionCode, pointsToUse: request.pointsToUse,
       shippingAddress: request.shippingAddress, paymentMethod: request.paymentMethod, notes: request.notes,
       items: request.items.map(item => ({ productId: item.productId, quantity: item.quantity }))
     });

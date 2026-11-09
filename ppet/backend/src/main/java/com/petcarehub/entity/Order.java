@@ -39,6 +39,13 @@ public class Order extends BaseEntity {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    private String promotionCode;
+    private String checkoutKey;
+    private String checkoutFingerprint;
+    private Integer pointsUsed;
+    private BigDecimal pointsDiscount;
+    private BigDecimal shippingFee;
+
     @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal taxAmount = BigDecimal.ZERO;

@@ -142,3 +142,5 @@ Booking requires `petId`, `serviceId`, `appointmentTime`; customer identity is t
 
 
 Các phản hồi đơn hàng có thêm expiresAt và expiredAt (giờ Việt Nam). Đơn COD chứa thú cưng chờ xác nhận có hạn 24 giờ. Khi hết hạn, trạng thái là CANCELLED và expiredAt có giá trị, khách nhận thông báo trong hộp thư trên web.
+
+POST /api/v1/orders/quote (CUSTOMER) nhận items, promotionCode, pointsToUse. Kết quả gồm subtotal, discount, pointsApplied, pointsDiscount, shippingFee, total, availablePoints, maxRedeemablePoints. POST /orders hỗ trợ checkoutKey UUID cùng phạm vi khách, dùng lại khi gửi lại cùng payload.

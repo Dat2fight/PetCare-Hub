@@ -25,9 +25,30 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryService inventory;
     private final Ownership ownership;
     private final CartRepository carts;
+    private final CheckoutPricing pricing;
     private final java.time.Clock clock;
     private final com.petcarehub.config.OrderExpiryConfig.Settings expiry;
     private final NotificationRepository notifications;
+
+    @Override
+    @Transactional(readOnly = true)
+    public OrderQuote quote(QuoteRequest request) {
+        Long userId = ownership.userId();
+        BigDecimal merchandise = BigDecimal.ZERO;
+        BigDecimal animals = BigDecimal.ZERO;
+        for (OrderItemDTO line : request.getItems()) {
+            if (line.getPetId() != null) {
+                Pet pet = pets.findById(line.getPetId()).filter(p -> p.getOwner() == null && p.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE)
+                        .orElseThrow(() -> new ResourceNotFoundException("Thú cưng không còn khả dụng"));
+                animals = animals.add(pet.getPrice());
+            } else {
+                Product product = products.findById(line.getProductId()).filter(p -> Boolean.TRUE.equals(p.getActive()))
+                        .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm đã ngừng bán"));
+                merchandise = merchandise.add(product.getPrice().multiply(BigDecimal.valueOf(line.getQuantity())));
+            }
+        }
+        return pricing.calculate(userId, merchandise.add(animals), merchandise, request.getPromotionCode(), request.getPointsToUse(), false);
+    }
 
     @Override
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
@@ -48,7 +69,18 @@ public class OrderServiceImpl implements OrderService {
                 throw new BadRequestException("items[" + index + "]: Chọn đúng một sản phẩm hoặc thú cưng và số lượng hợp lệ");
             if (item.getPetId() != null && !petIds.add(item.getPetId())) throw new BadRequestException("items[" + index + "].petId: Thú cưng bị trùng trong đơn");
         }
-        Order order = Order.builder().customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
+        users.findLockedById(customerId).orElseThrow();
+        String key = request.getCheckoutKey() == null ? null : request.getCheckoutKey().toString();
+        String fingerprint = key == null ? null : checkoutFingerprint(request);
+        if (key != null) {
+            var prior = orders.findByCustomerIdAndCheckoutKey(customerId, key);
+            if (prior.isPresent()) {
+                if (!fingerprint.equals(prior.get().getCheckoutFingerprint()))
+                    throw new IllegalStateException("Mã yêu cầu đã được dùng cho đơn khác");
+                return dto(prior.get());
+            }
+        }
+        Order order = Order.builder().checkoutKey(key).checkoutFingerprint(fingerprint).customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
                 .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
                 .paymentMethod("COD").shippingAddress(request.getShippingAddress()).notes(request.getNotes()).build();
         BigDecimal total = BigDecimal.ZERO;
@@ -62,7 +94,7 @@ public class OrderServiceImpl implements OrderService {
             order.addItem(OrderItem.builder().itemType(OrderItemType.PET).pet(pet).quantity(1).unitPrice(pet.getPrice()).subtotal(pet.getPrice()).build());
             total = total.add(pet.getPrice()); reservedPets.add(pet);
         }
-        // NEEDS DECISION: existing checkout has no promotion/loyalty or shipping fees; pet items get no new discounts.
+        BigDecimal petTotal = total;
         // Stable ordering reduces deadlocks; reserve stock in this same transaction.
         for (OrderItemDTO item : request.getItems().stream().filter(item -> item.getProductId() != null).sorted(java.util.Comparator.comparing(OrderItemDTO::getProductId)).toList()) {
             if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
@@ -73,8 +105,15 @@ public class OrderServiceImpl implements OrderService {
             order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
             total = total.add(subtotal);
         }
-        order.setSubtotal(total); order.setTotalAmount(total);
-        users.findLockedById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
+        var summary = pricing.calculate(customerId, total, total.subtract(petTotal), request.getPromotionCode(), request.getPointsToUse(), true);
+        order.setSubtotal(total);
+        order.setDiscountAmount(summary.discount());
+        order.setPointsUsed(summary.pointsApplied());
+        order.setPointsDiscount(summary.pointsDiscount());
+        order.setShippingFee(summary.shippingFee());
+        order.setTotalAmount(summary.total());
+        if (request.getPromotionCode() != null && !request.getPromotionCode().isBlank())
+            order.setPromotionCode(request.getPromotionCode().trim());
         carts.findByCustomerId(customerId).ifPresent(cart -> {
             java.util.Map<Long, Long> purchased = new java.util.HashMap<>();
             request.getItems().forEach(item -> purchased.merge(item.getProductId(), item.getQuantity().longValue(), Math::addExact));
@@ -89,6 +128,7 @@ public class OrderServiceImpl implements OrderService {
         });
         if (!reservedPets.isEmpty()) order.setExpiresAt(java.time.LocalDateTime.now(clock).plusHours(expiry.holdHours()));
         Order saved = orders.saveAndFlush(order);
+        pricing.reserve(saved);
         for (Pet pet : reservedPets) {
             pet.setAvailabilityStatus(AvailabilityStatus.PENDING); pet.setReservedOrder(saved); pets.save(pet);
         }
@@ -99,6 +139,20 @@ public class OrderServiceImpl implements OrderService {
     public org.springframework.data.domain.Page<OrderDTO> getMyOrders(org.springframework.data.domain.Pageable pageable) {
         return orders.findByCustomerId(ownership.userId(), pageable).map(this::dto);
     }
+    private String checkoutFingerprint(OrderCreateRequest request) {
+        var lines = request.getItems().stream()
+                .map(i -> java.util.Arrays.asList(i.getProductId(), i.getPetId(), i.getQuantity()))
+                .toList();
+        var fields = java.util.Arrays.asList(request.getShippingAddress(), request.getNotes(),
+                request.getPromotionCode(), request.getPointsToUse(), lines);
+        try {
+            byte[] payload = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(fields);
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(payload));
+        } catch (java.security.NoSuchAlgorithmException | com.fasterxml.jackson.core.JsonProcessingException e) {
+            throw new IllegalStateException("Không thể xác minh yêu cầu đặt hàng", e);
+        }
+    }
+
     private Pet lockPet(Long id) {
         return pets.findByIdForUpdate(id).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng"));
     }
@@ -140,6 +194,7 @@ public class OrderServiceImpl implements OrderService {
         }
         // NEEDS DECISION: COD is collected on delivery; no online payment claim is made.
         if ("COD".equals(o.getPaymentMethod())) {
+            pricing.earn(o);
             o.setPaymentStatus(PaymentStatus.COMPLETED);
             o.setPaidAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
         }
@@ -173,6 +228,7 @@ public class OrderServiceImpl implements OrderService {
         // Keep legacy product-only cancellation behavior; pet retries never release another order's reservation.
         if (o.getStatus() == OrderStatus.CANCELLED && o.getItems().stream().anyMatch(item -> item.getPet() != null)) return dto(o);
         if (o.getStatus() == OrderStatus.DELIVERED) throw new InvalidStateTransitionException("Không thể hủy đơn đã giao");
+        pricing.release(o);
         var reserved = reservedPets(o); state(o).cancel(o);
         for (Pet pet : reserved) {
             pet.setAvailabilityStatus(AvailabilityStatus.AVAILABLE); pet.setReservedOrder(null); pets.save(pet);

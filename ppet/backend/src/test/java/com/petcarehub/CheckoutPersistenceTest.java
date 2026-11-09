@@ -38,7 +38,7 @@ class CheckoutPersistenceTest {
             OrderItemDTO item = new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
             OrderCreateRequest request = new OrderCreateRequest(); request.setItems(List.of(item)); request.setShippingAddress("Địa chỉ thử nghiệm");
             OrderDTO result = service.createOrder(request);
-            assertNotNull(result.getId()); assertEquals(customer.getId(), result.getUserId()); assertEquals(20.0, result.getTotalPrice());
+            assertNotNull(result.getId()); assertEquals(customer.getId(), result.getUserId()); assertEquals(30020.0, result.getTotalPrice());
             assertEquals(1, inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
             assertEquals(1, orders.findById(result.getId()).orElseThrow().getItems().size());
             service.cancelOrder(result.getId());

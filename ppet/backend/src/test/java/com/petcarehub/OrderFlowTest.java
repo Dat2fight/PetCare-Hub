@@ -44,7 +44,7 @@ class OrderFlowTest {
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
     @Test void persistsServerPriceAndProtectedDetail() throws Exception {
         var order=service.createOrder(request);
-        assertEquals(owner.getId(),order.getUserId()); assertEquals(20.0,order.getTotalPrice());
+        assertEquals(owner.getId(),order.getUserId()); assertEquals(30020.0,order.getTotalPrice());
         assertEquals(3,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(owner,"CUSTOMER"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].price").value(10))

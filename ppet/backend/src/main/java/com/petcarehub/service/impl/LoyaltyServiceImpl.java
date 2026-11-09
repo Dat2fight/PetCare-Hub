@@ -127,7 +127,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     
     private static final java.util.Map<String, Integer> THRESHOLDS = java.util.Map.of("BRONZE", 0, "SILVER", 1000, "GOLD", 5000, "PLATINUM", 10000);
 
-    private void updateMembershipLevel(LoyaltyAccount account) {
+    static void updateMembershipLevel(LoyaltyAccount account) {
         int lifetime = account.getTotalPoints() == null ? 0 : account.getTotalPoints();
         if (lifetime >= THRESHOLDS.get("PLATINUM")) {
             account.setMembershipLevel(MembershipLevel.PLATINUM);

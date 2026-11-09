@@ -5,10 +5,7 @@ import java.util.List;
 
 @Data
 @com.fasterxml.jackson.annotation.JsonIgnoreProperties(value = {"userId", "customerId", "ownerId", "price", "totalAmount", "availability"}, ignoreUnknown = true)
-public class OrderCreateRequest {
-    @jakarta.validation.Valid
-    @jakarta.validation.constraints.NotEmpty(message="Đơn hàng phải có sản phẩm")
-    private List<@jakarta.validation.constraints.NotNull(message="Dòng hàng không được trống") OrderItemDTO> items;
+public class OrderCreateRequest extends QuoteRequest {
     @jakarta.validation.constraints.NotBlank(message="Địa chỉ giao hàng là bắt buộc")
     @jakarta.validation.constraints.Size(max=2000, message="Địa chỉ tối đa 2000 ký tự")
     private String shippingAddress;
@@ -17,4 +14,5 @@ public class OrderCreateRequest {
     private String paymentMethod;
     @jakarta.validation.constraints.Size(max=2000, message="Ghi chú tối đa 2000 ký tự")
     private String notes;
+    private java.util.UUID checkoutKey;
 }

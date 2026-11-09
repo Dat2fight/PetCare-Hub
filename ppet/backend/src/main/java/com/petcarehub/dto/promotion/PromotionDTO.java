@@ -22,5 +22,6 @@ public class PromotionDTO {
     private LocalDateTime endDate;
     private Boolean active = true;
     private Integer maxUses;
+    private Integer maxUsesPerCustomer;
     private Integer currentUses;
 }

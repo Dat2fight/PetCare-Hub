@@ -31,7 +31,7 @@ class EndpointSecurityMatrixTest {
     // Customer operations must obtain identity from the principal and enforce resource ownership.
     static final Set<String> CUSTOMER_WRITES = Set.of(
         "POST /cart/items", "PUT /cart/items/{itemId}", "DELETE /cart/items/{itemId}", "DELETE /cart",
-        "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "PUT /appointments/{id}/status",
+        "POST /orders/quote", "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "PUT /appointments/{id}/status",
         "POST /reviews", "PUT /users/me", "POST /pets/my-pets", "PUT /pets/my-pets/{id}",
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");

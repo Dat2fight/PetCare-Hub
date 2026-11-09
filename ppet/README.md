@@ -407,3 +407,5 @@ Không commit .env thật, khóa, token, mật khẩu, hash demo hoặc log. .en
 Các báo cáo trước có giới hạn kiểm chứng và việc còn lại riêng; smoke test local không thay thế kiểm thử nghiệp vụ/concurrency/deploy.
 
 Trước khi chạy bản có hết hạn giữ chỗ, áp dụng cả hai migration 004 rồi chạy migration 005_order_expiry.sql bằng sqlcmd -I -b -f 65001 trên database đã chọn. Hibernate kiểm tra schema khi khởi động. app.order-expiry.hold-hours mặc định 24, app.order-expiry.interval-ms mặc định 60000.
+
+Sau migration 005, áp dụng 006_checkout_pricing.sql. app.checkout.shipping-fee mặc định 30000, app.checkout.free-shipping-from mặc định 500000, app.checkout.promotion-per-customer mặc định 1. Đổi 1 điểm lấy 100đ, tối đa 50% tiền sản phẩm sau voucher.

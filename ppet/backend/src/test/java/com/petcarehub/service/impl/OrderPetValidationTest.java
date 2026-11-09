@@ -14,7 +14,7 @@ class OrderPetValidationTest {
         var orders=mock(OrderRepository.class);var products=mock(ProductRepository.class);var pets=mock(PetRepository.class);
         var users=mock(UserRepository.class);var stock=mock(InventoryService.class);var ownership=mock(Ownership.class);
         var carts=mock(CartRepository.class);
-        var service=new OrderServiceImpl(orders,products,pets,users,stock,ownership,carts,java.time.Clock.systemUTC(),null,null);
+        var service=new OrderServiceImpl(orders,products,pets,users,stock,ownership,carts,null,java.time.Clock.systemUTC(),null,null);
         when(ownership.userId()).thenReturn(1L);when(ownership.hasRole("CUSTOMER")).thenReturn(true);
         var item=new OrderItemDTO();item.setPetId(2L);item.setQuantity(1);
         var request=new OrderCreateRequest();request.setItems(List.of(item));request.setShippingAddress("Địa chỉ test");

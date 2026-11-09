@@ -474,3 +474,5 @@ erDiagram
 *   **Veterinary**: Wellness Exam, Vaccination Visit, Dental Checkup
 
 Migration 005_order_expiry.sql thêm orders.expires_at, expired_at và chỉ mục tìm đơn đến hạn. performed_by trên giao dịch kho cho phép NULL đối với thao tác tự động. Đơn cũ chưa được cấp hạn giữ nguyên hạn NULL.
+
+006_checkout_pricing.sql thêm snapshot ưu đãi, phí giao hàng, khóa checkout duy nhất theo khách và giới hạn mã theo khách.
