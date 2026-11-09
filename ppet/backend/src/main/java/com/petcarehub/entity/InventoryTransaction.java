@@ -45,7 +45,7 @@ public class InventoryTransaction {
     private String notes;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "performed_by", nullable = false)
+    @JoinColumn(name = "performed_by")
     private User performedBy;
 
     @CreatedDate

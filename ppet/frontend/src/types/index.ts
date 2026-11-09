@@ -88,6 +88,8 @@ export interface ProductCategory {
 
 // ===== Order Types =====
 export interface Order {
+  expiresAt?: string
+  expiredAt?: string
   id: number
   userId: number
   orderNumber: string

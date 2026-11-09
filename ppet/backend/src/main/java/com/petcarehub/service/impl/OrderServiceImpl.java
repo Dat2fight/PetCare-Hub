@@ -25,6 +25,9 @@ public class OrderServiceImpl implements OrderService {
     private final InventoryService inventory;
     private final Ownership ownership;
     private final CartRepository carts;
+    private final java.time.Clock clock;
+    private final com.petcarehub.config.OrderExpiryConfig.Settings expiry;
+    private final NotificationRepository notifications;
 
     @Override
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER')")
@@ -84,11 +87,11 @@ public class OrderServiceImpl implements OrderService {
             }
             carts.saveAndFlush(cart);
         });
+        if (!reservedPets.isEmpty()) order.setExpiresAt(java.time.LocalDateTime.now(clock).plusHours(expiry.holdHours()));
         Order saved = orders.saveAndFlush(order);
         for (Pet pet : reservedPets) {
             pet.setAvailabilityStatus(AvailabilityStatus.PENDING); pet.setReservedOrder(saved); pets.save(pet);
         }
-        // NEEDS DECISION: no expiry mechanism exists. Only explicit cancellation releases a reservation.
         return dto(saved);
     }
     @Override
@@ -124,7 +127,9 @@ public class OrderServiceImpl implements OrderService {
     private void requireStaff() {
         if (!ownership.hasRole("ADMIN") && !ownership.hasRole("SALES_STAFF")) throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền xử lý đơn hàng");
     }
-    @Override public OrderDTO confirmOrder(Long id) { requireStaff(); Order o=locked(id); state(o).confirm(o); return dto(orders.save(o)); }
+    @Override public OrderDTO confirmOrder(Long id) { requireStaff(); Order o=locked(id);
+        if (isDue(o, java.time.LocalDateTime.now(clock))) throw new IllegalStateException("Đơn hàng đã quá hạn xác nhận");
+        state(o).confirm(o); return dto(orders.save(o)); }
     @Override public OrderDTO processOrder(Long id) { requireStaff(); Order o=locked(id); state(o).process(o); return dto(orders.save(o)); }
     @Override public OrderDTO shipOrder(Long id) { requireStaff(); Order o=locked(id); state(o).ship(o); return dto(orders.save(o)); }
     @Override public OrderDTO deliverOrder(Long id) {
@@ -144,6 +149,27 @@ public class OrderServiceImpl implements OrderService {
         Long currentId = ownership.userId();
         Order o = (ownership.hasRole("ADMIN") ? orders.findLockedById(id) : orders.findOwnedLockedById(id, currentId))
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
+        return cancelLocked(o);
+    }
+
+    private boolean isDue(Order order, java.time.LocalDateTime now) {
+        return order.getStatus() == OrderStatus.PENDING && order.getPaymentStatus() == PaymentStatus.PENDING
+                && order.getExpiresAt() != null && !order.getExpiresAt().isAfter(now);
+    }
+
+    @Override
+    public boolean expireIfDue(Long id) {
+        Order order = locked(id);
+        var now = java.time.LocalDateTime.now(clock);
+        if (!isDue(order, now)) return false;
+        order.setExpiredAt(now);
+        cancelLocked(order);
+        notifications.save(Notification.builder().user(order.getCustomer()).type(NotificationType.ORDER_UPDATE)
+                .title("Đơn hàng hết hạn").message("Đơn " + order.getOrderNumber() + " đã hết hạn chờ xác nhận.").build());
+        return true;
+    }
+
+    private OrderDTO cancelLocked(Order o) {
         // Keep legacy product-only cancellation behavior; pet retries never release another order's reservation.
         if (o.getStatus() == OrderStatus.CANCELLED && o.getItems().stream().anyMatch(item -> item.getPet() != null)) return dto(o);
         if (o.getStatus() == OrderStatus.DELIVERED) throw new InvalidStateTransitionException("Không thể hủy đơn đã giao");
@@ -164,6 +190,7 @@ public class OrderServiceImpl implements OrderService {
     }
     private OrderDTO dto(Order o) {
         OrderDTO dto = new OrderDTO(); dto.setId(o.getId()); dto.setUserId(o.getCustomer().getId()); dto.setStatus(o.getStatus().name()); dto.setTotalPrice(o.getTotalAmount().doubleValue());
+        dto.setExpiresAt(o.getExpiresAt()); dto.setExpiredAt(o.getExpiredAt());
         dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setShippingAddress(o.getShippingAddress()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {

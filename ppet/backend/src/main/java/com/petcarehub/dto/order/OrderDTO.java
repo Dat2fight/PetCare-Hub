@@ -12,6 +12,8 @@ public class OrderDTO {
     private List<OrderItemDTO> items;
     private String orderNumber;
     private String shippingAddress;
+    private java.time.LocalDateTime expiresAt;
+    private java.time.LocalDateTime expiredAt;
     private String notes;
     private String paymentMethod;
     private String paymentStatus;

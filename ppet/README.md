@@ -405,3 +405,5 @@ Không commit .env thật, khóa, token, mật khẩu, hash demo hoặc log. .en
 - [High lượt 1](docs/high-round-1/REPORT.md), [lượt 2](docs/high-round-2/REPORT.md), [lượt 3](docs/high-round-3/REPORT.md)
 
 Các báo cáo trước có giới hạn kiểm chứng và việc còn lại riêng; smoke test local không thay thế kiểm thử nghiệp vụ/concurrency/deploy.
+
+Trước khi chạy bản có hết hạn giữ chỗ, áp dụng cả hai migration 004 rồi chạy migration 005_order_expiry.sql bằng sqlcmd -I -b -f 65001 trên database đã chọn. Hibernate kiểm tra schema khi khởi động. app.order-expiry.hold-hours mặc định 24, app.order-expiry.interval-ms mặc định 60000.

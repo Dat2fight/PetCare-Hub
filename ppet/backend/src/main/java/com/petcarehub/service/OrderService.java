@@ -11,5 +11,6 @@ public interface OrderService {
     OrderDTO processOrder(Long orderId);
     OrderDTO shipOrder(Long orderId);
     OrderDTO deliverOrder(Long orderId);
+    boolean expireIfDue(Long id);
     OrderDTO cancelOrder(Long orderId);
 }

@@ -110,6 +110,23 @@ class PetPurchaseTest {
         postOrder(json.writeValueAsString(request(item(pet.getId()),item(pet.getId())))).andExpect(status().isBadRequest());
         postOrder("{\"items\":[null],\"shippingAddress\":\"Test\"}").andExpect(status().isBadRequest());
     }
+    @Test void expiryReleasesOnlyUnpaidDueOrdersOnce() {
+        var order = existingOrder(null, pet);
+        order.setExpiresAt(java.time.LocalDateTime.now().plusDays(2));
+        orders.save(order);
+        assertFalse(service.expireIfDue(order.getId()));
+        order.setExpiresAt(java.time.LocalDateTime.now().minusDays(2));
+        order.setPaymentStatus(PaymentStatus.COMPLETED);
+        orders.save(order);
+        assertFalse(service.expireIfDue(order.getId()));
+        order.setPaymentStatus(PaymentStatus.PENDING);
+        orders.save(order);
+        assertTrue(service.expireIfDue(order.getId()));
+        assertFalse(service.expireIfDue(order.getId()));
+        assertEquals(AvailabilityStatus.AVAILABLE, pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+        assertNotNull(orders.findById(order.getId()).orElseThrow().getExpiredAt());
+    }
+
     @Test void onlyCustomerCanCreate() throws Exception {
         String body=json.writeValueAsString(request(item(pet.getId())));
         SecurityContextHolder.clearContext();mvc.perform(post("/api/v1/orders").contentType("application/json").content(body)).andExpect(status().isUnauthorized());

@@ -140,3 +140,5 @@ Personal routes including `/auth/me` and `/pets/my-pets/**` require authenticati
 
 Booking requires `petId`, `serviceId`, `appointmentTime`; customer identity is taken from the principal. Foreign, unowned and missing pets return 404. `GET /appointments/pet/{petId}` retains owner/assigned-vet/admin scope. There is no customer rescheduling endpoint or staff-on-behalf booking flow.
 
+
+Các phản hồi đơn hàng có thêm expiresAt và expiredAt (giờ Việt Nam). Đơn COD chứa thú cưng chờ xác nhận có hạn 24 giờ. Khi hết hạn, trạng thái là CANCELLED và expiredAt có giá trị, khách nhận thông báo trong hộp thư trên web.
