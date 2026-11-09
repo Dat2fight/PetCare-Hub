@@ -223,7 +223,7 @@ export const HomePage: React.FC = () => {
           {[
             { title: "Tắm & Grooming", desc: "Làm sạch, cắt tỉa, chăm sóc lông chuyên nghiệp", price: "200.000đ", image: mockImages.grooming, icon: "✂️" },
             { title: "Khám thú y", desc: "Kiểm tra sức khỏe, tư vấn điều trị", price: "150.000đ", image: mockImages.vet, icon: "🏥" },
-            { title: "Gói chăm sóc theo tháng", desc: "Dinh dưỡng + khám định kỳ + ưu đãi", price: "1.000.000đ", image: mockImages.dogHero, icon: "🎁" },
+            { title: "Gói chăm sóc định kỳ", desc: "Chọn quyền lợi và thời hạn phù hợp cho thú cưng", price: "", to: "/care-packages", image: mockImages.dogHero, icon: "🎁" },
             { title: "Pet Sitting", desc: "Chăm sóc thú cưng khi bạn vắng nhà", price: "300.000đ", image: mockImages.dogGolden, icon: "🏠" },
           ].map((srv, idx) => (
             <Card key={idx} noPadding className="group border-gray-100 hover:border-primary-200 transition-colors h-full flex flex-col rounded-3xl overflow-hidden">
@@ -239,10 +239,8 @@ export const HomePage: React.FC = () => {
                 
                 <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
                   <span className="font-extrabold text-primary-600">{srv.price}</span>
-                  <Link to="/services">
-                    <button className="text-xs font-semibold text-primary-600 border border-primary-200 px-3 py-1.5 rounded-full hover:bg-primary-50 transition-colors">
-                      Đặt lịch ngay →
-                    </button>
+                  <Link to={srv.to || "/services"} className="text-xs font-semibold text-primary-600 border border-primary-200 px-3 py-1.5 rounded-full hover:bg-primary-50">
+                    {srv.to ? "Khám phá các gói →" : "Đặt lịch ngay →"}
                   </Link>
                 </div>
               </div>

@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
-import { orderService } from '../../services/orderService';
+import { newCheckoutKey, orderService } from '../../services/orderService';
 import toast from 'react-hot-toast';
 interface Item { id:number; productId?:number; productName?:string; petId?:number; petName?:string; quantity:number; price:number }
 interface Quote {
@@ -49,7 +49,7 @@ export const CheckoutPage = () => {
     items: items.map(i => ({ productId: i.productId, petId: i.petId, quantity: i.quantity }))
    };
    const payload = JSON.stringify(request);
-   if (lastAttempt.current?.payload !== payload) lastAttempt.current = { payload, key: crypto.randomUUID() };
+   if (lastAttempt.current?.payload !== payload) lastAttempt.current = { payload, key: newCheckoutKey() };
    const response = await orderService.create({ ...request, checkoutKey: lastAttempt.current.key });
    const orderId: unknown = response?.id;
    if (typeof orderId !== 'number' || !Number.isSafeInteger(orderId) || orderId <= 0) throw new Error('Phản hồi đơn hàng không hợp lệ');

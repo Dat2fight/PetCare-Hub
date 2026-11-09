@@ -6,7 +6,6 @@ import java.util.List;
 @Data
 @com.fasterxml.jackson.annotation.JsonIgnoreProperties(value = {"userId", "customerId", "ownerId", "price", "totalAmount", "availability"}, ignoreUnknown = true)
 public class OrderCreateRequest extends QuoteRequest {
-    @jakarta.validation.constraints.NotBlank(message="Địa chỉ giao hàng là bắt buộc")
     @jakarta.validation.constraints.Size(max=2000, message="Địa chỉ tối đa 2000 ký tự")
     private String shippingAddress;
     // Only COD is supported until a real payment provider is integrated; omitted means legacy COD.

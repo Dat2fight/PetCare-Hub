@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 @Transactional
 public class OrderServiceImpl implements OrderService {
+    private final PackageCheckout packages;
     private final OrderRepository orders;
     private final ProductRepository products;
     private final PetRepository pets;
@@ -34,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public OrderQuote quote(QuoteRequest request) {
         Long userId = ownership.userId();
+        if (PackageCheckout.requested(request)) return packages.quote(packages.prepare(request,false));
         BigDecimal merchandise = BigDecimal.ZERO;
         BigDecimal animals = BigDecimal.ZERO;
         for (OrderItemDTO line : request.getItems()) {
@@ -58,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
         Long customerId = ownership.userId();
         if (!ownership.hasRole("CUSTOMER") || java.util.stream.Stream.of("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN").anyMatch(ownership::hasRole))
             throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng được đặt mua");
-        if (request.getShippingAddress() == null || request.getShippingAddress().isBlank() || request.getShippingAddress().length() > 2000)
+        if (!PackageCheckout.requested(request) && (request.getShippingAddress() == null || request.getShippingAddress().isBlank() || request.getShippingAddress().length() > 2000))
             throw new BadRequestException("Thông tin giao hàng là bắt buộc, tối đa 2000 ký tự");
         if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
             throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
@@ -84,6 +86,17 @@ public class OrderServiceImpl implements OrderService {
         Order order = Order.builder().checkoutKey(key).checkoutFingerprint(fingerprint).customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
                 .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
                 .paymentMethod("COD").shippingAddress(request.getShippingAddress()).notes(request.getNotes()).build();
+        if (PackageCheckout.requested(request)) {
+            var line=packages.prepare(request,true);
+            order.addItem(line);
+            order.setSubtotal(line.getSubtotal());
+            order.setTotalAmount(line.getSubtotal());
+            order.setShippingFee(BigDecimal.ZERO);
+            order.setDiscountAmount(BigDecimal.ZERO);
+            order.setPointsUsed(0);
+            order.setPointsDiscount(BigDecimal.ZERO);
+            return dto(orders.saveAndFlush(order));
+        }
         BigDecimal total = BigDecimal.ZERO;
         // Lock pets first, then product stock, in ascending IDs across create/cancel/deliver.
         java.util.List<Pet> reservedPets = new java.util.ArrayList<>();
@@ -143,7 +156,8 @@ public class OrderServiceImpl implements OrderService {
     }
     private String checkoutFingerprint(OrderCreateRequest request) {
         var lines = request.getItems().stream()
-                .map(i -> java.util.Arrays.asList(i.getProductId(), i.getPetId(), i.getQuantity()))
+                .map(i -> i.getCarePackageId()==null ? java.util.Arrays.asList(i.getProductId(), i.getPetId(), i.getQuantity())
+                        : java.util.Arrays.asList("CARE_PACKAGE",i.getCarePackageId(),i.getBeneficiaryPetId(),i.getQuantity()))
                 .toList();
         var fields = java.util.Arrays.asList(request.getShippingAddress(), request.getNotes(),
                 request.getPromotionCode(), request.getPointsToUse(), lines);
@@ -190,6 +204,8 @@ public class OrderServiceImpl implements OrderService {
     @Override public OrderDTO shipOrder(Long id) { requireStaff(); Order o=locked(id); state(o).ship(o); return dto(orders.save(o)); }
     @Override public OrderDTO deliverOrder(Long id) {
         requireStaff(); Order o=locked(id);
+        var packageLine=o.getItems().stream().filter(i -> i.getCarePackage()!=null).findFirst();
+        if (packageLine.isPresent() && o.getStatus()==OrderStatus.DELIVERED && o.getPaymentStatus()==PaymentStatus.COMPLETED) return dto(o);
         var reserved = reservedPets(o); state(o).deliver(o);
         for (Pet pet : reserved) {
             pet.setOwner(o.getCustomer()); pet.setAvailabilityStatus(AvailabilityStatus.SOLD); pet.setReservedOrder(null); pets.save(pet);
@@ -197,7 +213,8 @@ public class OrderServiceImpl implements OrderService {
         if ("COD".equals(o.getPaymentMethod())) {
             pricing.earn(o);
             o.setPaymentStatus(PaymentStatus.COMPLETED);
-            o.setPaidAt(java.time.LocalDateTime.now(java.time.ZoneId.of("Asia/Ho_Chi_Minh")));
+            o.setPaidAt(java.time.LocalDateTime.now(clock.withZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))));
+            packageLine.ifPresent(line -> packages.activate(o,line));
         }
         return dto(orders.save(o));
     }
@@ -260,6 +277,11 @@ public class OrderServiceImpl implements OrderService {
             OrderItemDTO d = new OrderItemDTO();
             if (item.getProduct() != null) { d.setProductId(item.getProduct().getId()); d.setProductName(item.getProduct().getName()); d.setImageUrl(item.getProduct().getImageUrl()); }
             if (item.getPet() != null) { d.setPetId(item.getPet().getId()); d.setPetName(item.getPet().getName()); d.setImageUrl(item.getPet().getImageUrl()); }
+            if (item.getCarePackage()!=null) {
+                d.setCarePackageId(item.getCarePackage().getId());
+                d.setBeneficiaryPetId(item.getBeneficiaryPet().getId());
+                d.setPackageName(item.getPackageName());
+            }
             d.setQuantity(item.getQuantity()); d.setPrice(item.getUnitPrice().doubleValue()); return d;
         }).toList()); return dto;
     }

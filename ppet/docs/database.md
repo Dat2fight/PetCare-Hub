@@ -482,3 +482,7 @@ Dòng PET dùng cart_items.pet_id và order_items.pet_id hiện có. Hạn trên
 Chạy `007_reviews.sql` trên SQL Server sau migration 006 để bổ sung trạng thái và lý do kiểm duyệt. Đánh giá cũ giữ nguyên trạng thái công khai.
 
 Chạy `008_wishlist.sql` sau 007. Hai unique index có điều kiện bảo đảm mỗi khách chỉ lưu một lần cho từng đích.
+
+Sau 008, chạy `009_package_orders.sql` để mở rộng ràng buộc dòng đơn và gắn gói đã kích hoạt với dòng đơn gốc. Hai khóa thú cưng có ý nghĩa riêng. `pet_id` dùng cho thú cưng bán, `beneficiary_pet_id` dùng cho thú cưng được chăm sóc. Dòng gói lưu giá, tên, số tháng và quyền lợi tại thời điểm đặt. Unique index trên order_item_id ngăn kích hoạt trùng và cho phép các hợp đồng cũ không có dòng đơn.
+
+Ngày hiệu lực dùng múi giờ Việt Nam. API tính hết hạn khi ngày hiện tại vượt end_date. Hợp đồng cũ đọc quyền lợi từ danh mục khi thiếu snapshot. Mô hình hiện tại lưu quyền lợi theo loại dịch vụ, chưa lưu định mức lượt hoặc sự kiện sử dụng gói.

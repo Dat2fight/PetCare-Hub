@@ -413,3 +413,18 @@ Sau migration 005, áp dụng 006_checkout_pricing.sql. app.checkout.shipping-fe
 Khách có thể đánh giá sản phẩm sau khi nhận hàng hoặc dịch vụ sau khi hoàn thành lịch hẹn. Mở **Đánh giá của tôi** trong menu tài khoản để sửa, xóa và theo dõi kết quả duyệt.
 
 Dùng nút tim trên thẻ hoặc trang chi tiết để lưu mục. Trong **Yêu thích**, khách có thể chuyển mục còn bán vào giỏ.
+
+### Giai đoạn 3 cho khách hàng
+
+Khách mở **Dịch vụ → Gói chăm sóc định kỳ**, chọn gói và thú cưng của mình, rồi đặt đơn tiền mặt. Sau khi nhân viên xác nhận thu tiền, khách xem quyền lợi và hạn dùng trong **Gói của tôi**. Các gói mới không tự gia hạn.
+
+Trước khi khởi động bản mới với SQL Server, sao lưu database đích đã có migration 006. Từ thư mục `ppet/backend/src/main/resources/migrations`, đặt `$dbName` thành tên database triển khai và chạy theo thứ tự sau bằng PowerShell với tài khoản tích hợp đã được cấp quyền.
+
+```powershell
+foreach ($script in '007_reviews.sql','008_wishlist.sql','009_package_orders.sql') {
+    sqlcmd -S localhost,1433 -E -C -I -b -f 65001 -d $dbName -i $script
+    if ($LASTEXITCODE -ne 0) { throw "Migration failed: $script" }
+}
+```
+
+Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu và kiểm thử ở [báo cáo giai đoạn 3](docs/phase-3-customer.md).

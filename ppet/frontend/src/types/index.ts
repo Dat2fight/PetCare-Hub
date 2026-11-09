@@ -104,6 +104,9 @@ export interface Order {
 }
 
 export interface OrderItem {
+  carePackageId?: number
+  beneficiaryPetId?: number
+  packageName?: string
   petId?: number | null
   productId?: number | null
   petName?: string | null

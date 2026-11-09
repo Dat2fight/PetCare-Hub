@@ -15,7 +15,7 @@ class OrderPetValidationTest {
     @Test void nullOrNonPositivePetPriceNeverReachesInventoryOrPersistence() {
         var orders=mock(OrderRepository.class);var products=mock(ProductRepository.class);var pets=mock(PetRepository.class);
         var users=mock(UserRepository.class);var stock=mock(InventoryService.class);var ownership=mock(Ownership.class);
-        var service=new OrderServiceImpl(orders,products,pets,users,stock,ownership,mock(CartRepository.class),null,null,null,null);
+        var service=new OrderServiceImpl(null,orders,products,pets,users,stock,ownership,mock(CartRepository.class),null,null,null,null);
         when(ownership.userId()).thenReturn(1L);when(ownership.hasRole("CUSTOMER")).thenReturn(true);
         when(users.findLockedById(1L)).thenReturn(Optional.of(new User()));
         when(users.findById(1L)).thenReturn(Optional.of(new User()));

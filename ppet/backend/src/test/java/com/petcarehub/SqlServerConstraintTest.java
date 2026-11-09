@@ -82,7 +82,8 @@ class SqlServerConstraintTest {
     }
 
     private void migrate(java.sql.Statement statement) throws Exception {
-        for (String resource : new String[]{"migrations/001_inventory_nullable_unique.sql", "migrations/002_cart_product_unique.sql", "migrations/003_inventory_generated_unique.sql", "migrations/004_pet_purchase.sql"})
+        for (String resource : new String[]{"migrations/001_inventory_nullable_unique.sql", "migrations/002_cart_product_unique.sql", "migrations/003_inventory_generated_unique.sql", "migrations/004_pet_purchase.sql",
+                "migrations/007_reviews.sql","migrations/008_wishlist.sql","migrations/009_package_orders.sql"})
             runScript(statement, resource);
     }
 
