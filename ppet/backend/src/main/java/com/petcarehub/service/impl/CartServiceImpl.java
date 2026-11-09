@@ -22,6 +22,7 @@ public class CartServiceImpl implements CartService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final InventoryRepository inventoryRepository;
+    private final PetRepository pets;
 
     private CartDTO toDTO(Cart cart) {
         CartDTO dto = new CartDTO();
@@ -35,6 +36,12 @@ public class CartServiceImpl implements CartService {
                 itemDTO.setProductId(item.getProduct().getId());
                 itemDTO.setProductName(item.getProduct().getName());
                 itemDTO.setPrice(item.getProduct().getPrice());
+            }
+            if (item.getPet() != null) {
+                var pet = item.getPet();
+                itemDTO.setPetId(pet.getId());
+                itemDTO.setPetName(pet.getOwner() == null ? pet.getName() : "Thú cưng đã có chủ");
+                itemDTO.setPrice(pet.getPrice());
             }
             return itemDTO;
         }).toList());
@@ -55,6 +62,20 @@ public class CartServiceImpl implements CartService {
     @Override
     @Transactional
     public CartDTO addItemToCart(Long userId, AddToCartRequest request) {
+        if (request.getPetId() != null) {
+            if (request.getProductId() != null || !Integer.valueOf(1).equals(request.getQuantity()))
+                throw new BadRequestException("Mỗi dòng thú cưng có số lượng bằng một");
+            var customer = userRepository.findLockedById(userId).orElseThrow();
+            var pet = pets.findById(request.getPetId()).filter(p -> p.getOwner() == null)
+                    .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng"));
+            if (pet.getAvailabilityStatus() != com.petcarehub.enums.AvailabilityStatus.AVAILABLE || pet.getReservedOrder() != null
+                    || pet.getPrice() == null || pet.getPrice().signum() <= 0)
+                throw new IllegalStateException("Thú cưng không còn khả dụng");
+            var cart = cartRepository.findByCustomerId(userId).orElseGet(() -> Cart.builder().customer(customer).build());
+            if (cart.getItems().stream().noneMatch(i -> i.getPet() != null && i.getPet().getId().equals(pet.getId())))
+                cart.addItem(CartItem.builder().pet(pet).itemType(OrderItemType.PET).quantity(1).build());
+            return toDTO(cartRepository.saveAndFlush(cart));
+        }
         if (request.getProductId() == null || request.getQuantity() == null || request.getQuantity() <= 0) {
             throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
         }

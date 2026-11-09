@@ -6,7 +6,7 @@ import apiClient from '../../api/client';
 import { Button } from '../../components/common/Button';
 import { FiTrash2, FiMinus, FiPlus, FiArrowRight } from 'react-icons/fi';
 
-interface CartItem { id: number; productId: number; productName: string; quantity: number; price: number }
+interface CartItem { id: number; productId?: number; productName?: string; petId?: number; petName?: string; quantity: number; price: number }
 interface Cart { items: CartItem[] }
 const money = (value: number) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(value);
 
@@ -58,15 +58,15 @@ export const CartPage: React.FC = () => {
         <div className="lg:w-2/3 space-y-4">
           {cart.items.map(item => <div key={item.id} className="bg-white rounded-2xl p-6 shadow-xs border border-gray-100 flex items-center gap-6">
             <div className="flex-1">
-              <Link to={`/products/${item.productId}`} className="font-semibold hover:text-primary-600">{item.productName}</Link>
+              <Link to={item.petId ? `/pets/${item.petId}` : `/products/${item.productId}`} className="font-semibold hover:text-primary-600">{item.petName || item.productName}</Link>
               <div className="font-bold text-primary-600 mt-2">{money(Number(item.price))}</div>
             </div>
             <div className="flex items-center border rounded-xl">
-              <button aria-label={`Giảm ${item.productName}`} disabled={disabled || item.quantity <= 1} onClick={() => void update(item, item.quantity - 1)} className="p-2 disabled:opacity-40"><FiMinus /></button>
+              <button aria-label={`Giảm ${item.petName || item.productName}`} disabled={disabled || item.quantity <= 1} onClick={() => void update(item, item.quantity - 1)} className="p-2 disabled:opacity-40"><FiMinus /></button>
               <span className="w-8 text-center">{item.quantity}</span>
-              <button aria-label={`Tăng ${item.productName}`} disabled={disabled} onClick={() => void update(item, item.quantity + 1)} className="p-2 disabled:opacity-40"><FiPlus /></button>
+              <button aria-label={`Tăng ${item.petName || item.productName}`} disabled={disabled || !!item.petId} onClick={() => void update(item, item.quantity + 1)} className="p-2 disabled:opacity-40"><FiPlus /></button>
             </div>
-            <button aria-label={`Xóa ${item.productName}`} disabled={disabled} onClick={() => void mutate(() => apiClient.delete(`/cart/items/${item.id}`))} className="p-2 text-red-500 disabled:opacity-40"><FiTrash2 /></button>
+            <button aria-label={`Xóa ${item.petName || item.productName}`} disabled={disabled} onClick={() => void mutate(() => apiClient.delete(`/cart/items/${item.id}`))} className="p-2 text-red-500 disabled:opacity-40"><FiTrash2 /></button>
           </div>)}
           <div className="flex justify-between gap-4">
             <Link to="/products" className="text-primary-600">+ Tiếp tục mua sắm</Link>

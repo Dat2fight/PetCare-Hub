@@ -73,31 +73,28 @@ class PetPurchaseTest {
     @BeforeEach void setup() { customer=account();pet=sale();authenticate(customer,"CUSTOMER"); }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
 
-    @Test void httpRejectsPetPurchaseAndForgedFieldsWithoutChangingData() throws Exception {
-        long before=transactions.count(), orderCount=orders.count();
+    @Test void httpUsesServerIdentityAndPriceAndDoesNotTouchInventory() throws Exception {
+        long before=transactions.count();
         var body=Map.of("items",List.of(Map.of("petId",pet.getId(),"quantity",1,"price",0.01)),"shippingAddress","Địa chỉ test","customerId",999,"userId",999,"totalAmount",0.01);
-        postOrder(json.writeValueAsString(body)).andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message",org.hamcrest.Matchers.containsString("Mua thú cưng chưa khả dụng")));
-        var unchanged=pets.findById(pet.getId()).orElseThrow();
-        assertEquals(AvailabilityStatus.AVAILABLE,unchanged.getAvailabilityStatus());assertNull(unchanged.getReservedOrder());assertNull(unchanged.getOwner());
-        assertEquals(0,new BigDecimal("1500.00").compareTo(unchanged.getPrice()));
-        assertEquals(before,transactions.count());assertEquals(orderCount,orders.count());
-        mvc.perform(get("/api/v1/orders").with(user(caller(customer,"CUSTOMER")))).andExpect(status().isOk()).andExpect(jsonPath("$.totalElements").value(0));
-        mvc.perform(get("/api/v1/pets/{id}",pet.getId())).andExpect(status().isOk()).andExpect(jsonPath("$.availabilityStatus").value("AVAILABLE")).andExpect(jsonPath("$.price").value(1500));
+        var response=postOrder(json.writeValueAsString(body)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.userId").value(customer.getId())).andExpect(jsonPath("$.totalPrice").value(1500))
+                .andExpect(jsonPath("$.items[0].petId").value(pet.getId())).andExpect(jsonPath("$.items[0].petName").value("Sale pet"))
+                .andExpect(jsonPath("$.items[0].imageUrl").value("/pet.png")).andReturn();
+        long orderId=json.readTree(response.getResponse().getContentAsString()).get("id").asLong();
+        var reserved=pets.findById(pet.getId()).orElseThrow();assertEquals(AvailabilityStatus.PENDING,reserved.getAvailabilityStatus());assertEquals(orderId,reserved.getReservedOrder().getId());
+        assertEquals(before,transactions.count());
+        mvc.perform(get("/api/v1/orders").with(user(caller(customer,"CUSTOMER")))).andExpect(status().isOk()).andExpect(jsonPath("$.content[0].items[0].petId").value(pet.getId()));
+        mvc.perform(get("/api/v1/pets/{id}",pet.getId())).andExpect(status().isOk()).andExpect(jsonPath("$.availabilityStatus").value("PENDING")).andExpect(jsonPath("$.price").value(1500));
     }
     @Test void rejectsMissingUnavailableOwnedAndUnpricedPets() throws Exception {
-        long before=orders.count();
-        postOrder(json.writeValueAsString(request(item(Long.MAX_VALUE)))).andExpect(status().isBadRequest());
+        postOrder(json.writeValueAsString(request(item(Long.MAX_VALUE)))).andExpect(status().isNotFound());
         for (AvailabilityStatus state:List.of(AvailabilityStatus.PENDING,AvailabilityStatus.SOLD,AvailabilityStatus.RESERVED,AvailabilityStatus.UNAVAILABLE)) {
-            pet.setAvailabilityStatus(state);pets.save(pet);postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isBadRequest());
-            assertEquals(state,pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+            pet.setAvailabilityStatus(state);pets.save(pet);postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isConflict());
         }
         pet.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);pet.setOwner(customer);pets.save(pet);
-        postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isBadRequest());
-        assertEquals(customer.getId(),pets.findById(pet.getId()).orElseThrow().getOwner().getId());
+        postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isConflict());
         pet.setOwner(null);pet.setPrice(BigDecimal.ZERO);pets.save(pet);
-        postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isBadRequest());
-        assertEquals(before,orders.count());assertNull(pets.findById(pet.getId()).orElseThrow().getReservedOrder());
+        postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isConflict());
     }
     @Test void invalidItemsHave400IncludingServiceChecks() throws Exception {
         var both=item(pet.getId());both.setProductId(1L);
@@ -110,6 +107,20 @@ class PetPurchaseTest {
         postOrder(json.writeValueAsString(request(item(pet.getId()),item(pet.getId())))).andExpect(status().isBadRequest());
         postOrder("{\"items\":[null],\"shippingAddress\":\"Test\"}").andExpect(status().isBadRequest());
     }
+    @Test void addingPetToCartTwiceDoesNotReserveItAndCheckoutConsumesTheLine() throws Exception {
+        var payload = json.writeValueAsBytes(Map.of("petId", pet.getId(), "quantity", 1));
+        for (int i = 0; i < 2; i++) {
+            mvc.perform(post("/api/v1/cart/items").with(user(caller(customer, "CUSTOMER")))
+                    .contentType("application/json").content(payload)).andExpect(status().isOk())
+                    .andExpect(jsonPath("$.items.length()").value(1)).andExpect(jsonPath("$.items[0].petId").value(pet.getId()));
+        }
+        assertEquals(AvailabilityStatus.AVAILABLE, pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+        postOrder(json.writeValueAsString(request(item(pet.getId())))).andExpect(status().isOk())
+                .andExpect(jsonPath("$.expiresAt").isString());
+        mvc.perform(get("/api/v1/cart").with(user(caller(customer, "CUSTOMER"))))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.items.length()").value(0));
+    }
+
     @Test void expiryReleasesOnlyUnpaidDueOrdersOnce() {
         var order = existingOrder(null, pet);
         order.setExpiresAt(java.time.LocalDateTime.now().plusDays(2));
@@ -133,29 +144,49 @@ class PetPurchaseTest {
         for(String role:List.of("ADMIN","SALES_STAFF","WAREHOUSE_STAFF","VETERINARIAN"))
             mvc.perform(post("/api/v1/orders").with(user(caller(customer,role))).contentType("application/json").content(body)).andExpect(status().isForbidden());
     }
-    @Test void mixedPurchaseIsRejectedWithoutChangingStockCartOrPets() throws Exception {
-        var category=categories.save(ProductCategory.builder().name("Mixed purchase").build());
-        var product=products.save(Product.builder().name("Food").sku(UUID.randomUUID().toString()).category(category).price(BigDecimal.TEN).active(true).build());
+    @Test void mixedOrderPersistsAndCancelIsIdempotentAfterAnotherReservation() {
+        var c=categories.save(ProductCategory.builder().name("Food").build());
+        var product=products.save(Product.builder().name("Food").sku(UUID.randomUUID().toString()).category(c).price(BigDecimal.TEN).active(true).build());
         inventory.save(Inventory.builder().product(product).quantity(3).build());
-        Cart cart=Cart.builder().customer(customer).build();
-        cart.addItem(CartItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(2).build());carts.saveAndFlush(cart);
-        var line=new OrderItemDTO();line.setProductId(product.getId());line.setQuantity(2);
-        long before=orders.count(), stockTransactions=transactions.count();
-        for(var lines:List.of(List.of(line,item(pet.getId())),List.of(item(pet.getId()),line))) {
-            var body=request(lines.toArray(OrderItemDTO[]::new));
-            postOrder(json.writeValueAsString(body)).andExpect(status().isBadRequest());
-            authenticate(customer,"CUSTOMER");
-            assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createOrder(body));
-        }
-        assertEquals(before,orders.count());assertEquals(stockTransactions,transactions.count());
+        var p=new OrderItemDTO();p.setProductId(product.getId());p.setQuantity(2);
+        var order=service.createOrder(request(p,item(pet.getId())));assertEquals(31520.0,order.getTotalPrice());
+        assertEquals(1,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
+        service.cancelOrder(order.getId());assertEquals(AvailabilityStatus.AVAILABLE,pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+        var next=service.createOrder(request(item(pet.getId())));service.cancelOrder(order.getId());
+        assertEquals(next.getId(),pets.findById(pet.getId()).orElseThrow().getReservedOrder().getId());
         assertEquals(3,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
-        new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(status -> {
-            var unchanged=carts.findByCustomerId(customer.getId()).orElseThrow();assertEquals(1,unchanged.getItems().size());
-            assertEquals(product.getId(),unchanged.getItems().get(0).getProduct().getId());assertEquals(2,unchanged.getItems().get(0).getQuantity());
-        });
-        var unchanged=pets.findById(pet.getId()).orElseThrow();assertEquals(AvailabilityStatus.AVAILABLE,unchanged.getAvailabilityStatus());
-        assertNull(unchanged.getOwner());assertNull(unchanged.getReservedOrder());
     }
+    @Test void expiringMixedCartRestoresPetStockAndBenefitsOnce() {
+        var category = categories.save(ProductCategory.builder().name("qa_food").build());
+        var product = products.save(Product.builder().name("qa_food").sku(UUID.randomUUID().toString())
+                .category(category).price(new BigDecimal("100000")).active(true).build());
+        inventory.save(Inventory.builder().product(product).quantity(2).build());
+        var line = new OrderItemDTO();
+        line.setProductId(product.getId());
+        line.setQuantity(1);
+        var balance = balances.save(LoyaltyAccount.builder().customer(customer).availablePoints(100).totalPoints(100).build());
+        var promo = promotions.save(Promotion.builder().code(UUID.randomUUID().toString()).discountType(DiscountType.PERCENTAGE)
+                .discountValue(BigDecimal.TEN).maxUses(1).build());
+        var req = request(item(pet.getId()), line);
+        req.setPromotionCode(promo.getCode());
+        req.setPointsToUse(10);
+        var created = service.createOrder(req);
+        assertEquals(120500.0, created.getTotalPrice());
+        var order = orders.findById(created.getId()).orElseThrow();
+        order.setExpiresAt(java.time.LocalDateTime.now().minusDays(1));
+        orders.save(order);
+        SecurityContextHolder.clearContext();
+        assertTrue(service.expireIfDue(order.getId()));
+        assertFalse(service.expireIfDue(order.getId()));
+        assertEquals(AvailabilityStatus.AVAILABLE, pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+        assertEquals(2, inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
+        assertEquals(100, balances.findById(balance.getId()).orElseThrow().getAvailablePoints());
+        assertEquals(0, promotions.findById(promo.getId()).orElseThrow().getCurrentUses());
+    }
+
+    @Autowired LoyaltyAccountRepository balances;
+    @Autowired PromotionRepository promotions;
+
     @Test void existingMixedOrderCancelIsIdempotentAfterAnotherReservation() throws Exception {
         var c=categories.save(ProductCategory.builder().name("Food").build());
         var product=products.save(Product.builder().name("Food").sku(UUID.randomUUID().toString()).category(c).price(BigDecimal.TEN).active(true).build());
@@ -181,9 +212,9 @@ class PetPurchaseTest {
         mvc.perform(get("/api/v1/pets/{id}",pet.getId())).andExpect(status().isNotFound()).andExpect(jsonPath("$.availabilityStatus").doesNotExist())
                 .andExpect(jsonPath("$.name").doesNotExist()).andExpect(jsonPath("$.ownerId").doesNotExist()).andExpect(jsonPath("$.description").doesNotExist());
     }
-    @Test void petAndInvalidProductAreRejectedWithoutReservationOrOrder() {
+    @Test void badSecondItemRollsBackReservationAndOrder() {
         long before=orders.count();var product=new OrderItemDTO();product.setProductId(Long.MAX_VALUE);product.setQuantity(1);
-        assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createOrder(request(item(pet.getId()),product)));
+        assertThrows(com.petcarehub.exception.ResourceNotFoundException.class,()->service.createOrder(request(item(pet.getId()),product)));
         assertEquals(before,orders.count());assertEquals(AvailabilityStatus.AVAILABLE,pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());assertNull(pets.findById(pet.getId()).orElseThrow().getReservedOrder());
     }
     @Test void abnormalReservationCannotPartiallyDeliverOrCancel() {
@@ -198,17 +229,14 @@ class PetPurchaseTest {
         assertNull(pets.findById(pet.getId()).orElseThrow().getOwner());
         assertEquals(AvailabilityStatus.PENDING,pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
     }
-    @Test void concurrentPetPurchasesAreBothRejectedWithoutReservation() throws Exception {
-        long before=orders.count(), stockTransactions=transactions.count();
+    @Test void concurrentRequestsOnlyOneCanReservePet() throws Exception {
         var pool=Executors.newFixedThreadPool(2);var ready=new CountDownLatch(2);var start=new CountDownLatch(1);
         try {
-            Callable<Boolean> buy=()->{authenticate(customer,"CUSTOMER");ready.countDown();try {start.await();service.createOrder(request(item(pet.getId())));return true;}
-                catch(com.petcarehub.exception.BadRequestException ex){return false;}finally{SecurityContextHolder.clearContext();}};
-            var a=pool.submit(buy);var b=pool.submit(buy);assertTrue(ready.await(5,TimeUnit.SECONDS));start.countDown();
-            assertFalse(a.get(15,TimeUnit.SECONDS));assertFalse(b.get(15,TimeUnit.SECONDS));
-            assertEquals(before,orders.count());assertEquals(stockTransactions,transactions.count());
-            var unchanged=pets.findById(pet.getId()).orElseThrow();assertEquals(AvailabilityStatus.AVAILABLE,unchanged.getAvailabilityStatus());
-            assertNull(unchanged.getReservedOrder());assertNull(unchanged.getOwner());
+            java.util.function.Function<User,Callable<Boolean>> buy=buyer->()->{authenticate(buyer,"CUSTOMER");ready.countDown();try {start.await();service.createOrder(request(item(pet.getId())));return true;}
+                catch(IllegalStateException ex){return false;}finally{SecurityContextHolder.clearContext();}};
+            var other = account();
+            var a=pool.submit(buy.apply(customer));var b=pool.submit(buy.apply(other));assertTrue(ready.await(5,TimeUnit.SECONDS));start.countDown();
+            assertNotEquals(a.get(15,TimeUnit.SECONDS),b.get(15,TimeUnit.SECONDS));
         } finally {start.countDown();pool.shutdownNow();}
     }
 }

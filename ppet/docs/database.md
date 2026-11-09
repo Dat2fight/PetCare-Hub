@@ -476,3 +476,5 @@ erDiagram
 Migration 005_order_expiry.sql thêm orders.expires_at, expired_at và chỉ mục tìm đơn đến hạn. performed_by trên giao dịch kho cho phép NULL đối với thao tác tự động. Đơn cũ chưa được cấp hạn giữ nguyên hạn NULL.
 
 006_checkout_pricing.sql thêm snapshot ưu đãi, phí giao hàng, khóa checkout duy nhất theo khách và giới hạn mã theo khách.
+
+Dòng PET dùng cart_items.pet_id và order_items.pet_id hiện có. Hạn trên orders áp dụng cho toàn bộ đơn hỗn hợp, bắt đầu khi tạo đơn. Job nhả pet và hoàn sản phẩm, voucher, điểm trong cùng transaction.

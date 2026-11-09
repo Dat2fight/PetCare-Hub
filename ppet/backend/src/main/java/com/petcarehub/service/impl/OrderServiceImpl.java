@@ -40,6 +40,8 @@ public class OrderServiceImpl implements OrderService {
             if (line.getPetId() != null) {
                 Pet pet = pets.findById(line.getPetId()).filter(p -> p.getOwner() == null && p.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE)
                         .orElseThrow(() -> new ResourceNotFoundException("Thú cưng không còn khả dụng"));
+                if (pet.getPrice() == null || pet.getPrice().signum() <= 0 || pet.getReservedOrder() != null)
+                    throw new IllegalStateException("Thú cưng chưa sẵn sàng để đặt");
                 animals = animals.add(pet.getPrice());
             } else {
                 Product product = products.findById(line.getProductId()).filter(p -> Boolean.TRUE.equals(p.getActive()))
@@ -61,7 +63,6 @@ public class OrderServiceImpl implements OrderService {
         if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
             throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
         if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
-        for (OrderItemDTO item : request.getItems()) if (item == null || item.getPetId() != null || item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ; phiên bản này chưa hỗ trợ mua thú cưng");
         java.util.Set<Long> petIds = new java.util.TreeSet<>();
         for (int index = 0; index < request.getItems().size(); index++) {
             OrderItemDTO item = request.getItems().get(index);
@@ -116,8 +117,9 @@ public class OrderServiceImpl implements OrderService {
             order.setPromotionCode(request.getPromotionCode().trim());
         carts.findByCustomerId(customerId).ifPresent(cart -> {
             java.util.Map<Long, Long> purchased = new java.util.HashMap<>();
-            request.getItems().forEach(item -> purchased.merge(item.getProductId(), item.getQuantity().longValue(), Math::addExact));
+            request.getItems().stream().filter(line -> line.getProductId() != null).forEach(item -> purchased.merge(item.getProductId(), item.getQuantity().longValue(), Math::addExact));
             for (CartItem item : new java.util.ArrayList<>(cart.getItems())) {
+                if (item.getPet() != null && petIds.contains(item.getPet().getId())) cart.removeItem(item);
                 if (item.getProduct() == null) continue;
                 long quantity = purchased.getOrDefault(item.getProduct().getId(), 0L);
                 if (quantity == 0) continue;
@@ -192,7 +194,6 @@ public class OrderServiceImpl implements OrderService {
         for (Pet pet : reserved) {
             pet.setOwner(o.getCustomer()); pet.setAvailabilityStatus(AvailabilityStatus.SOLD); pet.setReservedOrder(null); pets.save(pet);
         }
-        // NEEDS DECISION: COD is collected on delivery; no online payment claim is made.
         if ("COD".equals(o.getPaymentMethod())) {
             pricing.earn(o);
             o.setPaymentStatus(PaymentStatus.COMPLETED);
@@ -246,6 +247,12 @@ public class OrderServiceImpl implements OrderService {
     }
     private OrderDTO dto(Order o) {
         OrderDTO dto = new OrderDTO(); dto.setId(o.getId()); dto.setUserId(o.getCustomer().getId()); dto.setStatus(o.getStatus().name()); dto.setTotalPrice(o.getTotalAmount().doubleValue());
+        dto.setSubtotal(o.getSubtotal());
+        dto.setPromotionCode(o.getPromotionCode());
+        dto.setDiscountAmount(o.getDiscountAmount());
+        dto.setPointsUsed(o.getPointsUsed());
+        dto.setPointsDiscount(o.getPointsDiscount());
+        dto.setShippingFee(o.getShippingFee());
         dto.setExpiresAt(o.getExpiresAt()); dto.setExpiredAt(o.getExpiredAt());
         dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setShippingAddress(o.getShippingAddress()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
