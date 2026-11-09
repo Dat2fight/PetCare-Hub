@@ -6,12 +6,17 @@ import { useAuth } from '../../contexts/AuthContext';
 import { useResource } from '../../hooks/useResource';
 import { newCheckoutKey, orderService } from '../../services/orderService';
 import { Button } from '../common/Button';
+import { mockImages } from '../../data/mockImages';
 
 interface Benefits {includesGrooming:boolean; includesCheckup:boolean; includesVaccination:boolean}
 interface Plan extends Benefits {id:number; name:string; description?:string; price:number; durationMonths:number}
 interface Subscription extends Benefits {id:number; orderId?:number; name:string; petName:string; startDate:string; endDate:string; status:string}
 const shell='max-w-5xl mx-auto px-4 py-10';
 const card='min-w-0 break-words p-5 rounded-2xl bg-white shadow-sm space-y-3';
+function PackagePhoto({plan}:{plan:Benefits}) {
+  const src = plan.includesGrooming ? mockImages.grooming : mockImages.vet;
+  return <img src={src} alt="" className="w-full h-44 object-cover rounded-xl" />;
+}
 function BenefitsList({plan}:{plan:Benefits}) {
   const items=[plan.includesGrooming && 'Chăm sóc lông',plan.includesCheckup && 'Khám sức khỏe',plan.includesVaccination && 'Tiêm phòng'].filter(Boolean);
   return items.length ? <ul className="list-disc pl-5">{items.map(b=><li key={String(b)}>{b}</li>)}</ul> : null;
@@ -24,6 +29,7 @@ export function CarePackages() {
   return <main className={shell}><h1 className="text-3xl font-bold mb-6">Gói chăm sóc định kỳ</h1>
     {!plans.data ? <Feedback error={plans.error} retry={plans.retry}/> : !plans.data.length ? <p>Chưa có gói đang bán.</p> :
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">{plans.data.map(p=><article className={card} key={p.id}>
+      <PackagePhoto plan={p}/>
       <h2 className="text-xl font-bold"><Link to={'/care-packages/'+p.id}>{p.name}</Link></h2>
       <p>{p.price.toLocaleString('vi-VN')} ₫ · {p.durationMonths} tháng</p><BenefitsList plan={p}/>
       <Link className="inline-block underline text-primary-700" to={'/care-packages/'+p.id}>Xem chi tiết</Link></article>)}</div>}</main>;
@@ -60,6 +66,7 @@ export function PackageDetail({checkout=false}:{checkout?:boolean}) {
   const plan=useResource<Plan>('/care-packages/'+encodeURIComponent(id || ''));
   return <main className={shell}><Link to="/care-packages">← Các gói chăm sóc</Link>
     {!plan.data ? <Feedback error={plan.error} retry={plan.retry}/> : <article className={card}>
+      {!checkout && <PackagePhoto plan={plan.data}/>}
       <h1 className="text-3xl font-bold">{plan.data.name}</h1><p>{plan.data.description}</p>
       <p>{plan.data.price.toLocaleString('vi-VN')} ₫ · {plan.data.durationMonths} tháng</p><BenefitsList plan={plan.data}/>
       {checkout ? <PackagePurchase key={id} plan={plan.data}/> : (!user || user.roles.includes('CUSTOMER')) &&

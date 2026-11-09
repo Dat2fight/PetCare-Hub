@@ -2,8 +2,6 @@
 
 Tài liệu vận hành chính của repository. Các lệnh PowerShell bên dưới dùng checkout `D:\PetCare-Hub`; đổi đường dẫn nếu bạn clone ở nơi khác. Mỗi khối ghi rõ terminal/thư mục sử dụng.
 
-**Đã kiểm chứng ngày 19/10/2026:** Java 25.0.2, Node 24.21.0, npm 11.19.0, Maven Wrapper 3.9.9, SQL Server 17.0.1145.4 Standard Developer Edition; backend dev và frontend chạy trên database có sẵn. Test/build/lint và xác thực API pass. [Báo cáo đầy đủ](docs/local-run-20261019.md).
-
 Các mục tạo database mới, cài/bật SQL Server, bootstrap admin, seed mới và Bash là hướng dẫn từ cấu hình/mã nguồn, **chưa thực thi trong phiên này**. Không xem chúng là bằng chứng đã kiểm thử trên database mới. Luồng đặt lịch cần kiểm tra tay riêng.
 
 ## Mục lục
@@ -141,7 +139,7 @@ $scripts = @(
     'migrations\003_inventory_generated_unique.sql'
 )
 foreach ($script in $scripts) {
-    sqlcmd -S localhost,1433 -E -C -b -d $dbName -i (Join-Path $sqlRoot $script)
+    sqlcmd -S localhost,1433 -E -C -b -d $dbName -f 65001 -i (Join-Path $sqlRoot $script)
     if ($LASTEXITCODE -ne 0) { throw "SQL thất bại tại $script; không chạy tiếp" }
 }
 ```
