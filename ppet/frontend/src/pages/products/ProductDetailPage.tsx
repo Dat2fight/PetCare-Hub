@@ -1,3 +1,4 @@
+import { HeartButton, useWishlistStatus } from '../../components/customer/Wishlist';
 import { Reviews } from '../../components/customer/Reviews';
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
@@ -7,7 +8,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { Button } from '../../components/common/Button';
-import { FiShoppingCart, FiHeart, FiMinus, FiPlus } from 'react-icons/fi';
+import { FiShoppingCart, FiMinus, FiPlus } from 'react-icons/fi';
 import LoadingSpinner from '../../components/common/LoadingSpinner';
 
 export const ProductDetailPage: React.FC = () => {
@@ -82,6 +83,7 @@ export const ProductDetailPage: React.FC = () => {
     return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
   };
 
+  const hearts=useWishlistStatus('PRODUCT',product?[product.id]:[]);
   if (loading) {
     return (
       <div className="bg-background min-h-screen py-20 flex justify-center">
@@ -175,9 +177,7 @@ export const ProductDetailPage: React.FC = () => {
                 <Button size="lg" className="flex-1 py-4 text-lg" isLoading={addingToCart} onClick={handleAddToCart} disabled={(product.stockQuantity ?? 0) <= 0}>
                   <FiShoppingCart className="mr-2" /> Thêm vào giỏ hàng
                 </Button>
-                <button disabled aria-disabled="true" title="Yêu thích — Sắp ra mắt" className="flex items-center justify-center gap-2 p-4 rounded-2xl border-2 border-gray-200 text-gray-400 bg-white shadow-xs">
-                  <FiHeart size={24} /><span className="text-xs">Sắp ra mắt</span>
-                </button>
+                <HeartButton type="PRODUCT" id={product.id} status={hearts}/>
               </div>
 
             </div>

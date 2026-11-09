@@ -10,6 +10,7 @@ function ScrollToTop() {
 
   return null;
 }
+import { WishlistPage } from './components/customer/Wishlist';
 import { MyReviews, ServiceDetail } from './components/customer/Reviews';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import { OrdersPage } from './pages/orders/OrdersPage';
@@ -58,6 +59,7 @@ function App() {
               <Route path="/cart" element={<ProtectedRoute><CartPage /></ProtectedRoute>} />
               <Route path="/checkout" element={<ProtectedRoute><CheckoutPage /></ProtectedRoute>} />
               <Route path="/orders/tracking" element={<ProtectedRoute><OrderTrackingPage /></ProtectedRoute>} />
+              <Route path="/wishlist" element={<ProtectedRoute roles={['CUSTOMER']}><WishlistPage /></ProtectedRoute>} />
               <Route path="/my-reviews" element={<ProtectedRoute roles={['CUSTOMER']}><MyReviews /></ProtectedRoute>} />
               <Route path="/services/:id" element={<ServiceDetail />} />
               <Route path="/services" element={<ServiceListPage />} />

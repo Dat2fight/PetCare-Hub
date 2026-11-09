@@ -149,3 +149,5 @@ POST /cart/items (CUSTOMER) nhận đúng một trong hai trường productId ho
 
 ### Đánh giá
 `GET /reviews` và `/reviews/summary` nhận `targetType` và `targetId`. Khách đã mua hoặc đã dùng dịch vụ kiểm tra `/reviews/eligibility`, đăng đánh giá và quản lý qua `/reviews/me`. Sửa nội dung sẽ chuyển về chờ duyệt. Nhân viên bán hàng và quản trị xem `/reviews/pending`, dùng PUT `/{id}/approve`, `/{id}/reject` (gửi `reason`) hoặc `/{id}/hide` dưới `/reviews`.
+
+`GET /wishlist?page=0&size=12` trả mục yêu thích của khách hiện tại. `POST /wishlist` nhận `{type,targetId}`, gọi lại trả cùng ID. `GET /wishlist/status?type=PET&ids=1,2` tra cứu theo lô. `DELETE /wishlist/{id}` dùng ID mục đã lưu.

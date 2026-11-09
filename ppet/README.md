@@ -411,3 +411,5 @@ Trước khi chạy bản có hết hạn giữ chỗ, áp dụng cả hai migra
 Sau migration 005, áp dụng 006_checkout_pricing.sql. app.checkout.shipping-fee mặc định 30000, app.checkout.free-shipping-from mặc định 500000, app.checkout.promotion-per-customer mặc định 1. Đổi 1 điểm lấy 100đ, tối đa 50% tiền sản phẩm sau voucher.
 
 Khách có thể đánh giá sản phẩm sau khi nhận hàng hoặc dịch vụ sau khi hoàn thành lịch hẹn. Mở **Đánh giá của tôi** trong menu tài khoản để sửa, xóa và theo dõi kết quả duyệt.
+
+Dùng nút tim trên thẻ hoặc trang chi tiết để lưu mục. Trong **Yêu thích**, khách có thể chuyển mục còn bán vào giỏ.

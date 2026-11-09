@@ -1,3 +1,6 @@
+import { HeartButton, useWishlistStatus } from '../components/customer/Wishlist';
+import { useResource } from '../hooks/useResource';
+import { PublicPetDTO } from '../services/petManagementService';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
@@ -6,10 +9,12 @@ import { productService, Product, ProductCategory } from '../services/productSer
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import { ProductImage } from '../components/common/ProductImage';
 import { mockImages } from '../data/mockImages';
-import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield, FiClock, FiTruck, FiUser } from 'react-icons/fi';
+import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield, FiClock, FiTruck } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
+  const featured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE');
+  const hearts=useWishlistStatus('PET',featured.data?.content.map(p=>p.id) ?? []);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
   const [loadingProducts, setLoadingProducts] = useState(true);
@@ -131,37 +136,15 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {[
-            { id: 1, name: "Chó Golden Retriever", breed: "Golden Retriever", age: "2 tháng", gender: "Đực", weight: "15kg", price: "12.000.000đ", image: mockImages.dogGolden, status: "Đã tiêm phòng", bg: "bg-primary-500" },
-            { id: 2, name: "Mèo Anh Lông Ngắn", breed: "Mèo ALN", age: "3 tháng", gender: "Cái", weight: "4kg", price: "8.000.000đ", image: mockImages.catScottish, status: "Sức khỏe tốt", bg: "bg-blue-500" },
-            { id: 3, name: "Chó Corgi", breed: "Corgi", age: "2 tháng", gender: "Đực", weight: "10kg", price: "10.000.000đ", image: mockImages.dogCorgi, status: "Đang chăm sóc", bg: "bg-secondary-500" },
-            { id: 4, name: "Poodle", breed: "Poodle", age: "4 tháng", gender: "Cái", weight: "5kg", price: "9.500.000đ", image: mockImages.dogPoodle, status: "Đã tiêm phòng", bg: "bg-primary-500" },
-            { id: 5, name: "Mèo Munchkin", breed: "Munchkin", age: "3 tháng", gender: "Cái", weight: "3kg", price: "7.500.000đ", image: mockImages.catPersian, status: "Sức khỏe tốt", bg: "bg-blue-500" },
-          ].map(pet => (
-            <Link to={`/pets/${pet.id}`} key={pet.id} className="block h-full">
-              <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-gray-100 hover:border-primary-200">
-              <div className="relative aspect-[4/3] overflow-hidden bg-gray-50 rounded-t-2xl p-2">
-                <img src={pet.image} alt={pet.name} className="w-full h-full object-cover rounded-xl group-hover:scale-105 transition-transform duration-500" />
-                <span aria-disabled="true" title="Yêu thích — Sắp ra mắt" className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full flex items-center gap-1 px-2 py-1 text-gray-400 shadow-xs">
-                  <FiHeart size={16} />
-                  <span className="text-xs">Sắp ra mắt</span>
-                </span>
-                <div className="absolute bottom-4 left-4">
-                  <span className={`${pet.bg} text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-xs`}>{pet.status}</span>
-                </div>
-              </div>
-              <div className="p-4 flex flex-col grow">
-                <h3 className="font-bold text-[15px] text-gray-900 mb-2 line-clamp-1">{pet.name}</h3>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mb-4 divide-x divide-gray-200">
-                  <span className="flex items-center gap-1"><FiUser size={12}/> {pet.age}</span>
-                  <span className="pl-2">{pet.gender}</span>
-                  <span className="pl-2">{pet.weight}</span>
-                </div>
-                <div className="mt-auto font-extrabold text-primary-600 text-lg">{pet.price}</div>
-              </div>
-            </Card>
-            </Link>
-          ))}
+          {featured.error ? <p role="alert">{featured.error} <button onClick={featured.retry}>Thử lại</button></p> : !featured.data ? <p>Đang tải…</p> :
+            !featured.data.content.length ? <p>Chưa có thú cưng đang bán.</p> : featured.data.content.map(pet=>(
+              <article key={pet.id} className="relative rounded-2xl bg-white shadow-sm p-3">
+                <Link to={`/pets/${pet.id}`}>
+                  {pet.imageUrl && <img src={pet.imageUrl} alt="" className="w-full aspect-[4/3] object-cover rounded-xl"/>}
+                  <h3 className="font-bold mt-3">{pet.name}</h3><p>{pet.breedName || pet.speciesName}</p>
+                  <p className="text-primary-700">{pet.price?.toLocaleString('vi-VN')} ₫</p>
+                </Link><div className="absolute top-4 right-4"><HeartButton type="PET" id={pet.id} status={hearts}/></div>
+              </article>))}
         </div>
       </section>
 
