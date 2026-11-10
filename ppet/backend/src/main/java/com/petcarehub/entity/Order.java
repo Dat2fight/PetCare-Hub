@@ -39,6 +39,13 @@ public class Order extends BaseEntity {
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    private String promotionCode;
+    private String checkoutKey;
+    private String checkoutFingerprint;
+    private Integer pointsUsed;
+    private BigDecimal pointsDiscount;
+    private BigDecimal shippingFee;
+
     @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
     @Builder.Default
     private BigDecimal taxAmount = BigDecimal.ZERO;
@@ -56,6 +63,12 @@ public class Order extends BaseEntity {
     @Column(name = "payment_status", length = 50)
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+
+    @Column(name = "expires_at")
+    private java.time.LocalDateTime expiresAt;
+
+    @Column(name = "expired_at")
+    private java.time.LocalDateTime expiredAt;
 
     // Local business time in Asia/Ho_Chi_Minh; legacy unknown dates remain null.
     @Column(name = "paid_at")

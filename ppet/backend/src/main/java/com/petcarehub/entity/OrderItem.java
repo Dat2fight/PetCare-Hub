@@ -37,6 +37,16 @@ public class OrderItem {
     @JoinColumn(name = "product_id")
     private Product product;
 
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="care_package_id")
+    private CarePackage carePackage;
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="beneficiary_pet_id")
+    private Pet beneficiaryPet;
+    private String packageName;
+    private Integer packageMonths;
+    private Boolean packageGrooming;
+    private Boolean packageCheckup;
+    private Boolean packageVaccination;
+
     @Column(nullable = false)
     private Integer quantity;
 

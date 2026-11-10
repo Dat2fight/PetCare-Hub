@@ -26,4 +26,6 @@ public class PromotionCreateRequest {
     private Boolean active = true;
     @Positive
     private Integer maxUses;
+    @Positive
+    private Integer maxUsesPerCustomer;
 }

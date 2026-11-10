@@ -5,8 +5,8 @@ import { MdPets } from 'react-icons/md';
 import apiClient from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 
-const navigation = [['/', 'Trang chủ'], ['/pets', 'Thú cưng'], ['/products', 'Sản phẩm'], ['/services', 'Dịch vụ'], ['/pet-matching', 'Tìm thú cưng phù hợp']];
-const accountLinks = [['/profile', 'Hồ sơ cá nhân'], ['/my-pets', 'Thú cưng của tôi'], ['/orders', 'Đơn hàng'], ['/loyalty', 'Điểm thưởng']];
+const navigation = [['/', 'Trang chủ'], ['/pets', 'Thú cưng'], ['/products', 'Sản phẩm'], ['/services', 'Dịch vụ'], ['/care-packages','Gói chăm sóc'], ['/pet-matching', 'Tìm thú cưng phù hợp']];
+const accountLinks = [['/my-care-packages','Gói của tôi'],['/wishlist','Yêu thích'],['/my-reviews','Đánh giá của tôi'],['/profile', 'Hồ sơ cá nhân'], ['/my-pets', 'Thú cưng của tôi'], ['/orders', 'Đơn hàng'], ['/loyalty', 'Điểm thưởng']];
 const touch = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-primary-50 focus-visible:outline-primary-600';
 
 export default function Header() {
@@ -35,7 +35,7 @@ export default function Header() {
   const signOut = () => { setOpen(false); logout(); navigate('/login'); };
   const search = (event: FormEvent) => { event.preventDefault(); setOpen(false); navigate(`/products?keyword=${encodeURIComponent(query.trim())}`); };
   const links = navigation.map(([to, label]) => <Link key={to} to={to} onClick={() => setOpen(false)} className={`${touch} px-2 text-sm font-medium`}>{label}</Link>);
-  const personal = accountLinks.map(([to, label]) => <Link key={to} to={to} onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 hover:bg-primary-50">{label}</Link>);
+  const personal = accountLinks.filter(([to]) => user?.roles.includes('CUSTOMER') || !['/my-care-packages','/my-reviews','/wishlist'].includes(to)).map(([to, label]) => <Link key={to} to={to} onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 hover:bg-primary-50">{label}</Link>);
   return <header className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-xs">
     <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">
       <div className="flex h-20 min-w-0 items-center justify-between gap-2">

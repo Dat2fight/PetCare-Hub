@@ -88,6 +88,8 @@ export interface ProductCategory {
 
 // ===== Order Types =====
 export interface Order {
+  expiresAt?: string
+  expiredAt?: string
   id: number
   userId: number
   orderNumber: string
@@ -102,6 +104,9 @@ export interface Order {
 }
 
 export interface OrderItem {
+  carePackageId?: number
+  beneficiaryPetId?: number
+  packageName?: string
   petId?: number | null
   productId?: number | null
   petName?: string | null

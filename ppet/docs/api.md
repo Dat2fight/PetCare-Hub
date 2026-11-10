@@ -140,3 +140,25 @@ Personal routes including `/auth/me` and `/pets/my-pets/**` require authenticati
 
 Booking requires `petId`, `serviceId`, `appointmentTime`; customer identity is taken from the principal. Foreign, unowned and missing pets return 404. `GET /appointments/pet/{petId}` retains owner/assigned-vet/admin scope. There is no customer rescheduling endpoint or staff-on-behalf booking flow.
 
+
+Các phản hồi đơn hàng có thêm expiresAt và expiredAt (giờ Việt Nam). Đơn COD chứa thú cưng chờ xác nhận có hạn 24 giờ. Khi hết hạn, trạng thái là CANCELLED và expiredAt có giá trị, khách nhận thông báo trong hộp thư trên web.
+
+POST /api/v1/orders/quote (CUSTOMER) nhận items, promotionCode, pointsToUse. Kết quả gồm subtotal, discount, pointsApplied, pointsDiscount, shippingFee, total, availablePoints, maxRedeemablePoints. POST /orders hỗ trợ checkoutKey UUID cùng phạm vi khách, dùng lại khi gửi lại cùng payload.
+
+POST /cart/items (CUSTOMER) nhận đúng một trong hai trường productId hoặc petId. Với pet, quantity = 1. Lặp lại thao tác thêm cùng pet giữ một dòng trong giỏ. POST /orders nhận cả hai loại dòng trong cùng đơn COD. Cart chỉ xóa những mặt hàng vừa đặt.
+
+### Đánh giá
+`GET /reviews` và `/reviews/summary` nhận `targetType` và `targetId`. Khách đã mua hoặc đã dùng dịch vụ kiểm tra `/reviews/eligibility`, đăng đánh giá và quản lý qua `/reviews/me`. Sửa nội dung sẽ chuyển về chờ duyệt. Nhân viên bán hàng và quản trị xem `/reviews/pending`, dùng PUT `/{id}/approve`, `/{id}/reject` (gửi `reason`) hoặc `/{id}/hide` dưới `/reviews`.
+
+`GET /wishlist?page=0&size=12` trả mục yêu thích của khách hiện tại. `POST /wishlist` nhận `{type,targetId}`, gọi lại trả cùng ID. `GET /wishlist/status?type=PET&ids=1,2` tra cứu theo lô. `DELETE /wishlist/{id}` dùng ID mục đã lưu.
+
+### Gói chăm sóc
+
+| Quyền | API dưới /api/v1 |
+|---|---|
+| Công khai | `GET /care-packages`, `GET /care-packages/{id}` trả gói đang bán |
+| CUSTOMER | `POST /orders/quote`, `POST /orders` nhận đúng một dòng `{carePackageId, beneficiaryPetId, quantity: 1}`. Giá lấy từ DB. Giao diện gửi UUID `checkoutKey` để có thể thử lại. Đơn gói dùng COD, phí vận chuyển và ưu đãi bằng 0. |
+| CUSTOMER | `GET /care-packages/subscriptions/me` trả quyền lợi, tên thú cưng, ngày hiệu lực, ngày cuối được sử dụng và mã đơn nếu có |
+| ADMIN, SALES_STAFF | `GET /care-packages/manage` xem cả gói đã tắt. `POST /care-packages`, `PUT /care-packages/{id}` nhận name, description, price, durationMonths, includesGrooming, includesCheckup, includesVaccination, active. `DELETE /care-packages/{id}` ngừng bán. |
+
+Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích hoạt trong cùng giao dịch. Gửi lại lệnh giao đơn gói đã thu tiền trả về đơn hiện tại. Đơn đã hủy không thể kích hoạt. Dòng đơn trả thêm `carePackageId`, `beneficiaryPetId`, `packageName`.

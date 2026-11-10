@@ -27,6 +27,9 @@ public class Review extends BaseEntity {
 
     @Column(nullable = false)
     private Integer rating;
+    private String moderationState;
+    @Column(length=500)
+    private String moderationReason;
 
     @Column(columnDefinition = "TEXT")
     private String comment;

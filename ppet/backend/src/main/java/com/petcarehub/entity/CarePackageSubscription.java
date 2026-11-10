@@ -37,6 +37,9 @@ public class CarePackageSubscription {
     @JoinColumn(name = "package_id", nullable = false)
     private CarePackage carePackage;
 
+    @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="order_item_id")
+    private OrderItem orderItem;
+
     @Column(name = "start_date", nullable = false)
     private LocalDate startDate;
 
@@ -50,7 +53,7 @@ public class CarePackageSubscription {
 
     @Column(name = "auto_renew", nullable = false)
     @Builder.Default
-    private Boolean autoRenew = true;
+    private Boolean autoRenew = false;
 
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)

@@ -16,6 +16,7 @@ public class ReviewCreateRequest {
     private Integer rating;
     
     @NotBlank(message = "Comment is required")
+    @jakarta.validation.constraints.Size(max=2000)
     private String comment;
     
     @NotBlank(message = "Target type is required")

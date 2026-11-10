@@ -2,8 +2,6 @@
 
 Tài liệu vận hành chính của repository. Các lệnh PowerShell bên dưới dùng checkout `D:\PetCare-Hub`; đổi đường dẫn nếu bạn clone ở nơi khác. Mỗi khối ghi rõ terminal/thư mục sử dụng.
 
-**Đã kiểm chứng ngày 19/10/2026:** Java 25.0.2, Node 24.21.0, npm 11.19.0, Maven Wrapper 3.9.9, SQL Server 17.0.1145.4 Standard Developer Edition; backend dev và frontend chạy trên database có sẵn. Test/build/lint và xác thực API pass. [Báo cáo đầy đủ](docs/local-run-20261019.md).
-
 Các mục tạo database mới, cài/bật SQL Server, bootstrap admin, seed mới và Bash là hướng dẫn từ cấu hình/mã nguồn, **chưa thực thi trong phiên này**. Không xem chúng là bằng chứng đã kiểm thử trên database mới. Luồng đặt lịch cần kiểm tra tay riêng.
 
 ## Mục lục
@@ -141,7 +139,7 @@ $scripts = @(
     'migrations\003_inventory_generated_unique.sql'
 )
 foreach ($script in $scripts) {
-    sqlcmd -S localhost,1433 -E -C -b -d $dbName -i (Join-Path $sqlRoot $script)
+    sqlcmd -S localhost,1433 -E -C -b -d $dbName -f 65001 -i (Join-Path $sqlRoot $script)
     if ($LASTEXITCODE -ne 0) { throw "SQL thất bại tại $script; không chạy tiếp" }
 }
 ```
@@ -405,3 +403,26 @@ Không commit .env thật, khóa, token, mật khẩu, hash demo hoặc log. .en
 - [High lượt 1](docs/high-round-1/REPORT.md), [lượt 2](docs/high-round-2/REPORT.md), [lượt 3](docs/high-round-3/REPORT.md)
 
 Các báo cáo trước có giới hạn kiểm chứng và việc còn lại riêng; smoke test local không thay thế kiểm thử nghiệp vụ/concurrency/deploy.
+
+Trước khi chạy bản có hết hạn giữ chỗ, áp dụng cả hai migration 004 rồi chạy migration 005_order_expiry.sql bằng sqlcmd -I -b -f 65001 trên database đã chọn. Hibernate kiểm tra schema khi khởi động. app.order-expiry.hold-hours mặc định 24, app.order-expiry.interval-ms mặc định 60000.
+
+Sau migration 005, áp dụng 006_checkout_pricing.sql. app.checkout.shipping-fee mặc định 30000, app.checkout.free-shipping-from mặc định 500000, app.checkout.promotion-per-customer mặc định 1. Đổi 1 điểm lấy 100đ, tối đa 50% tiền sản phẩm sau voucher.
+
+Khách có thể đánh giá sản phẩm sau khi nhận hàng hoặc dịch vụ sau khi hoàn thành lịch hẹn. Mở **Đánh giá của tôi** trong menu tài khoản để sửa, xóa và theo dõi kết quả duyệt.
+
+Dùng nút tim trên thẻ hoặc trang chi tiết để lưu mục. Trong **Yêu thích**, khách có thể chuyển mục còn bán vào giỏ.
+
+### Giai đoạn 3 cho khách hàng
+
+Khách mở **Dịch vụ → Gói chăm sóc định kỳ**, chọn gói và thú cưng của mình, rồi đặt đơn tiền mặt. Sau khi nhân viên xác nhận thu tiền, khách xem quyền lợi và hạn dùng trong **Gói của tôi**. Các gói mới không tự gia hạn.
+
+Trước khi khởi động bản mới với SQL Server, sao lưu database đích đã có migration 006. Từ thư mục `ppet/backend/src/main/resources/migrations`, đặt `$dbName` thành tên database triển khai và chạy theo thứ tự sau bằng PowerShell với tài khoản tích hợp đã được cấp quyền.
+
+```powershell
+foreach ($script in '007_reviews.sql','008_wishlist.sql','009_package_orders.sql') {
+    sqlcmd -S localhost,1433 -E -C -I -b -f 65001 -d $dbName -i $script
+    if ($LASTEXITCODE -ne 0) { throw "Migration failed: $script" }
+}
+```
+
+Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu và kiểm thử ở [báo cáo giai đoạn 3](docs/phase-3-customer.md).

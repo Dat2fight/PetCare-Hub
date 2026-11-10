@@ -43,6 +43,8 @@ public class Promotion {
     @Column(name = "max_uses")
     private Integer maxUses;
 
+    private Integer maxUsesPerCustomer;
+
     @Column(name = "current_uses", nullable = false)
     @Builder.Default
     private Integer currentUses = 0;

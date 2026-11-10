@@ -42,6 +42,7 @@ export const ServiceListPage: React.FC = () => {
         
         <div className="text-center max-w-2xl mx-auto mb-12">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">Dịch vụ chăm sóc thú cưng</h1>
+          <Link className="underline text-primary-700" to="/care-packages">Khám phá gói chăm sóc định kỳ</Link>
           <p className="text-gray-600">Chúng tôi cung cấp các dịch vụ chất lượng cao nhất để đảm bảo thú cưng của bạn luôn khỏe mạnh và hạnh phúc.</p>
         </div>
 
@@ -66,6 +67,7 @@ export const ServiceListPage: React.FC = () => {
                   <p className="text-primary-600 font-bold mb-3">{service.price.toLocaleString('vi-VN')} đ <span className="text-sm text-gray-500 font-normal">/ {service.durationMinutes} phút</span></p>
                   <p className="text-gray-600 mb-6 flex-1">{service.description}</p>
                   
+                  <Link className="underline mb-2" to={`/services/${service.id}`}>Chi tiết và đánh giá</Link>
                   <Link to={`/services/booking?serviceId=${service.id}`}>
                     <Button fullWidth variant={idx === 0 ? 'primary' : 'outline'}>
                       Đặt lịch ngay

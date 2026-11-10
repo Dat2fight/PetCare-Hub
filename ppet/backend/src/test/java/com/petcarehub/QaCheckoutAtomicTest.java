@@ -44,6 +44,43 @@ class QaCheckoutAtomicTest {
             "userId",b.getId(),"total",0.01,"items",List.of(Map.of("productId",product.getId(),"quantity",qty,"price",0.01)));}
     @BeforeEach void setup(){a=account();b=account();p=product(3);q=product(1);}
     @AfterEach void clear(){SecurityContextHolder.clearContext();}
+    @Autowired PromotionRepository promotions;
+    @Autowired PromotionUsageRepository usages;
+    @Autowired LoyaltyAccountRepository balances;
+
+    @Test void quoteDoesNotConsumeBenefitsAndCancellationRestoresThem() throws Exception {
+        p.setPrice(new BigDecimal("500000"));
+        products.save(p);
+        balances.save(LoyaltyAccount.builder().customer(a).availablePoints(1000).totalPoints(1000).build());
+        String code = UUID.randomUUID().toString();
+        Promotion promo = promotions.save(Promotion.builder().code(code)
+                .discountType(com.petcarehub.enums.DiscountType.PERCENTAGE)
+                .discountValue(BigDecimal.TEN).maxUses(1).build());
+        var payload = new HashMap<>(body(p, 1));
+        payload.put("checkoutKey", UUID.randomUUID().toString());
+        payload.put("promotionCode", code);
+        payload.put("pointsToUse", 500);
+        var bytes = json.writeValueAsBytes(payload);
+        mvc.perform(post("/api/v1/orders/quote").with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(bytes)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.total").value(400000)).andExpect(jsonPath("$.shippingFee").value(0));
+        assertEquals(0, promotions.findById(promo.getId()).orElseThrow().getCurrentUses());
+        var response = mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(bytes)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.totalPrice").value(400000)).andReturn().getResponse();
+        long id = json.readTree(response.getContentAsByteArray()).get("id").asLong();
+        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(bytes)).andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(id));
+        assertEquals(500, balances.findByCustomerId(a.getId()).orElseThrow().getAvailablePoints());
+        mvc.perform(post("/api/v1/orders/quote").with(user(caller(b,"CUSTOMER")))
+                .contentType("application/json").content(bytes)).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/orders/{id}/cancel", id).with(user(caller(a,"CUSTOMER")))).andExpect(status().isOk());
+        assertEquals(1000, balances.findByCustomerId(a.getId()).orElseThrow().getAvailablePoints());
+        assertEquals(0, promotions.findById(promo.getId()).orElseThrow().getCurrentUses());
+        assertTrue(usages.findByOrderId(id).isEmpty());
+    }
+
     @Test void successfulOrderUsesServerPriceAndRemovesOnlyPurchasedCartQuantity() throws Exception {
         var cart=Cart.builder().customer(a).build();
         cart.addItem(CartItem.builder().product(p).itemType(OrderItemType.PRODUCT).quantity(3).build());
@@ -51,7 +88,7 @@ class QaCheckoutAtomicTest {
         mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,2))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").isNumber()).andExpect(jsonPath("$.userId").value(a.getId()))
                 .andExpect(jsonPath("$.status").value("PENDING")).andExpect(jsonPath("$.paymentStatus").value("PENDING"))
-                .andExpect(jsonPath("$.totalPrice").value(20)).andExpect(jsonPath("$.items[0].price").value(10));
+                .andExpect(jsonPath("$.totalPrice").value(30020)).andExpect(jsonPath("$.items[0].price").value(10));
         new TransactionTemplate(transactions).executeWithoutResult(tx->{
             var remaining=carts.findByCustomerId(a.getId()).orElseThrow().getItems();
             assertEquals(2,remaining.size());

@@ -1,4 +1,4 @@
--- SQLCMD mode only. No admin account is created by this demo script.
+﻿-- SQLCMD mode only. No admin account is created by this demo script.
 :On Error exit
 IF N'$(APP_PROFILE)' <> N'dev'
     THROW 50000, 'Demo seed requires explicit APP_PROFILE=dev', 1;

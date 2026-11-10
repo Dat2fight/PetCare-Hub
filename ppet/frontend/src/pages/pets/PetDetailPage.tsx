@@ -1,8 +1,16 @@
+import { HeartButton, useWishlistStatus } from '../../components/customer/Wishlist';
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
+import { PetPurchaseModal } from '../../components/pets/PetPurchaseModal';
+import { Button } from '../../components/common/Button';
+import { useLocation, useNavigate, useParams, Link } from 'react-router-dom';
 import { PublicPetDTO, petManagementService } from '../../services/petManagementService';
 
 export const PetDetailPage = () => {
+  const {user, isLoading} = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [open, setOpen] = useState(false);
   const { id } = useParams();
   const [pet, setPet] = useState<PublicPetDTO | null>(null);
   const [loading, setLoading] = useState(true);
@@ -19,6 +27,7 @@ export const PetDetailPage = () => {
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
   }, [id, retry, validId]);
+  const hearts=useWishlistStatus('PET',pet?[pet.id]:[]);
   if (!validId || (loadedId === id && notFound)) return <div role="alert" className="p-8">Không tìm thấy thú cưng. <Link to="/pets">Quay lại danh sách</Link></div>;
   if (loading || loadedId !== id) return <p className="p-8">Đang tải…</p>;
   if (error || !pet) return <div role="alert" className="p-8">{error || 'Không tìm thấy thú cưng'} <button onClick={() => setRetry(retry + 1)}>Thử lại</button> <Link to="/pets">Danh sách thú cưng</Link></div>;
@@ -26,11 +35,11 @@ export const PetDetailPage = () => {
     {pet.imageUrl && <img src={pet.imageUrl} alt={pet.name} className="w-full max-h-96 object-contain" />}
     <p className="my-4">{pet.speciesName} · {pet.breedName} · {pet.age == null ? 'Chưa có tuổi' : `${pet.age} tuổi`}</p>
     {pet.price != null && <p className="text-xl font-bold">{pet.price.toLocaleString('vi-VN')} ₫</p>}
-    <p>{pet.description}</p>
-    {pet.availabilityStatus === 'RESERVED' && <p className="mt-4 font-semibold">Thú cưng đang được đặt</p>}
-    {/* Online pet purchases are unavailable; product checkout remains separate. */}
-    <button disabled aria-disabled="true" className="mt-4 rounded-xl bg-gray-100 px-6 py-3 text-gray-600">
-      {pet.availabilityStatus === 'RESERVED' ? 'Đang được đặt' : 'Đặt mua — Sắp ra mắt'}
-    </button>
+    <p>{pet.description}</p><HeartButton type="PET" id={pet.id} status={hearts}/>
+    {pet.availabilityStatus === 'AVAILABLE' && Number(pet.price) > 0
+      ? (!user || user.roles.every(role => role === 'CUSTOMER')) && <Button disabled={isLoading}
+          onClick={()=>user ? setOpen(true) : navigate('/login', {state:{from:location}})}>Thêm vào giỏ</Button>
+      : <p>{['RESERVED','PENDING'].includes(pet.availabilityStatus) ? 'Đang được đặt' : 'Hiện chưa thể mua'}</p>}
+    {open && <PetPurchaseModal pet={pet} onClose={()=>setOpen(false)} onConflict={()=>{setOpen(false);setRetry(n=>n+1);}}/>}
   </article>;
 };

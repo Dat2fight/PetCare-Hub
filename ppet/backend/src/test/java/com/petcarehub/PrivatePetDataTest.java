@@ -82,7 +82,7 @@ class PrivatePetDataTest {
         for (AvailabilityStatus state : AvailabilityStatus.values()) {
             for (boolean owned : List.of(false, true)) {
                 sale.setAvailabilityStatus(state); sale.setOwner(owned ? owner : null); pets.saveAndFlush(sale);
-                boolean visible = !owned && (state == AvailabilityStatus.AVAILABLE || state == AvailabilityStatus.RESERVED);
+                boolean visible = !owned && (state == AvailabilityStatus.AVAILABLE || state == AvailabilityStatus.PENDING || state == AvailabilityStatus.RESERVED);
                 var response = mvc.perform(get("/api/v1/pets/" + sale.getId()));
                 if (visible) response.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(sale.getId()))
                         .andExpect(jsonPath("$.name").value(sale.getName())).andExpect(jsonPath("$.availabilityStatus").value(state.name()))

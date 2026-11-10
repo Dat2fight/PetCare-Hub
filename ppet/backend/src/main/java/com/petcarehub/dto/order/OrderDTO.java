@@ -9,9 +9,17 @@ public class OrderDTO {
     private Long userId;
     private String status;
     private Double totalPrice;
+    private java.math.BigDecimal subtotal;
+    private String promotionCode;
+    private java.math.BigDecimal discountAmount;
+    private Integer pointsUsed;
+    private java.math.BigDecimal pointsDiscount;
+    private java.math.BigDecimal shippingFee;
     private List<OrderItemDTO> items;
     private String orderNumber;
     private String shippingAddress;
+    private java.time.LocalDateTime expiresAt;
+    private java.time.LocalDateTime expiredAt;
     private String notes;
     private String paymentMethod;
     private String paymentStatus;

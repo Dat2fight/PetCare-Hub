@@ -1,3 +1,4 @@
+import { HeartButton, useWishlistStatus } from '../../components/customer/Wishlist';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import apiClient from '../../api/client';
@@ -10,6 +11,7 @@ export const PetListPage = () => {
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [retry, setRetry] = useState(0);
+  const hearts=useWishlistStatus('PET',pets.map(p=>p.id));
   useEffect(() => {
     const controller = new AbortController(); setLoading(true); setError(false);
     apiClient.get('/pets', { params: { page, size: 20, availabilityStatus: 'AVAILABLE' }, signal: controller.signal })
@@ -20,12 +22,12 @@ export const PetListPage = () => {
   }, [page, retry]);
   return <div className="max-w-7xl mx-auto p-8"><h1 className="text-3xl font-bold mb-8">Tìm người bạn bốn chân</h1>
     {loading ? <p>Đang tải…</p> : error ? <div role="alert">Không tải được thú cưng. <button onClick={() => setRetry(retry + 1)}>Thử lại</button></div> : pets.length === 0 ? <p>Chưa có thú cưng phù hợp.</p> :
-      <div className="grid md:grid-cols-3 gap-6">{pets.map(pet => <Link className="bg-white rounded-2xl shadow-sm p-5" key={pet.id} to={`/pets/${pet.id}`}>
+      <div className="grid md:grid-cols-3 gap-6">{pets.map(pet => <article className="relative bg-white rounded-2xl shadow-sm p-5" key={pet.id}><Link to={`/pets/${pet.id}`}>
         {pet.imageUrl && <img className="w-full h-64 object-cover rounded-xl" src={pet.imageUrl} alt={pet.name} />}
         <h2 className="text-xl font-bold mt-4">{pet.name}</h2><p>{pet.speciesName} · {pet.breedName}</p>
         <p>{pet.age == null ? 'Chưa có ngày sinh' : `${pet.age} tuổi`}</p>
         {pet.price != null && <p>{pet.price.toLocaleString('vi-VN')} ₫</p>}
-      </Link>)}</div>}
+      </Link><div className="absolute top-6 right-6"><HeartButton type="PET" id={pet.id} status={hearts}/></div></article>)}</div>}
     <nav className="flex gap-6 mt-8"><button disabled={page === 0} onClick={() => setPage(page - 1)}>Trang trước</button><span>{totalPages ? page + 1 : 0}/{totalPages}</span><button disabled={page + 1 >= totalPages} onClick={() => setPage(page + 1)}>Trang sau</button></nav>
   </div>;
 };

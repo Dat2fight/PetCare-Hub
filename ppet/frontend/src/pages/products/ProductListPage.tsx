@@ -1,3 +1,4 @@
+import { HeartButton, useWishlistStatus } from '../../components/customer/Wishlist';
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { Card } from '../../components/common/Card';
@@ -37,6 +38,7 @@ export const ProductListPage: React.FC = () => {
   const [categoriesError, setCategoriesError] = useState<string | null>(null);
   const addingRef = useRef(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const hearts=useWishlistStatus('PRODUCT',products.map(p=>p.id));
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [addingProductId, setAddingProductId] = useState<number | null>(null);
@@ -192,14 +194,14 @@ export const ProductListPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
-              <Link to={`/products/${product.id}`} key={product.id}>
+              <div key={product.id}>
                 <Card noPadding className="group cursor-pointer hover:shadow-lg transition-all duration-300 h-full flex flex-col border-transparent hover:border-primary-100">
                   <div className="relative aspect-square overflow-hidden bg-white p-6 flex items-center justify-center border-b border-gray-50">
-                    <ProductImage
+                    <Link to={`/products/${product.id}`} className="contents"><ProductImage
                       src={product.imageUrl}
                       alt={product.name}
                       className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500"
-                    />
+                    /></Link><div className="absolute top-3 right-3"><HeartButton type="PRODUCT" id={product.id} status={hearts}/></div>
                     <button
                       type="button"
                       aria-label="Thêm vào giỏ hàng"
@@ -223,7 +225,7 @@ export const ProductListPage: React.FC = () => {
                   </div>
                   <div className="p-5 flex flex-col grow bg-white">
                     <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-primary-600 transition-colors">
-                      {product.name}
+                      <Link to={`/products/${product.id}`}>{product.name}</Link>
                     </h3>
                     <div className="mt-auto pt-2 flex flex-col">
                       <div className="font-bold text-lg text-primary-600">
@@ -232,7 +234,7 @@ export const ProductListPage: React.FC = () => {
                     </div>
                   </div>
                 </Card>
-              </Link>
+              </div>
             ))}
           </div>
         )}

@@ -46,9 +46,9 @@ public class InventoryServiceImpl implements InventoryService {
         }
         if (username != null) {
             return userRepository.findByUsername(username)
-                    .orElseGet(() -> userRepository.findById(1L).orElse(null));
+                    .orElse(null);
         }
-        return userRepository.findById(1L).orElse(null);
+        return null;
     }
 
     @Override

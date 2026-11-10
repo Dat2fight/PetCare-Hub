@@ -5,11 +5,13 @@ import com.petcarehub.dto.order.OrderDTO;
 
 public interface OrderService {
     org.springframework.data.domain.Page<OrderDTO> getMyOrders(org.springframework.data.domain.Pageable pageable);
+    com.petcarehub.dto.order.OrderQuote quote(com.petcarehub.dto.order.QuoteRequest request);
     OrderDTO createOrder(OrderCreateRequest request);
     OrderDTO getOrderById(Long orderId);
     OrderDTO confirmOrder(Long orderId);
     OrderDTO processOrder(Long orderId);
     OrderDTO shipOrder(Long orderId);
     OrderDTO deliverOrder(Long orderId);
+    boolean expireIfDue(Long id);
     OrderDTO cancelOrder(Long orderId);
 }

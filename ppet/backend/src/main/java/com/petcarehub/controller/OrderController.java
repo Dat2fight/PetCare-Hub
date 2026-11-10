@@ -19,6 +19,12 @@ public class OrderController {
         return orderService.getMyOrders(pageable);
     }
 
+    @PostMapping("/quote")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
+    public com.petcarehub.dto.order.OrderQuote quote(@jakarta.validation.Valid @RequestBody com.petcarehub.dto.order.QuoteRequest request) {
+        return orderService.quote(request);
+    }
+
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
     public ResponseEntity<OrderDTO> createOrder(@jakarta.validation.Valid @RequestBody OrderCreateRequest request) {

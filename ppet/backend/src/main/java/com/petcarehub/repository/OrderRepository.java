@@ -29,7 +29,13 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select o from Order o where o.id = :id")
     Optional<Order> findLockedById(Long id);
+    Optional<Order> findByCustomerIdAndCheckoutKey(Long customerId, String checkoutKey);
     Optional<Order> findByOrderNumber(String orderNumber);
+    @org.springframework.data.jpa.repository.Query("""
+        select o.id from Order o where o.id > :cursor and o.status = com.petcarehub.enums.OrderStatus.PENDING
+        and o.paymentStatus = com.petcarehub.enums.PaymentStatus.PENDING and o.expiresAt <= :now order by o.id
+        """)
+    List<Long> dueIds(long cursor, LocalDateTime now, Pageable pageable);
     List<Order> findByStatus(OrderStatus status);
     List<Order> findByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
     Page<Order> findByCustomerIdAndStatus(Long customerId, OrderStatus status, Pageable pageable);

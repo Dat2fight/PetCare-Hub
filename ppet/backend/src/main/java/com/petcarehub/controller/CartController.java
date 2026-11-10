@@ -34,6 +34,7 @@ public class CartController {
     }
 
     @PostMapping("/items")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
     public ResponseEntity<CartDTO> addItem(@RequestBody AddToCartRequest request) {
         Long userId = getCurrentUserId();
         return ResponseEntity.ok(cartService.addItemToCart(userId, request));
