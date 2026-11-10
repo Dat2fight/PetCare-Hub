@@ -26,7 +26,10 @@ public class JwtTokenProvider {
     private final JwtProperties properties;
     private final SecretKey signingKey;
 
-    public JwtTokenProvider(JwtProperties properties) {
+    private final java.time.Clock clock;
+
+    public JwtTokenProvider(JwtProperties properties, java.time.Clock clock) {
+        this.clock = clock;
         this.properties = properties;
         String secret = properties.getSecret();
         // Validate at bean creation, not on the first login; never include the value in errors.
@@ -56,7 +59,7 @@ public class JwtTokenProvider {
         if (authentication == null || !(authentication.getPrincipal() instanceof UserDetailsImpl userPrincipal))
             throw new org.springframework.security.authentication.InsufficientAuthenticationException("Vui lòng đăng nhập");
 
-        Date now = new Date();
+        Date now = Date.from(clock.instant());
         Date expiryDate = new Date(now.getTime() + properties.getExpirationMs());
 
         return Jwts.builder()
@@ -68,7 +71,7 @@ public class JwtTokenProvider {
     }
 
     public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parser()
+        Claims claims = Jwts.parser().clock(() -> Date.from(clock.instant()))
                 .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
@@ -79,7 +82,7 @@ public class JwtTokenProvider {
 
     public boolean validateToken(String authToken) {
         try {
-            Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(authToken);
+            Jwts.parser().clock(() -> Date.from(clock.instant())).verifyWith(getSigningKey()).build().parseSignedClaims(authToken);
             return true;
         } catch (JwtException | IllegalArgumentException ex) {
             return false;
@@ -87,6 +90,6 @@ public class JwtTokenProvider {
     }
 
     public Date getExpirationFromJWT(String token) {
-        return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload().getExpiration();
+        return Jwts.parser().clock(() -> Date.from(clock.instant())).verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload().getExpiration();
     }
 }

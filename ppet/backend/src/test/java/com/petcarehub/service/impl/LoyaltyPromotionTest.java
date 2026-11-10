@@ -22,7 +22,7 @@ class LoyaltyPromotionTest {
         assertEquals("SILVER",service.spendPoints(1L,50,"Test").getTier());
     }
     @Test void promotionChecksDatesUsageAndActive() {
-        var repository=mock(PromotionRepository.class);var service=new PromotionServiceImpl(repository);
+        var repository=mock(PromotionRepository.class);var service=new PromotionServiceImpl(repository, java.time.Clock.systemDefaultZone());
         var promotion=Promotion.builder().active(true).startDate(LocalDateTime.now().minusDays(1)).endDate(LocalDateTime.now().plusDays(1)).currentUses(0).maxUses(1).build();
         when(repository.findByCode("TEST")).thenReturn(Optional.of(promotion));assertTrue(service.validatePromotion("TEST"));
         promotion.setCurrentUses(1);assertFalse(service.validatePromotion("TEST"));promotion.setCurrentUses(0);

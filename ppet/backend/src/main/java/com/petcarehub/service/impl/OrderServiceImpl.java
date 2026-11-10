@@ -213,7 +213,7 @@ public class OrderServiceImpl implements OrderService {
         if ("COD".equals(o.getPaymentMethod())) {
             pricing.earn(o);
             o.setPaymentStatus(PaymentStatus.COMPLETED);
-            o.setPaidAt(java.time.LocalDateTime.now(clock.withZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh"))));
+            o.setPaidAt(java.time.LocalDateTime.now(clock));
             packageLine.ifPresent(line -> packages.activate(o,line));
         }
         return dto(orders.save(o));

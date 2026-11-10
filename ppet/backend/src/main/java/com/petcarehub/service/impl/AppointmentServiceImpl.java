@@ -39,6 +39,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final EntityManager entityManager;
     private final com.petcarehub.config.BookingProperties booking;
     private final com.petcarehub.security.Ownership ownership;
+    private final java.time.Clock clock;
     
     @Override
     @Transactional
@@ -50,7 +51,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         ServiceEntity serviceEntity = requireService(request.getServiceId());
         LocalDateTime start = request.getAppointmentTime();
         int duration = serviceEntity.getDurationMinutes() == null ? 0 : serviceEntity.getDurationMinutes();
-        if (duration < 5 || duration > 480 || start == null || !start.isAfter(LocalDateTime.now().plusMinutes(booking.getMinimumNoticeMinutes())))
+        if (duration < 5 || duration > 480 || start == null || !start.isAfter(LocalDateTime.now(clock).plusMinutes(booking.getMinimumNoticeMinutes())))
             throw new BadRequestException("Thời gian đặt lịch hoặc thời lượng không hợp lệ");
         LocalDateTime end = start.plusMinutes(duration);
         if (start.toLocalTime().isBefore(booking.getOpeningTime()) || !start.toLocalDate().equals(end.toLocalDate()) || end.toLocalTime().isAfter(booking.getClosingTime()))
@@ -97,7 +98,7 @@ public class AppointmentServiceImpl implements AppointmentService {
                     && appointment.getStaff() != null && appointment.getStaff().getId().equals(currentUserId));
         if (!staff && (appointment.getCustomer() == null || !appointment.getCustomer().getId().equals(currentUserId)
                 || request.getStatus() != AppointmentStatus.CANCELLED
-                || !LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()).isAfter(LocalDateTime.now())))
+                || !LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()).isAfter(LocalDateTime.now(clock))))
             throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền đổi trạng thái lịch hẹn");
         if (request.getStatus() != null) {
             if (!appointment.getStatus().canTransitionTo(request.getStatus())) throw new IllegalStateException("Không thể chuyển trạng thái lịch hẹn");
@@ -153,7 +154,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<User> staff = userRepository.findEligibleStaff(service.getServiceType().staffRole());
         List<LocalDateTime> slots = new ArrayList<>();
         LocalDateTime close = date.atTime(booking.getClosingTime());
-        LocalDateTime now = LocalDateTime.now().plusMinutes(booking.getMinimumNoticeMinutes());
+        LocalDateTime now = LocalDateTime.now(clock).plusMinutes(booking.getMinimumNoticeMinutes());
         for (LocalDateTime start = date.atTime(booking.getOpeningTime()); !start.plusMinutes(duration).isAfter(close); start = start.plusMinutes(duration)) {
             if (!start.isAfter(now)) continue;
             for (User candidate : staff) {

@@ -54,7 +54,7 @@ public class CarePackageController {
     public void archive(@PathVariable Long id) { plans.findLockedById(id).orElseThrow(this::missing).setActive(false); }
     @GetMapping("/subscriptions/me") @PreAuthorize("hasRole('CUSTOMER')")
     public List<Subscription> mine() {
-        var today=LocalDate.now(clock.withZone(ZoneId.of("Asia/Ho_Chi_Minh")));
+        var today=LocalDate.now(clock);
         return subscriptions.findByCustomerIdOrderByIdDesc(ownership.userId()).stream().map(s -> {
             var p=s.getCarePackage(); var line=s.getOrderItem();
             var status=s.getStatus()==SubscriptionStatus.ACTIVE && today.isAfter(s.getEndDate()) ? SubscriptionStatus.EXPIRED : s.getStatus();

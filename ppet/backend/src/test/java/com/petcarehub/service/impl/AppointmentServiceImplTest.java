@@ -16,7 +16,7 @@ class AppointmentServiceImplTest {
     final UserRepository users = mock(UserRepository.class);
     final EntityManager em = mock(EntityManager.class);
     final PetRepository pets = mock(PetRepository.class);
-    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets));
+    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets), java.time.Clock.systemDefaultZone());
 
     @Test void invalidDurationsTerminateAndAvailabilityUsesRealConflicts() {
         ServiceEntity treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).build();
@@ -55,6 +55,31 @@ class AppointmentServiceImplTest {
             assertThrows(IllegalStateException.class,()->service.bookAppointment(request));
             verify(appointments,never()).save(any());
         } finally { org.springframework.security.core.context.SecurityContextHolder.clearContext(); }
+    }
+
+    @Test void slotsFollowBusinessMidnightAcrossHostTimezones() {
+        var settings = new BookingProperties();
+        var clock = Clock.fixed(Instant.parse("2026-02-10T17:30:00Z"), settings.getTimezone());
+        settings.setOpeningTime(LocalTime.MIDNIGHT);
+        settings.setClosingTime(LocalTime.of(2, 0));
+        var booking = new AppointmentServiceImpl(appointments, pets, users, em, settings,
+                new com.petcarehub.security.Ownership(pets), clock);
+        var treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).durationMinutes(30).build();
+        when(em.find(ServiceEntity.class, 1L)).thenReturn(treatment);
+        var staff = User.builder().enabled(true).roles(Set.of(Role.builder().name(RoleType.VETERINARIAN).build())).build();
+        staff.setId(2L);
+        when(users.findEligibleStaff(RoleType.VETERINARIAN)).thenReturn(List.of(staff));
+        LocalDate date = LocalDate.of(2026, 2, 11);
+        var original = TimeZone.getDefault();
+        try {
+            for (String zone : List.of("UTC", "Asia/Ho_Chi_Minh", "America/Los_Angeles")) {
+                TimeZone.setDefault(TimeZone.getTimeZone(zone));
+                assertEquals(List.of(date.atTime(1, 0), date.atTime(1, 30)), booking.getAvailableTimeSlots(date, 1L));
+                assertTrue(booking.getAvailableTimeSlots(date.minusDays(1), 1L).isEmpty());
+            }
+        } finally {
+            TimeZone.setDefault(original);
+        }
     }
 
     @Test void completeTransitionMatrix() {

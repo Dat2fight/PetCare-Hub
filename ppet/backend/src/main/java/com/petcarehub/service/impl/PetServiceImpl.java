@@ -34,6 +34,7 @@ public class PetServiceImpl implements PetService {
     private final com.petcarehub.repository.UserRepository userRepository;
     private final com.petcarehub.security.Ownership ownership;
     private final com.petcarehub.config.PersonalPetProperties personalPetProperties;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional
@@ -56,7 +57,7 @@ public class PetServiceImpl implements PetService {
         if (petRepository.countByOwnerId(ownerId) >= personalPetProperties.getMaxPersonalPets())
             throw new IllegalStateException("Bạn đã đạt giới hạn " + personalPetProperties.getMaxPersonalPets() + " thú cưng cá nhân");
         Pet pet = Pet.builder().name(request.getName().strip()).species(species).owner(owner)
-                .dateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()))
+                .dateOfBirth(java.time.LocalDate.now(clock).minusYears(request.getAge()))
                 .price(java.math.BigDecimal.ZERO).healthStatus(com.petcarehub.enums.HealthStatus.HEALTHY)
                 .availabilityStatus(com.petcarehub.enums.AvailabilityStatus.UNAVAILABLE).build();
         return mapToDTO(petRepository.save(pet));
@@ -114,15 +115,15 @@ public class PetServiceImpl implements PetService {
         pet.setBreed(breed);
         // NEEDS DECISION: legacy age is whole years; estimate birth date only when absent.
         if (request.getBirthDate() != null) pet.setDateOfBirth(request.getBirthDate());
-        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()));
+        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now(clock).minusYears(request.getAge()));
         pet.setHealthStatus(parseEnum(com.petcarehub.enums.HealthStatus.class, request.getHealthStatus()));
         pet.setAvailabilityStatus(parseEnum(com.petcarehub.enums.AvailabilityStatus.class, request.getAvailabilityStatus()));
         pet.setDescription(request.getDescription());
         pet.setImageUrl(request.getImageUrl());
         pet.setPrice(request.getPrice() != null ? request.getPrice() : java.math.BigDecimal.ZERO);
         if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ thú cưng")));
-        pet.setCreatedAt(LocalDateTime.now());
-        pet.setUpdatedAt(LocalDateTime.now());
+        pet.setCreatedAt(LocalDateTime.now(clock));
+        pet.setUpdatedAt(LocalDateTime.now(clock));
 
         Pet savedPet = petRepository.save(pet);
         return mapToDTO(savedPet);
@@ -151,7 +152,7 @@ public class PetServiceImpl implements PetService {
         pet.setBreed(breed);
         // NEEDS DECISION: legacy age is whole years; estimate birth date only when absent.
         if (request.getBirthDate() != null) pet.setDateOfBirth(request.getBirthDate());
-        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now().minusYears(request.getAge()));
+        else if (request.getAge() != null && pet.getDateOfBirth() == null) pet.setDateOfBirth(java.time.LocalDate.now(clock).minusYears(request.getAge()));
         var newHealth = parseEnum(com.petcarehub.enums.HealthStatus.class, request.getHealthStatus());
         if (newHealth != pet.getHealthStatus()) petHealthService.updatePetHealthStatus(id, newHealth);
         pet.setAvailabilityStatus(parseEnum(com.petcarehub.enums.AvailabilityStatus.class, request.getAvailabilityStatus()));
@@ -159,7 +160,7 @@ public class PetServiceImpl implements PetService {
         pet.setImageUrl(request.getImageUrl());
         if (request.getPrice() != null) pet.setPrice(request.getPrice());
         if (request.getOwnerId() != null) pet.setOwner(userRepository.findById(request.getOwnerId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy chủ thú cưng")));
-        pet.setUpdatedAt(LocalDateTime.now());
+        pet.setUpdatedAt(LocalDateTime.now(clock));
 
         Pet updatedPet = petRepository.save(pet);
         return mapToDTO(updatedPet);
@@ -188,5 +189,5 @@ public class PetServiceImpl implements PetService {
         catch (IllegalArgumentException | NullPointerException ex) { throw new com.petcarehub.exception.BadRequestException("Trạng thái không hợp lệ"); }
     }
 
-    private PetDTO mapToDTO(Pet pet) { return com.petcarehub.mapper.PetMapper.toDTO(pet); }
+    private PetDTO mapToDTO(Pet pet) { return com.petcarehub.mapper.PetMapper.toDTO(pet, clock); }
 }

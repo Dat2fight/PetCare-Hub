@@ -1,3 +1,4 @@
+import { formatBusinessTime } from '../../utils/businessDate';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { isAxiosError } from 'axios';
@@ -33,7 +34,7 @@ export const OrderTrackingPage = () => {
     {loading ? <p>Đang tải…</p> : error ? <p role="alert">{error} <button onClick={()=>setRetry(n=>n+1)}>Thử lại</button></p> : order && <article className="bg-white rounded-2xl p-6 mt-4 space-y-4">
       <h1 className="text-2xl font-bold break-words">Đơn {order.orderNumber}</h1><p>{order.expiredAt ? 'Đã hết hạn' : statusNames[order.status] || order.status}</p>
       {order.expiresAt && order.status === 'PENDING' && <p>Hết hạn lúc {order.expiresAt.replace('T', ' ').slice(0, 16)} (giờ Việt Nam)</p>}
-      <p>Ngày đặt: {new Date(order.createdAt).toLocaleString('vi-VN')}</p>{order.shippingAddress && <p>Giao đến: {order.shippingAddress}</p>}
+      <p>Ngày đặt: {formatBusinessTime(order.createdAt, true)}</p>{order.shippingAddress && <p>Giao đến: {order.shippingAddress}</p>}
       {order.items.some(i=>i.carePackageId) && order.paymentStatus==='COMPLETED' && <Link className="underline" to="/my-care-packages">Xem gói đã kích hoạt</Link>}
       <p>{order.paymentMethod} · {order.paymentStatus==='COMPLETED' ? 'Đã thanh toán' : order.paymentStatus==='PENDING' ? 'Chưa thanh toán' : order.paymentStatus}</p>
       <OrderItems items={order.items}/>{order.notes && <p>Ghi chú: {order.notes}</p>}

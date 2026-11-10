@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component @RequiredArgsConstructor
 public class StompAuthorizationInterceptor implements ChannelInterceptor {
     public static final String NOTIFICATIONS = "/user/queue/notifications";
+    private final java.time.Clock clock;
     private final JwtTokenProvider tokens;
     private final UserDetailsServiceImpl users;
     private final Map<String, SessionIdentity> sessions = new ConcurrentHashMap<>();
@@ -43,7 +44,7 @@ public class StompAuthorizationInterceptor implements ChannelInterceptor {
                 var principal = (UserDetailsImpl) users.loadUserByUsername(tokens.getUsernameFromJWT(jwt));
                 if (!principal.isEnabled()) throw denied();
                 Instant expiresAt = tokens.getExpirationFromJWT(jwt).toInstant();
-                if (!expiresAt.isAfter(Instant.now())) throw denied();
+                if (!expiresAt.isAfter(clock.instant())) throw denied();
                 headers.setUser(new UsernamePasswordAuthenticationToken(principal.getId().toString(), null, principal.getAuthorities()));
                 sessions.put(sessionId, new SessionIdentity(principal.getId(), principal.getUsername(), expiresAt));
                 return message;
@@ -74,7 +75,7 @@ public class StompAuthorizationInterceptor implements ChannelInterceptor {
     }
 
     private boolean valid(SessionIdentity identity) {
-        if (identity == null || !identity.expiresAt().isAfter(Instant.now())) return false;
+        if (identity == null || !identity.expiresAt().isAfter(clock.instant())) return false;
         try {
             var current = (UserDetailsImpl) users.loadUserByUsername(identity.username());
             return current.isEnabled() && current.getId().equals(identity.userId());

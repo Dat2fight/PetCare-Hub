@@ -31,7 +31,7 @@ class JwtSecretConfigurationTest {
     static class ConfigurationUnderTest {}
 
     private ApplicationContextRunner runner() {
-        return new ApplicationContextRunner().withUserConfiguration(ConfigurationUnderTest.class)
+        return new ApplicationContextRunner().withBean(java.time.Clock.class, java.time.Clock::systemUTC).withUserConfiguration(ConfigurationUnderTest.class)
                 .withInitializer(context -> {
                     // Test scenarios must not inherit an operator's real signing key.
                     context.getEnvironment().getPropertySources().remove(StandardEnvironment.SYSTEM_ENVIRONMENT_PROPERTY_SOURCE_NAME);
@@ -46,7 +46,7 @@ class JwtSecretConfigurationTest {
 
     private JwtTokenProvider provider(String secret) {
         var properties = new JwtProperties(); properties.setSecret(secret); properties.setExpirationMs(60000);
-        return new JwtTokenProvider(properties);
+        return new JwtTokenProvider(properties, java.time.Clock.systemUTC());
     }
 
     private UsernamePasswordAuthenticationToken authentication() {

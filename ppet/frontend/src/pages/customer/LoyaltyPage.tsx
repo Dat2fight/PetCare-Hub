@@ -1,3 +1,4 @@
+import { formatBusinessTime } from '../../utils/businessDate';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
@@ -17,7 +18,7 @@ export const LoyaltyPage = () => {
     {loading ? <p>Đang tải…</p> : error ? <p role="alert">Không tải được điểm thưởng. <button onClick={() => setRetry(retry+1)}>Thử lại</button></p> : account && <>
       <p className="text-2xl">{account.currentPoints} điểm · {account.tier}</p><p>{account.nextTier ? `Còn ${account.pointsToNextTier} điểm để lên ${account.nextTier}` : 'Đã đạt hạng cao nhất'}</p>
       <p>{Object.entries(account.thresholds).map(([tier, points]) => `${tier}: ${points}`).join(' · ')}</p>
-      <h2 className="text-xl mt-6">Lịch sử điểm</h2>{!history.length ? <p>Chưa có giao dịch điểm.</p> : history.map(tx => <p key={tx.id}>{tx.description} · {tx.points} điểm · {new Date(tx.transactionDate).toLocaleDateString('vi-VN')}</p>)}
+      <h2 className="text-xl mt-6">Lịch sử điểm</h2>{!history.length ? <p>Chưa có giao dịch điểm.</p> : history.map(tx => <p key={tx.id}>{tx.description} · {tx.points} điểm · {formatBusinessTime(tx.transactionDate)}</p>)}
       <nav className="flex gap-6 mt-6"><button disabled={!page} onClick={() => setPage(page-1)}>Trang trước</button><button disabled={history.length < 20} onClick={() => setPage(page+1)}>Trang sau</button></nav>
     </>}
   </div>;

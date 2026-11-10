@@ -6,13 +6,16 @@ import java.time.LocalDate;
 import java.time.Period;
 
 @Component
+@lombok.RequiredArgsConstructor
 public class ActivityLevelStrategy implements PetMatchingStrategy {
+    private final java.time.Clock clock;
+
     @Override
     public double calculateMatchScore(PetMatchingQuiz quiz, Pet pet, StringBuilder explanation) {
         String desiredActivity = quiz.getActivityLevel();
         if (desiredActivity == null) return 0.0;
         
-        int age = pet.getDateOfBirth() != null ? Period.between(pet.getDateOfBirth(), LocalDate.now()).getYears() : 2;
+        int age = pet.getDateOfBirth() != null ? Period.between(pet.getDateOfBirth(), LocalDate.now(clock)).getYears() : 2;
         
         if ("HIGH".equalsIgnoreCase(desiredActivity) && age < 3) {
             explanation.append("Mức vận động cao phù hợp với thú cưng trẻ, năng động. ");

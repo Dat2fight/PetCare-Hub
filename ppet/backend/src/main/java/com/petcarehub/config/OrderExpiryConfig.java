@@ -1,7 +1,6 @@
 package com.petcarehub.config;
 
 import java.time.Clock;
-import java.time.ZoneId;
 import jakarta.validation.constraints.Min;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -16,8 +15,8 @@ import org.springframework.validation.annotation.Validated;
 @EnableConfigurationProperties(OrderExpiryConfig.Settings.class)
 public class OrderExpiryConfig {
     @Bean
-    Clock businessClock() {
-        return Clock.system(ZoneId.of("Asia/Ho_Chi_Minh"));
+    Clock businessClock(BookingProperties booking) {
+        return Clock.system(booking.getTimezone());
     }
 
     @Validated

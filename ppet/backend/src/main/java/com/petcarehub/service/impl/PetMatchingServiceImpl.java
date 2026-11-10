@@ -29,7 +29,10 @@ public class PetMatchingServiceImpl implements PetMatchingService {
     private final PetMatchingQuizRepository quizRepository;
     private final PetMatchingResultRepository resultRepository;
 
-    public PetMatchingServiceImpl(List<PetMatchingStrategy> strategies, PetRepository petRepository, UserRepository userRepository, PetMatchingQuizRepository quizRepository, PetMatchingResultRepository resultRepository) {
+    private final java.time.Clock clock;
+
+    public PetMatchingServiceImpl(List<PetMatchingStrategy> strategies, PetRepository petRepository, UserRepository userRepository, PetMatchingQuizRepository quizRepository, PetMatchingResultRepository resultRepository, java.time.Clock clock) {
+        this.clock = clock;
         this.strategies = strategies;
         this.petRepository = petRepository;
         this.userRepository = userRepository;
@@ -72,7 +75,7 @@ public class PetMatchingServiceImpl implements PetMatchingService {
             result.setQuiz(quiz); result.setPet(item.pet()); result.setOverallScore((int) item.score());
             result.setExplanation(item.explanation()); result.setRank(i + 1);
             persisted.add(result);
-            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.dto.pet.PublicPetDTO.from(com.petcarehub.mapper.PetMapper.toDTO(item.pet())), item.score(), item.explanation()));
+            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.dto.pet.PublicPetDTO.from(com.petcarehub.mapper.PetMapper.toDTO(item.pet(), clock)), item.score(), item.explanation()));
         }
         resultRepository.saveAll(persisted);
         return results;

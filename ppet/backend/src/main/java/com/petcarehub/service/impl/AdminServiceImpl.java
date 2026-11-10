@@ -33,6 +33,7 @@ public class AdminServiceImpl implements AdminService {
     private final OrderRepository orderRepository;
     private final PetRepository petRepository;
     private final RoleRepository roleRepository;
+    private final java.time.Clock clock;
 
     @Override
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
@@ -59,17 +60,16 @@ public class AdminServiceImpl implements AdminService {
         var summary = orderRepository.summarizeRevenue(period.start(), period.end());
 
         return RevenueReportDTO.builder()
-                .reportDate(LocalDate.now(REPORT_ZONE))
+                .reportDate(LocalDate.now(clock))
                 .periods(orderRepository.revenueByMonth(period.start(), period.end()))
                 .totalOrders(summary.getCount())
                 .totalRevenue(summary.getRevenue())
                 .build();
     }
 
-    private static final java.time.ZoneId REPORT_ZONE = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
     private record Period(java.time.LocalDateTime start, java.time.LocalDateTime end) {}
     private Period period(LocalDate from, LocalDate to) {
-        LocalDate end = to == null ? LocalDate.now(REPORT_ZONE) : to;
+        LocalDate end = to == null ? LocalDate.now(clock) : to;
         LocalDate start = from == null ? end.withDayOfMonth(1) : from;
         if (start.isAfter(end)) throw new BadRequestException("Ngày bắt đầu không được sau ngày kết thúc");
         if (java.time.temporal.ChronoUnit.DAYS.between(start, end) >= 366 || start.getYear() < 1 || end.getYear() > 9998)

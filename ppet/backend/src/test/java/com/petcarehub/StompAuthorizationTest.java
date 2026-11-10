@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 class StompAuthorizationTest {
     JwtTokenProvider tokens = mock(JwtTokenProvider.class);
     UserDetailsServiceImpl users = mock(UserDetailsServiceImpl.class);
-    StompAuthorizationInterceptor interceptor = new StompAuthorizationInterceptor(tokens, users);
+    StompAuthorizationInterceptor interceptor = new StompAuthorizationInterceptor(java.time.Clock.systemUTC(), tokens, users);
     String token = UUID.randomUUID().toString();
     UserDetailsImpl principal(boolean enabled) {
         return new UserDetailsImpl(1L,"customer","c@example.test","unused",List.of(new SimpleGrantedAuthority("ROLE_CUSTOMER")),enabled);

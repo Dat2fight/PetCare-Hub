@@ -1,3 +1,4 @@
+import { formatBusinessTime } from '../../utils/businessDate';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { petManagementService, PetDTO, MedicalRecordDTO } from '../../services/petManagementService';
@@ -70,7 +71,7 @@ export const PetHealthHistoryPage: React.FC = () => {
                       <p className="text-sm text-gray-700 mt-1"><strong>Khuyên dùng:</strong> {record.recommendations}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-gray-900">{new Date(record.examinationDate).toLocaleDateString('vi-VN')}</p>
+                      <p className="text-sm font-semibold text-gray-900">{formatBusinessTime(record.examinationDate)}</p>
                     </div>
                   </div>
                 </div>

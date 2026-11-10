@@ -25,6 +25,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     private final VaccinationRepository vaccinationRepository;
     private final PetRepository petRepository;
     private final UserRepository userRepository;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional
@@ -92,7 +93,7 @@ public class VaccinationServiceImpl implements VaccinationService {
     }
     
     private void validateDates(VaccinationCreateRequest request) {
-        if (request.getDateAdministered() == null || request.getDateAdministered().isAfter(java.time.LocalDate.now())) {
+        if (request.getDateAdministered() == null || request.getDateAdministered().isAfter(java.time.LocalDate.now(clock))) {
             throw new com.petcarehub.exception.BadRequestException("dateAdministered: Ngày tiêm phải là hôm nay hoặc trước đó");
         }
         if (request.getNextDueDate() != null && request.getNextDueDate().isBefore(request.getDateAdministered())) {

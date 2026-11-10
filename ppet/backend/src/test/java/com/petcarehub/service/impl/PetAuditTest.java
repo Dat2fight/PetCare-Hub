@@ -17,7 +17,7 @@ class PetAuditTest {
         var pets = mock(PetRepository.class); var species = mock(SpeciesRepository.class);
         var breeds = mock(BreedRepository.class); var users = mock(UserRepository.class);
         var health = new PetHealthServiceImpl(pets);
-        var service = new PetServiceImpl(health, pets, species, breeds, users, mock(com.petcarehub.security.Ownership.class), new com.petcarehub.config.PersonalPetProperties());
+        var service = new PetServiceImpl(health, pets, species, breeds, users, mock(com.petcarehub.security.Ownership.class), new com.petcarehub.config.PersonalPetProperties(), java.time.Clock.systemDefaultZone());
         Species dog = new Species(); dog.setId(1L);
         Pet pet = Pet.builder().species(dog).price(BigDecimal.TEN).healthStatus(HealthStatus.UNDER_TREATMENT).availabilityStatus(AvailabilityStatus.AVAILABLE).build(); pet.setId(1L);
         when(pets.findById(1L)).thenReturn(Optional.of(pet)); when(pets.findByIdForUpdate(1L)).thenReturn(Optional.of(pet)); when(species.findById(1L)).thenReturn(Optional.of(dog)); when(pets.save(pet)).thenReturn(pet);
@@ -35,14 +35,14 @@ class PetAuditTest {
 
     @Test void mapperCalculatesAgeAndHidesPrivatePetPrice() {
         Pet pet = Pet.builder().dateOfBirth(LocalDate.now().minusYears(3)).price(BigDecimal.TEN).availabilityStatus(AvailabilityStatus.AVAILABLE).build();
-        assertEquals(3, PetMapper.toDTO(pet).getAge()); assertEquals(BigDecimal.TEN, PetMapper.toDTO(pet).getPrice());
-        pet.setOwner(new User()); assertNull(PetMapper.toDTO(pet).getPrice());
+        assertEquals(3, PetMapper.toDTO(pet, java.time.Clock.systemDefaultZone()).getAge()); assertEquals(BigDecimal.TEN, PetMapper.toDTO(pet, java.time.Clock.systemDefaultZone()).getPrice());
+        pet.setOwner(new User()); assertNull(PetMapper.toDTO(pet, java.time.Clock.systemDefaultZone()).getPrice());
     }
 
     @Test void matchingStrategiesUseKnownAnswers() {
         Pet pet = Pet.builder().dateOfBirth(LocalDate.now().minusYears(1)).weight(BigDecimal.valueOf(5)).description("friendly").build();
         PetMatchingQuiz quiz = PetMatchingQuiz.builder().activityLevel("HIGH").dailyCareHours(BigDecimal.valueOf(4)).livingEnvironment("APARTMENT").hasChildren(true).build();
-        assertEquals(30, new com.petcarehub.strategy.matching.ActivityLevelStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
+        assertEquals(30, new com.petcarehub.strategy.matching.ActivityLevelStrategy(java.time.Clock.systemDefaultZone()).calculateMatchScore(quiz, pet, new StringBuilder()));
         assertEquals(30, new com.petcarehub.strategy.matching.CareTimeStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
         assertEquals(40, new com.petcarehub.strategy.matching.LivingEnvironmentStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
     }
@@ -50,7 +50,7 @@ class PetAuditTest {
     @Test void quizAnswersAreMappedExplicitly() {
         var pets=mock(PetRepository.class); var users=mock(UserRepository.class);
         var quizzes=mock(PetMatchingQuizRepository.class); var results=mock(PetMatchingResultRepository.class);
-        var service=new PetMatchingServiceImpl(java.util.List.of(), pets, users, quizzes, results);
+        var service=new PetMatchingServiceImpl(java.util.List.of(), pets, users, quizzes, results, java.time.Clock.systemDefaultZone());
         User customer=new User(); customer.setId(7L);
         when(users.findById(7L)).thenReturn(Optional.of(customer));
         when(quizzes.save(any())).thenAnswer(call->call.getArgument(0));

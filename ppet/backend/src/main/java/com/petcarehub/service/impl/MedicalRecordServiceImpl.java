@@ -27,11 +27,12 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     private final PetRepository petRepository;
     private final UserRepository userRepository;
     private final AppointmentRepository appointmentRepository;
+    private final java.time.Clock clock;
 
     @Override
     @Transactional
     public MedicalRecordDTO createMedicalRecord(MedicalRecordCreateRequest request) {
-        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now()))
+        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now(clock)))
             throw new com.petcarehub.exception.BadRequestException("examinationDate: Ngày khám không được trống hoặc trong tương lai");
         Pet pet = petRepository.findById(request.getPetId())
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy thú cưng: " + request.getPetId()));
@@ -79,7 +80,7 @@ public class MedicalRecordServiceImpl implements MedicalRecordService {
     @Override
     @Transactional
     public MedicalRecordDTO updateMedicalRecord(Long id, MedicalRecordCreateRequest request) {
-        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now()))
+        if (request.getExaminationDate() == null || request.getExaminationDate().isAfter(java.time.LocalDate.now(clock)))
             throw new com.petcarehub.exception.BadRequestException("examinationDate: Ngày khám không được trống hoặc trong tương lai");
         MedicalRecord record = medicalRecordRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy hồ sơ y tế: " + id));

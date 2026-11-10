@@ -21,7 +21,10 @@ public class PromotionServiceImpl implements PromotionService {
 
     private final PromotionRepository promotionRepository;
 
-    public PromotionServiceImpl(PromotionRepository promotionRepository) {
+    private final java.time.Clock clock;
+
+    public PromotionServiceImpl(PromotionRepository promotionRepository, java.time.Clock clock) {
+        this.clock = clock;
         this.promotionRepository = promotionRepository;
     }
 
@@ -72,7 +75,7 @@ public class PromotionServiceImpl implements PromotionService {
             return false;
         }
         
-        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime now = LocalDateTime.now(clock);
         if (promotion.getStartDate() != null && now.isBefore(promotion.getStartDate())) {
             return false;
         }

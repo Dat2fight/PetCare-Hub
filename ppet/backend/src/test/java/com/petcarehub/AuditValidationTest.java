@@ -30,7 +30,7 @@ class AuditValidationTest {
     }
 
     @Test void reversedVaccinationDatesAreRejectedBeforePersistence() {
-        var service = new VaccinationServiceImpl(null, null, null, null);
+        var service = new VaccinationServiceImpl(null, null, null, null, java.time.Clock.systemDefaultZone());
         var request = new VaccinationCreateRequest();
         request.setDateAdministered(LocalDate.now()); request.setNextDueDate(LocalDate.now().minusDays(1));
         assertThrows(com.petcarehub.exception.BadRequestException.class, () -> service.createVaccination(request));
@@ -38,7 +38,7 @@ class AuditValidationTest {
     }
 
     @Test void futureMedicalDatesAreRejectedByService() {
-        var service=new com.petcarehub.service.impl.MedicalRecordServiceImpl(null,null,null,null,null);
+        var service=new com.petcarehub.service.impl.MedicalRecordServiceImpl(null,null,null,null,null,java.time.Clock.systemDefaultZone());
         var request=new MedicalRecordCreateRequest(); request.setExaminationDate(LocalDate.now().plusDays(1));
         assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.createMedicalRecord(request));
         assertThrows(com.petcarehub.exception.BadRequestException.class,()->service.updateMedicalRecord(1L,request));

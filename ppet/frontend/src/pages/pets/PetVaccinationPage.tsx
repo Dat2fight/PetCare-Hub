@@ -1,3 +1,4 @@
+import { formatBusinessTime } from '../../utils/businessDate';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { petManagementService, PetDTO, VaccinationDTO } from '../../services/petManagementService';
@@ -94,12 +95,12 @@ export const PetVaccinationPage: React.FC = () => {
                         {vax.veterinarianName}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                        {new Date(vax.dateAdministered).toLocaleDateString('vi-VN')}
+                        {formatBusinessTime(vax.dateAdministered)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {vax.nextDueDate ? (
                           <span className="inline-block px-2.5 py-1 text-xs font-medium text-orange-700 bg-orange-100 rounded-full">
-                            {new Date(vax.nextDueDate).toLocaleDateString('vi-VN')}
+                            {formatBusinessTime(vax.nextDueDate)}
                           </span>
                         ) : (
                           <span className="text-gray-400">-</span>
