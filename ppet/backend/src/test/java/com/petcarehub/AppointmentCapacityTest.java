@@ -74,7 +74,7 @@ class AppointmentCapacityTest {
                 new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities()));
     }
 
-    @Test void concurrentAutoAssignmentCannotExceedTwoAvailableStaff() throws Exception {
+    @Test void concurrentRequestsForOnePetCannotUseTwoAvailableStaff() throws Exception {
         ExecutorService pool = Executors.newFixedThreadPool(3);
         CountDownLatch ready = new CountDownLatch(3), start = new CountDownLatch(1);
         Callable<Boolean> book = () -> {
@@ -88,15 +88,26 @@ class AppointmentCapacityTest {
             assertTrue(ready.await(10, TimeUnit.SECONDS)); start.countDown();
             int success = 0;
             for (Future<Boolean> call : calls) if (call.get(20, TimeUnit.SECONDS)) success++;
-            assertEquals(2, success);
-            var saved = appointments.findAll(); assertEquals(2, saved.size());
-            assertEquals(2, saved.stream().map(a -> a.getStaff().getId()).distinct().count());
+            assertEquals(1, success);
+            var saved = appointments.findAll(); assertEquals(1, saved.size());
+            assertEquals(1, saved.stream().map(a -> a.getStaff().getId()).distinct().count());
         } finally { start.countDown(); pool.shutdownNow(); }
     }
 
     @Test void allStaffBusyReturns409WithoutFallbackOrExtraRow() throws Exception {
         authenticate();
-        try { booking.bookAppointment(request); booking.bookAppointment(request); }
+        try {
+            booking.bookAppointment(request);
+            assertFalse(booking.getAvailableTimeSlots(request.getAppointmentTime().toLocalDate(),
+                    request.getServiceId(), request.getPetId()).contains(request.getAppointmentTime()));
+            request.setAppointmentTime(request.getAppointmentTime().plusMinutes(30));
+            assertThrows(IllegalStateException.class, () -> booking.bookAppointment(request));
+            request.setAppointmentTime(request.getAppointmentTime().minusMinutes(30));
+            var another = Pet.builder().name("Second").owner(customer).species(pets.findById(request.getPetId()).orElseThrow().getSpecies())
+                    .price(BigDecimal.ZERO).build();
+            request.setPetId(pets.save(another).getId());
+            booking.bookAppointment(request);
+        }
         finally { SecurityContextHolder.clearContext(); }
         mvc.perform(post("/api/v1/appointments").with(user(UserDetailsImpl.build(customer)))
                 .contentType("application/json").content(json.writeValueAsString(request)))

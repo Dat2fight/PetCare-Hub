@@ -59,8 +59,8 @@ public class AppointmentController {
     @GetMapping("/slots")
     public ResponseEntity<List<LocalDateTime>> getAvailableSlots(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, 
-            @RequestParam Long serviceId) {
-        return ResponseEntity.ok(appointmentService.getAvailableTimeSlots(date, serviceId));
+            @RequestParam Long serviceId, @RequestParam(required = false) Long petId) {
+        return ResponseEntity.ok(appointmentService.getAvailableTimeSlots(date, serviceId, petId));
     }
 }
 

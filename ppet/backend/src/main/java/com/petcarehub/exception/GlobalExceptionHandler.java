@@ -30,6 +30,12 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({org.springframework.dao.PessimisticLockingFailureException.class,
+            jakarta.persistence.LockTimeoutException.class, jakarta.persistence.PessimisticLockException.class})
+    public ResponseEntity<ErrorResponse> handleBusyResource(Exception ex, WebRequest request) {
+        return response(HttpStatus.CONFLICT, "Dữ liệu đang được cập nhật. Vui lòng thử lại.", request);
+    }
+
     @ExceptionHandler(CheckoutKeyConflictException.class)
     public ResponseEntity<ErrorResponse> handleCheckoutKeyConflict(CheckoutKeyConflictException ex, WebRequest request) {
         return response(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);

@@ -75,12 +75,12 @@ export const BookingPage: React.FC = () => {
     if (!serviceId || !selectedDate) return;
     const controller = new AbortController();
     setSlotsLoading(true); setSlotError(null); setAvailableSlots([]); setSelectedTime('');
-    bookingService.getAvailableSlots(selectedDate, Number(serviceId), controller.signal)
+    bookingService.getAvailableSlots(selectedDate, Number(serviceId), controller.signal, selectedPet?.id)
       .then(slots => { if (!controller.signal.aborted) setAvailableSlots(slots.map(slot => slot.slice(11, 16))); })
       .catch(() => { if (!controller.signal.aborted) setSlotError('Không tải được giờ trống. Vui lòng thử lại.'); })
       .finally(() => { if (!controller.signal.aborted) setSlotsLoading(false); });
     return () => controller.abort();
-  }, [selectedDate, serviceId, retry]);
+  }, [selectedDate, serviceId, retry, selectedPet?.id]);
 
   const handleBooking = async () => {
     if (submitting || petsLoading || petsError || !service || !selectedPet || !selectedTime || slotsLoading || slotError) return;

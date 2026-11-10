@@ -33,4 +33,6 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     @Query("SELECT a FROM Appointment a WHERE a.appointmentDate = :date AND a.staff.id = :staffId AND a.status in (com.petcarehub.enums.AppointmentStatus.SCHEDULED, com.petcarehub.enums.AppointmentStatus.CONFIRMED, com.petcarehub.enums.AppointmentStatus.IN_PROGRESS) AND a.startTime < :endTime AND a.endTime > :startTime")
     List<Appointment> findConflictingAppointments(LocalDate date, Long staffId, LocalTime startTime, LocalTime endTime);
+    @Query("SELECT a FROM Appointment a WHERE a.appointmentDate = :date AND a.pet.id = :petId AND a.status in (com.petcarehub.enums.AppointmentStatus.SCHEDULED, com.petcarehub.enums.AppointmentStatus.CONFIRMED, com.petcarehub.enums.AppointmentStatus.IN_PROGRESS) AND a.startTime < :endTime AND a.endTime > :startTime")
+    List<Appointment> findPetConflicts(LocalDate date, Long petId, LocalTime startTime, LocalTime endTime);
 }

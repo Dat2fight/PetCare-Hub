@@ -426,3 +426,9 @@ foreach ($script in '007_reviews.sql','008_wishlist.sql','009_package_orders.sql
 ```
 
 Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu và kiểm thử ở [báo cáo giai đoạn 3](docs/phase-3-customer.md).
+
+### Cấu hình giờ kinh doanh và nâng cấp checkout
+
+Đặt cùng múi giờ IANA cho `APP_BOOKING_TIMEZONE` ở backend và `VITE_BUSINESS_TIMEZONE` khi build frontend. Mặc định là `Asia/Ho_Chi_Minh`. Thời gian lịch và đơn đã lưu tiếp tục được đọc theo giờ địa phương. Đồng hồ nghiệp vụ được dùng cho đặt lịch, ngày khám và tiêm, tuổi thú cưng, ưu đãi, báo cáo, thời hạn đơn/gói, dấu thời gian lưu và JWT/WebSocket. Timestamp chẩn đoán của health và lỗi HTTP vẫn theo máy chạy. NEEDS DECISION — schema cũ có default SQL dùng UTC cho lệnh INSERT trực tiếp. Cần xác định nguồn ghi trước khi chuyển đổi dữ liệu lịch sử.
+
+Khi nâng cấp từ migration 009, sao lưu, thử 010 rồi 011 trên bản sao, sau đó triển khai backend và frontend tương thích cùng đợt. Xem [API](docs/api.md) và [đối soát dữ liệu](docs/database.md).

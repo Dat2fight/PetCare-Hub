@@ -14,5 +14,7 @@ public class BookingProperties {
     private java.time.ZoneId timezone = java.time.ZoneId.of("Asia/Ho_Chi_Minh");
     private LocalTime openingTime = LocalTime.of(9, 0);
     private LocalTime closingTime = LocalTime.of(17, 0);
+    @jakarta.validation.constraints.Min(1)
+    private int lockTimeoutMs = 5000;
     private long minimumNoticeMinutes = 0;
 }

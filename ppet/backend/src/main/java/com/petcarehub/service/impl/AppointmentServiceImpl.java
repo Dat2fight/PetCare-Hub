@@ -47,7 +47,10 @@ public class AppointmentServiceImpl implements AppointmentService {
         Long currentUserId = ownership.userId();
         User customer = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
-        Pet pet = ownership.ownedPet(request.getPetId());
+        Pet pet = entityManager.find(Pet.class, request.getPetId(), jakarta.persistence.LockModeType.PESSIMISTIC_WRITE,
+                java.util.Map.of("jakarta.persistence.lock.timeout", booking.getLockTimeoutMs()));
+        if (pet == null || pet.getOwner() == null || !currentUserId.equals(pet.getOwner().getId()))
+            throw new ResourceNotFoundException("Không tìm thấy thú cưng");
         ServiceEntity serviceEntity = requireService(request.getServiceId());
         LocalDateTime start = request.getAppointmentTime();
         int duration = serviceEntity.getDurationMinutes() == null ? 0 : serviceEntity.getDurationMinutes();
@@ -59,6 +62,13 @@ public class AppointmentServiceImpl implements AppointmentService {
         LocalDate appointmentDate = start.toLocalDate();
         LocalTime startTime = start.toLocalTime();
         LocalTime endTime = end.toLocalTime();
+        var conflicts = appointmentRepository.findPetConflicts(appointmentDate, pet.getId(), startTime, endTime);
+        if (!conflicts.isEmpty()) {
+            var conflict = conflicts.get(0);
+            var timeFormat = java.time.format.DateTimeFormatter.ofPattern("HH:mm");
+            throw new IllegalStateException("Thú cưng đã có lịch hẹn trùng thời gian (" + conflict.getStartTime().format(timeFormat)
+                    + " đến " + conflict.getEndTime().format(timeFormat) + ")");
+        }
         User staff = null;
         List<User> candidates = request.getStaffId() == null ? userRepository.findEligibleStaff(serviceEntity.getServiceType().staffRole())
                 : List.of(userRepository.findById(request.getStaffId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy nhân viên")));
@@ -147,7 +157,8 @@ public class AppointmentServiceImpl implements AppointmentService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId) {
+    public List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId, Long petId) {
+        if (petId != null) ownership.ownedPet(petId);
         ServiceEntity service = requireService(serviceId);
         int duration = service.getDurationMinutes() == null ? 0 : service.getDurationMinutes();
         if (duration < 5 || duration > 480) return List.of();
@@ -155,8 +166,12 @@ public class AppointmentServiceImpl implements AppointmentService {
         List<LocalDateTime> slots = new ArrayList<>();
         LocalDateTime close = date.atTime(booking.getClosingTime());
         LocalDateTime now = LocalDateTime.now(clock).plusMinutes(booking.getMinimumNoticeMinutes());
+        List<Appointment> occupied = petId == null ? List.of() : appointmentRepository.findPetConflicts(date, petId,
+                booking.getOpeningTime(), booking.getClosingTime());
         for (LocalDateTime start = date.atTime(booking.getOpeningTime()); !start.plusMinutes(duration).isAfter(close); start = start.plusMinutes(duration)) {
             if (!start.isAfter(now)) continue;
+            LocalTime from = start.toLocalTime(), until = start.plusMinutes(duration).toLocalTime();
+            if (occupied.stream().anyMatch(a -> a.getStartTime().isBefore(until) && a.getEndTime().isAfter(from))) continue;
             for (User candidate : staff) {
                 if (eligible(candidate, service) && appointmentRepository.findConflictingAppointments(date, candidate.getId(), start.toLocalTime(), start.plusMinutes(duration).toLocalTime()).isEmpty()) {
                     slots.add(start); break;

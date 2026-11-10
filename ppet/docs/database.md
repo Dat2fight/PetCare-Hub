@@ -499,3 +499,22 @@ FROM dbo.inventory_transactions
 WHERE source IS NULL AND performed_by = 1
 ORDER BY created_at, id;
 ```
+
+Migration 011 thêm các cột giao hàng cho đơn mới, cho phép NULL để giữ đơn cũ. Sao lưu và kiểm tra bản sao trước khi nâng cấp. Hai truy vấn chỉ đọc sau dùng để kiểm tra lịch trùng và tìm các cặp đơn cũ đáng rà soát. So sánh danh sách hàng hai chiều để loại đơn có cùng tổng nhưng khác nội dung.
+
+```sql
+SELECT a.id, b.id AS other_id, a.pet_id, a.appointment_date
+FROM dbo.appointments a JOIN dbo.appointments b
+ ON a.pet_id=b.pet_id AND a.appointment_date=b.appointment_date AND a.id<b.id
+ AND a.start_time<b.end_time AND b.start_time<a.end_time
+WHERE a.status IN ('SCHEDULED','CONFIRMED','IN_PROGRESS')
+ AND b.status IN ('SCHEDULED','CONFIRMED','IN_PROGRESS');
+
+SELECT a.id,b.id AS other_id,a.customer_id
+FROM dbo.orders a JOIN dbo.orders b ON a.customer_id=b.customer_id AND a.id<b.id
+ AND a.total_amount=b.total_amount AND ABS(DATEDIFF_BIG(second,a.created_at,b.created_at))<=120
+WHERE NOT EXISTS (SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=a.id
+ EXCEPT SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=b.id)
+AND NOT EXISTS (SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=b.id
+ EXCEPT SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=a.id);
+```

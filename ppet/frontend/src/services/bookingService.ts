@@ -40,11 +40,12 @@ export const bookingService = {
         return response.data;
     },
 
-    getAvailableSlots: async (date: string, serviceId: number, signal?: AbortSignal): Promise<string[]> => {
+    getAvailableSlots: async (date: string, serviceId: number, signal?: AbortSignal, petId?: number): Promise<string[]> => {
         const params = new URLSearchParams({
             date: date,
             serviceId: serviceId.toString()
         });
+        if (petId != null) params.set("petId", String(petId));
         const response = await apiClient.get<string[]>(`/appointments/slots?${params.toString()}`, { signal });
         return response.data;
     }

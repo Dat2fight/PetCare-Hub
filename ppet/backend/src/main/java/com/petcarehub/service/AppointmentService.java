@@ -13,5 +13,8 @@ public interface AppointmentService {
     List<AppointmentDTO> getAllAppointments(org.springframework.data.domain.Pageable pageable);
     List<AppointmentDTO> getAppointmentsByUser(Long userId, org.springframework.data.domain.Pageable pageable);
     List<AppointmentDTO> getAppointmentsByPet(Long petId, org.springframework.data.domain.Pageable pageable);
-    List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId);
+    default List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId) {
+        return getAvailableTimeSlots(date, serviceId, null);
+    }
+    List<LocalDateTime> getAvailableTimeSlots(LocalDate date, Long serviceId, Long petId);
 }

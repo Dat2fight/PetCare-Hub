@@ -162,3 +162,11 @@ POST /cart/items (CUSTOMER) nhận đúng một trong hai trường productId ho
 | ADMIN, SALES_STAFF | `GET /care-packages/manage` xem cả gói đã tắt. `POST /care-packages`, `PUT /care-packages/{id}` nhận name, description, price, durationMonths, includesGrooming, includesCheckup, includesVaccination, active. `DELETE /care-packages/{id}` ngừng bán. |
 
 Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích hoạt trong cùng giao dịch. Gửi lại lệnh giao đơn gói đã thu tiền trả về đơn hiện tại. Đơn đã hủy không thể kích hoạt. Dòng đơn trả thêm `carePackageId`, `beneficiaryPetId`, `packageName`.
+
+## Đặt hàng và lịch hẹn
+
+`POST /api/v1/orders` yêu cầu header `Idempotency-Key` dạng UUID. Gửi lại cùng nội dung và tài khoản trả đơn cũ với `Idempotent-Replay: true`. Dùng lại khóa cho nội dung khác nhận 422. Checkout sản phẩm và thú cưng nhận đối tượng `shipping` gồm `recipientName`, `phone`, `province`, `district`, `ward`, `addressLine` và `note` tùy chọn. Lỗi dữ liệu trả 400 và `fieldErrors`. Gói chăm sóc được miễn địa chỉ giao. Đơn cũ tiếp tục trả `shippingAddress`.
+
+`GET /api/v1/services` và chi tiết công khai chỉ hiển thị dịch vụ đang hoạt động. ADMIN và SALES_STAFF dùng `GET /api/v1/services/manage?active=false` để tra cứu dịch vụ ngừng.
+
+`GET /api/v1/appointments/slots?date=YYYY-MM-DD&serviceId=…&petId=…` loại thời gian trùng của thú cưng thuộc người gọi. Khi đặt, hệ thống khóa thú cưng trước nhân viên. Hai lịch kề nhau được phép. Lịch đã kết thúc, đã hủy hoặc vắng mặt giải phóng khung giờ.
