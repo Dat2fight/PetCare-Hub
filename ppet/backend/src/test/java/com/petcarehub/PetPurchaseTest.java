@@ -152,6 +152,11 @@ class PetPurchaseTest {
         var order=service.createOrder(request(p,item(pet.getId())));assertEquals(31520.0,order.getTotalPrice());
         assertEquals(1,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
         service.cancelOrder(order.getId());assertEquals(AvailabilityStatus.AVAILABLE,pets.findById(pet.getId()).orElseThrow().getAvailabilityStatus());
+        var ledger = transactions.findByInventoryId(inventory.findByProductId(product.getId()).orElseThrow().getId(),
+                org.springframework.data.domain.Pageable.unpaged()).getContent();
+        assertEquals(2, ledger.size());
+        assertTrue(ledger.stream().allMatch(tx -> "SYSTEM".equals(tx.getSource()) && tx.getPerformedBy() == null
+                && "ORDER".equals(tx.getReferenceType()) && order.getId().equals(tx.getReferenceId())));
         var next=service.createOrder(request(item(pet.getId())));service.cancelOrder(order.getId());
         assertEquals(next.getId(),pets.findById(pet.getId()).orElseThrow().getReservedOrder().getId());
         assertEquals(3,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());

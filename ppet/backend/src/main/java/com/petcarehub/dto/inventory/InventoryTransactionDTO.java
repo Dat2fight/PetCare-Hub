@@ -12,6 +12,7 @@ public class InventoryTransactionDTO {
     private Integer quantity;
     private String referenceType;
     private Long referenceId;
+    private String source;
     private String notes;
     private Long performedById;
     private LocalDateTime createdAt;

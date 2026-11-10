@@ -90,7 +90,9 @@ class EndpointSecurityMatrixTest {
             // Malformed JSON prevents test data mutations after an allowed filter boundary.
             // CatalogAuthorizationTest and flow tests exercise valid allowed requests as well.
             int status=perform(endpoint,role.name(),true);
-            if(allowed) assertTrue(Set.of(200,201,204,400,404,409).contains(status),role+": "+endpoint+" -> "+status);
+            // The synthetic staff principal has no backing account for this manual stock movement.
+            if (allowed && endpoint.equals("POST /inventory/reduce")) assertEquals(401, status);
+            else if(allowed) assertTrue(Set.of(200,201,204,400,404,409).contains(status),role+": "+endpoint+" -> "+status);
             else assertEquals(403,status,role+": "+endpoint);
         }
     }

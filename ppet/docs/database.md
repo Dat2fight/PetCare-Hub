@@ -486,3 +486,16 @@ Chạy `008_wishlist.sql` sau 007. Hai unique index có điều kiện bảo đ�
 Sau 008, chạy `009_package_orders.sql` để mở rộng ràng buộc dòng đơn và gắn gói đã kích hoạt với dòng đơn gốc. Hai khóa thú cưng có ý nghĩa riêng. `pet_id` dùng cho thú cưng bán, `beneficiary_pet_id` dùng cho thú cưng được chăm sóc. Dòng gói lưu giá, tên, số tháng và quyền lợi tại thời điểm đặt. Unique index trên order_item_id ngăn kích hoạt trùng và cho phép các hợp đồng cũ không có dòng đơn.
 
 Ngày hiệu lực dùng múi giờ Việt Nam. API tính hết hạn khi ngày hiện tại vượt end_date. Hợp đồng cũ đọc quyền lợi từ danh mục khi thiếu snapshot. Mô hình hiện tại lưu quyền lợi theo loại dịch vụ, chưa lưu định mức lượt hoặc sự kiện sử dụng gói.
+
+## Đối soát nhật ký kho
+
+Sau migration 009, chạy `010_inventory_actor.sql` trên bản sao trước khi nâng cấp. Script thêm nguồn thao tác và chỉ mục tham chiếu. Migration 005 đã cho phép `performed_by` rỗng. Dòng mới do nhân viên có nguồn `USER` và ID nhân viên. Đặt, hủy và hết hạn đơn ghi `SYSTEM` cùng tham chiếu `ORDER` và ID đơn hàng.
+
+Truy vấn sau liệt kê các dòng cũ cần đối chiếu với chứng từ. Kết quả có thể bao gồm thao tác thật của người có ID 1.
+
+```sql
+SELECT id, inventory_id, transaction_type, quantity, created_at, reference_type, reference_id
+FROM dbo.inventory_transactions
+WHERE source IS NULL AND performed_by = 1
+ORDER BY created_at, id;
+```

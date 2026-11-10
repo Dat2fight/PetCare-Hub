@@ -16,7 +16,8 @@ import com.petcarehub.service.InventoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
+import com.petcarehub.security.Ownership;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,26 +30,21 @@ public class InventoryServiceImpl implements InventoryService {
     private final InventoryRepository inventoryRepository;
     private final InventoryTransactionRepository inventoryTransactionRepository;
     private final UserRepository userRepository;
+    private final Ownership ownership;
 
     @Autowired
     public InventoryServiceImpl(InventoryRepository inventoryRepository, 
                                 InventoryTransactionRepository inventoryTransactionRepository,
-                                UserRepository userRepository) {
+                                UserRepository userRepository, Ownership ownership) {
+        this.ownership = ownership;
         this.inventoryRepository = inventoryRepository;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.userRepository = userRepository;
     }
 
     private User getCurrentUser() {
-        String username = null;
-        if (SecurityContextHolder.getContext().getAuthentication() != null) {
-            username = SecurityContextHolder.getContext().getAuthentication().getName();
-        }
-        if (username != null) {
-            return userRepository.findByUsername(username)
-                    .orElse(null);
-        }
-        return null;
+        return userRepository.findById(ownership.userId())
+                .orElseThrow(() -> new InsufficientAuthenticationException("Bạn cần đăng nhập"));
     }
 
     @Override
@@ -62,45 +58,42 @@ public class InventoryServiceImpl implements InventoryService {
     @Transactional
     public void reduceStock(Long productId, Integer quantity) {
         requirePositive(quantity);
-        Inventory inventory = inventoryRepository.findLockedByProductId(productId)
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product: " + productId));
-
-        if (inventory.getQuantity() < quantity) {
-            throw new IllegalStateException("Không đủ tồn kho cho sản phẩm " + productId);
-        }
-
-        inventory.setQuantity(inventory.getQuantity() - quantity);
-        inventoryRepository.save(inventory);
-
-        InventoryTransaction transaction = new InventoryTransaction();
-        transaction.setInventory(inventory);
-        transaction.setTransactionType(TransactionType.STOCK_OUT);
-        transaction.setQuantity(quantity);
-        transaction.setNotes("Stock reduced");
-        transaction.setPerformedBy(getCurrentUser());
-        inventoryTransactionRepository.save(transaction);
+        changeStock(productId, quantity, TransactionType.STOCK_OUT, "Xuất kho", getCurrentUser(), null);
     }
 
     @Override
     @Transactional
     public void addStock(StockUpdateRequest request) {
         requirePositive(request.getQuantity());
-        Inventory inventory = inventoryRepository.findLockedByProductId(request.getProductId())
-                .orElseThrow(() -> new ResourceNotFoundException("Inventory not found for product: " + request.getProductId()));
+        changeStock(request.getProductId(), request.getQuantity(), TransactionType.STOCK_IN,
+                request.getReason(), getCurrentUser(), null);
+    }
 
-        if ((long) inventory.getQuantity() + request.getQuantity() > Integer.MAX_VALUE) {
-            throw new BadRequestException("Số lượng tồn kho vượt giới hạn");
-        }
-        inventory.setQuantity(inventory.getQuantity() + request.getQuantity());
+    @Override
+    @Transactional
+    public void reserveForOrder(Long productId, int quantity, long orderId) {
+        changeStock(productId, quantity, TransactionType.STOCK_OUT, "Đặt hàng", null, orderId);
+    }
+
+    @Override
+    @Transactional
+    public void restoreForOrder(Long productId, int quantity, long orderId) {
+        changeStock(productId, quantity, TransactionType.STOCK_IN, "Hủy đơn", null, orderId);
+    }
+
+    private void changeStock(Long productId, int quantity, TransactionType type, String notes, User actor, Long orderId) {
+        requirePositive(quantity);
+        Inventory inventory = inventoryRepository.findLockedByProductId(productId)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tồn kho"));
+        long updated = (long) inventory.getQuantity() + (type == TransactionType.STOCK_IN ? quantity : -quantity);
+        if (updated < 0) throw new IllegalStateException("Không đủ tồn kho cho sản phẩm " + productId);
+        if (updated > Integer.MAX_VALUE) throw new BadRequestException("Số lượng tồn kho vượt giới hạn");
+        inventory.setQuantity((int) updated);
         inventoryRepository.save(inventory);
-
-        InventoryTransaction transaction = new InventoryTransaction();
-        transaction.setInventory(inventory);
-        transaction.setTransactionType(TransactionType.STOCK_IN);
-        transaction.setQuantity(request.getQuantity());
-        transaction.setNotes(request.getReason());
-        transaction.setPerformedBy(getCurrentUser());
-        inventoryTransactionRepository.save(transaction);
+        inventoryTransactionRepository.save(InventoryTransaction.builder()
+                .inventory(inventory).quantity(quantity).transactionType(type).notes(notes)
+                .source(orderId == null ? "USER" : "SYSTEM").performedBy(actor)
+                .referenceType(orderId == null ? null : "ORDER").referenceId(orderId).build());
     }
 
     @Override
@@ -134,6 +127,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
         Inventory inventory = inventoryRepository.findLockedByProductId(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tồn kho"));
+        User actor = getCurrentUser();
         int delta = quantity - inventory.getQuantity();
         inventory.setQuantity(quantity);
         inventoryRepository.save(inventory);
@@ -142,7 +136,8 @@ public class InventoryServiceImpl implements InventoryService {
         transaction.setTransactionType(TransactionType.ADJUSTMENT);
         transaction.setQuantity(delta); // Signed difference for stocktaking; stock in/out remain positive.
         transaction.setNotes(reason);
-        transaction.setPerformedBy(getCurrentUser());
+        transaction.setPerformedBy(actor);
+        transaction.setSource("USER");
         inventoryTransactionRepository.save(transaction);
     }
 
@@ -165,6 +160,7 @@ public class InventoryServiceImpl implements InventoryService {
         }
         dto.setTransactionType(transaction.getTransactionType());
         dto.setQuantity(transaction.getQuantity());
+        dto.setSource(transaction.getSource());
         dto.setReferenceType(transaction.getReferenceType());
         dto.setReferenceId(transaction.getReferenceId());
         dto.setNotes(transaction.getNotes());

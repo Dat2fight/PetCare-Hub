@@ -35,6 +35,9 @@ public class InventoryTransaction {
     @Column(nullable = false)
     private Integer quantity;
 
+    @Column(length = 10)
+    private String source;
+
     @Column(name = "reference_type", length = 50)
     private String referenceType;
 

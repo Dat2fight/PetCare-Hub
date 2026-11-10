@@ -1,7 +1,6 @@
 package com.petcarehub.service.impl;
 
 import com.petcarehub.dto.order.*;
-import com.petcarehub.dto.inventory.StockUpdateRequest;
 import com.petcarehub.entity.*;
 import com.petcarehub.enums.*;
 import com.petcarehub.exception.*;
@@ -114,7 +113,6 @@ public class OrderServiceImpl implements OrderService {
             if (item.getProductId() == null || item.getQuantity() == null || item.getQuantity() <= 0) throw new BadRequestException("Sản phẩm và số lượng phải hợp lệ");
             Product product = products.findById(item.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
             if (!Boolean.TRUE.equals(product.getActive())) throw new ResourceNotFoundException("Sản phẩm không tồn tại hoặc đã ngừng bán");
-            inventory.reduceStock(product.getId(), item.getQuantity());
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
             order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
             total = total.add(subtotal);
@@ -143,6 +141,9 @@ public class OrderServiceImpl implements OrderService {
         });
         if (!reservedPets.isEmpty()) order.setExpiresAt(java.time.LocalDateTime.now(clock).plusHours(expiry.holdHours()));
         Order saved = orders.saveAndFlush(order);
+        for (OrderItem item : saved.getItems()) {
+            if (item.getProduct() != null) inventory.reserveForOrder(item.getProduct().getId(), item.getQuantity(), saved.getId());
+        }
         pricing.reserve(saved);
         for (Pet pet : reservedPets) {
             pet.setAvailabilityStatus(AvailabilityStatus.PENDING); pet.setReservedOrder(saved); pets.save(pet);
@@ -252,7 +253,7 @@ public class OrderServiceImpl implements OrderService {
             pet.setAvailabilityStatus(AvailabilityStatus.AVAILABLE); pet.setReservedOrder(null); pets.save(pet);
         }
         for (OrderItem item : o.getItems().stream().filter(line -> line.getProduct() != null).sorted(java.util.Comparator.comparing(line -> line.getProduct().getId())).toList()) {
-            StockUpdateRequest stock = new StockUpdateRequest(); stock.setProductId(item.getProduct().getId()); stock.setQuantity(item.getQuantity()); stock.setReason("Hủy đơn " + o.getOrderNumber()); inventory.addStock(stock);
+            inventory.restoreForOrder(item.getProduct().getId(), item.getQuantity(), o.getId());
         }
         return dto(orders.save(o));
     }
