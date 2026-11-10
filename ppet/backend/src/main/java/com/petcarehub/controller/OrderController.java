@@ -27,8 +27,19 @@ public class OrderController {
 
     @PostMapping
     @org.springframework.security.access.prepost.PreAuthorize("hasRole('CUSTOMER') and !hasAnyRole('ADMIN', 'SALES_STAFF', 'WAREHOUSE_STAFF', 'VETERINARIAN')")
-    public ResponseEntity<OrderDTO> createOrder(@jakarta.validation.Valid @RequestBody OrderCreateRequest request) {
-        return ResponseEntity.ok(orderService.createOrder(request));
+    public ResponseEntity<OrderDTO> createOrder(@RequestHeader(value = "Idempotency-Key", required = false) String key,
+                                               @jakarta.validation.Valid @RequestBody OrderCreateRequest request) {
+        try {
+            var uuid = java.util.UUID.fromString(key == null ? "" : key);
+            if (!uuid.toString().equalsIgnoreCase(key)) throw new IllegalArgumentException();
+            request.setCheckoutKey(uuid);
+        } catch (IllegalArgumentException invalid) {
+            throw new com.petcarehub.exception.BadRequestException("Idempotency-Key phải là UUID hợp lệ");
+        }
+        var order = orderService.createOrder(request);
+        var response = ResponseEntity.ok();
+        if (order.isReplay()) response.header("Idempotent-Replay", "true");
+        return response.body(order);
     }
 
     @GetMapping("/{id}")

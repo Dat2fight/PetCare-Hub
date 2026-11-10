@@ -13,5 +13,6 @@ public class OrderCreateRequest extends QuoteRequest {
     private String paymentMethod;
     @jakarta.validation.constraints.Size(max=2000, message="Ghi chú tối đa 2000 ký tự")
     private String notes;
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private java.util.UUID checkoutKey;
 }

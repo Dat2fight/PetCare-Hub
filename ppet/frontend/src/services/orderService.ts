@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import apiClient from '../api/client';
 import { Order, Page } from '../types';
 
@@ -29,7 +30,7 @@ export interface OrderCreateRequest {
   shipping?: ShippingInfo;
   paymentMethod?: 'COD';
   notes?: string;
-  checkoutKey?: string;
+  checkoutKey: string;
   promotionCode?: string;
   pointsToUse?: number;
 }
@@ -45,12 +46,19 @@ export function newCheckoutKey(): string {
 
 export const orderService = {
   create: async (request: OrderCreateRequest): Promise<Order> => {
-    const { data } = await apiClient.post<Order>('/orders', {
-      checkoutKey: request.checkoutKey, promotionCode: request.promotionCode, pointsToUse: request.pointsToUse,
-      shipping: request.shipping, paymentMethod: request.paymentMethod, notes: request.notes,
-      items: request.items.map(item => ({ productId: item.productId, petId: item.petId, carePackageId: item.carePackageId, beneficiaryPetId: item.beneficiaryPetId, quantity: item.quantity }))
-    });
-    return data;
+    const { checkoutKey, ...body } = request;
+    for (let attempt = 0; ; attempt++) {
+      try {
+        const { data } = await apiClient.post<Order>('/orders', body, {
+          headers: { 'Idempotency-Key': checkoutKey }, timeout: 15000,
+        });
+        if (!Number.isSafeInteger(data.id) || data.id <= 0) throw new Error('Phản hồi đơn hàng không hợp lệ');
+        return data;
+      } catch (error) {
+        if (!isAxiosError(error) || (error.response && error.response.status < 500) || attempt >= 2) throw error;
+        await new Promise(resolve => setTimeout(resolve, 350 * 2 ** attempt));
+      }
+    }
   },
   list: async (page: number, signal?: AbortSignal): Promise<Page<Order>> =>
     (await apiClient.get<Page<Order>>('/orders', { params: { page, size: 20 }, signal })).data,

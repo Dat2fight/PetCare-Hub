@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
 import { ShippingForm } from '../../components/orders/ShippingForm';
-import { newCheckoutKey, orderService, validateShipping, type ShippingInfo } from '../../services/orderService';
+import { newCheckoutKey, orderService, validateShipping, type ShippingInfo, type OrderCreateRequest } from '../../services/orderService';
 import toast from 'react-hot-toast';
 interface Item { id:number; productId?:number; productName?:string; petId?:number; petName?:string; quantity:number; price:number }
 interface Quote {
@@ -20,7 +20,24 @@ export const CheckoutPage = () => {
  }));
  const [shippingErrors,setShippingErrors] = useState<Record<string,string>>({});
  const navigate=useNavigate();const [items,setItems]=useState<Item[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState(false);const [busy,setBusy]=useState(false);
- const lastAttempt = useRef<{ payload: string; key: string }>();
+ const storage = 'checkout:pending:' + user?.id;
+ const [pending, setPending] = useState<OrderCreateRequest | null>(() => {
+   try { return JSON.parse(sessionStorage.getItem(storage) || 'null'); } catch { return null; }
+ });
+ const pendingKey = pending?.checkoutKey;
+ useEffect(() => {
+   if (!pendingKey) return;
+   const controller = new AbortController();
+   apiClient.get('/orders', { params: { page: 0, size: 20, sort: 'id,desc' }, signal: controller.signal })
+     .then(({data}) => {
+       const existing = data.content.find((order: {checkoutKey?: string}) => order.checkoutKey === pendingKey);
+       if (!controller.signal.aborted && existing) {
+         sessionStorage.removeItem(storage);
+         navigate('/orders/' + existing.id, { replace: true });
+       }
+     }).catch(() => {});
+   return () => controller.abort();
+ }, [pendingKey, navigate, storage]);
  const submitting=useRef(false);const [submitError,setSubmitError]=useState('');
  useEffect(() => {const controller=new AbortController(); apiClient.get('/cart',{signal:controller.signal}).then(({data})=>setItems(data.items || [])).catch(()=>{if(!controller.signal.aborted)setError(true);}).finally(()=>{if(!controller.signal.aborted)setLoading(false);});return()=>controller.abort();},[]);
  const [draftCode, setDraftCode] = useState('');
@@ -46,19 +63,16 @@ export const CheckoutPage = () => {
    }, 250);
    return () => { controller.abort(); clearTimeout(timer); };
  }, [items, points, promotionCode, retry]);
- const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(submitting.current || !quote || !items.length)return;const errors = validateShipping(shipping);setShippingErrors(errors);if(Object.keys(errors).length)return;
+ const placeOrder = async (request: OrderCreateRequest) => {
+  if(submitting.current) return;
   submitting.current=true;setBusy(true);setSubmitError('');
   try {
-   const request = {
-    shipping,
-    paymentMethod: 'COD' as const, promotionCode, pointsToUse: points,
-    items: items.map(i => ({ productId: i.productId, petId: i.petId, quantity: i.quantity }))
-   };
-   const payload = JSON.stringify(request);
-   if (lastAttempt.current?.payload !== payload) lastAttempt.current = { payload, key: newCheckoutKey() };
-   const response = await orderService.create({ ...request, checkoutKey: lastAttempt.current.key });
+   sessionStorage.setItem(storage, JSON.stringify(request));
+   setPending(request);
+   const response = await orderService.create(request);
    const orderId: unknown = response?.id;
    if (typeof orderId !== 'number' || !Number.isSafeInteger(orderId) || orderId <= 0) throw new Error('Phản hồi đơn hàng không hợp lệ');
+   sessionStorage.removeItem(storage); setPending(null);
    toast.success('Đã đặt đơn hàng COD');
    navigate(`/orders/${orderId}`, { replace: true });
   }
@@ -67,8 +81,26 @@ export const CheckoutPage = () => {
       setShippingErrors(Object.fromEntries(Object.entries(error.response.data.fieldErrors)
         .map(([key,value]) => [key.replace(/^shipping\./, ''), String(value)])));
     }
+    if (isAxiosError(error) && error.response && error.response.status < 500) {
+      sessionStorage.removeItem(storage); setPending(null);
+    }
     const message=isAxiosError(error) && typeof error.response?.data?.message==='string' ? error.response.data.message : 'Không đặt được đơn hàng. Kiểm tra danh sách đơn nếu kết nối bị gián đoạn trước khi thử lại.';setSubmitError(message);toast.error(message);}finally{submitting.current=false;setBusy(false);}
  };
+ const submit = (event: FormEvent<HTMLFormElement>) => {
+   event.preventDefault();
+   if (submitting.current || pending || !quote || !items.length) return;
+   const errors = validateShipping(shipping); setShippingErrors(errors);
+   if (Object.keys(errors).length) return;
+   void placeOrder({ shipping, paymentMethod: 'COD', promotionCode, pointsToUse: points,
+     items: items.map(i => ({ productId: i.productId, petId: i.petId, quantity: i.quantity })),
+     checkoutKey: newCheckoutKey() });
+ };
+ if (pending) return <section className="max-w-xl mx-auto p-6" aria-live="polite">
+   <h1>Chúng tôi đang kiểm tra đơn của bạn</h1>
+   {submitError && <p role="alert">{submitError}</p>}
+   <button disabled={busy} onClick={() => void placeOrder(pending)}>{busy ? 'Đang xử lý…' : 'Thử lại'}</button>
+   <Link className="ml-4 underline" to="/orders">Xem đơn hàng của tôi</Link>
+ </section>;
  if(loading)return <p className="p-8">Đang tải giỏ hàng…</p>;if(error)return <div role="alert" className="p-8">Không tải được giỏ hàng. <Link to="/cart">Quay lại giỏ hàng</Link></div>;
  return <div className="max-w-4xl mx-auto p-8"><h1 className="text-3xl font-bold mb-6">Đặt hàng</h1>{!items.length?<p>Giỏ hàng trống.</p>:<form onSubmit={submit} className="grid gap-5 bg-white p-6 rounded-2xl">
  {items.map(i=><p key={i.id}>{i.petName || i.productName} × {i.quantity}: {(i.price*i.quantity).toLocaleString('vi-VN')} ₫</p>)}

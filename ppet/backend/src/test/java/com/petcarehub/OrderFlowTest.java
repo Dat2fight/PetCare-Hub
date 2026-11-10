@@ -39,7 +39,7 @@ class OrderFlowTest {
         product=products.save(Product.builder().category(category).name("Food").sku(UUID.randomUUID().toString()).price(BigDecimal.TEN).active(true).build());
         inventory.save(Inventory.builder().product(product).quantity(5).build());
         var item=new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
-        request=new OrderCreateRequest(); request.setItems(List.of(item)); request.setShipping(com.petcarehub.ShippingFixture.valid()); request.setPaymentMethod("COD");
+        request=new OrderCreateRequest();request.setCheckoutKey(java.util.UUID.randomUUID()); request.setItems(List.of(item)); request.setShipping(com.petcarehub.ShippingFixture.valid()); request.setPaymentMethod("COD");
     }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
     @Test void persistsServerPriceAndProtectedDetail() throws Exception {
@@ -76,7 +76,7 @@ class OrderFlowTest {
         assertEquals(before,orders.count()); assertEquals(5,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
     }
     @Test void checkoutResponseCanBeLoadedByItsRealId() throws Exception {
-        var response=mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER")))
+        var response=mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(owner,"CUSTOMER")))
                 .contentType("application/json").content(json.writeValueAsString(request)))
                 .andExpect(status().isOk()).andReturn();
         long id=json.readTree(response.getResponse().getContentAsString()).get("id").asLong();
@@ -86,14 +86,14 @@ class OrderFlowTest {
                 .andExpect(jsonPath("$.shippingAddress").value(request.getShipping().formatted()))
                 .andExpect(jsonPath("$.items[0].productName").value("Food"));
         long before=orders.count(); request.setShipping(null);
-        mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER")))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(owner,"CUSTOMER")))
                 .contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isBadRequest());
         assertEquals(before,orders.count());
     }
     @Test void missingOrderIs404AndUnsupportedPaymentIs400() throws Exception {
         mvc.perform(get("/api/v1/orders/9223372036854775807").with(user(caller(owner,"CUSTOMER")))).andExpect(status().isNotFound());
         request.setPaymentMethod("CARD");
-        mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(owner,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isBadRequest());
         assertEquals(5,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
     }
 }

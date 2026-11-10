@@ -77,19 +77,19 @@ class PhaseThreeOwnershipTest {
         var key=java.util.UUID.randomUUID();
         String orders="/api/v1/orders", mine="/api/v1/care-packages/subscriptions/me";
         String body="{\"checkoutKey\":\""+key+"\",\"items\":[{\"quantity\":1,\"carePackageId\":"+plan.getId()+",\"beneficiaryPetId\":"+pet.getId()+"}]}";
-        mvc.perform(post(orders).with(customer(other)).contentType("application/json").content(body)).andExpect(status().isNotFound());
+        mvc.perform(post(orders).header("Idempotency-Key",key.toString()).with(customer(other)).contentType("application/json").content(body)).andExpect(status().isNotFound());
         mvc.perform(post(orders+"/quote").with(customer(owner)).contentType("application/json").content(body)).andExpect(jsonPath("$.shippingFee").value(0));
-        String result=mvc.perform(post(orders).with(customer(owner)).contentType("application/json").content(body))
+        String result=mvc.perform(post(orders).header("Idempotency-Key",key.toString()).with(customer(owner)).contentType("application/json").content(body))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.totalPrice").value(10)).andReturn().getResponse().getContentAsString();
         long id=new com.fasterxml.jackson.databind.ObjectMapper().readTree(result).get("id").asLong();
-        var cancelled=mvc.perform(post(orders).with(customer(owner)).contentType("application/json")
+        var cancelled=mvc.perform(post(orders).header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(customer(owner)).contentType("application/json")
                 .content(body.replace(key.toString(),java.util.UUID.randomUUID().toString()))).andReturn().getResponse().getContentAsString();
         long cancelledId=new com.fasterxml.jackson.databind.ObjectMapper().readTree(cancelled).get("id").asLong();
         mvc.perform(post(orders+"/"+cancelledId+"/cancel").with(customer(owner))).andExpect(jsonPath("$.status").value("CANCELLED"));
         mvc.perform(post(orders+"/"+cancelledId+"/deliver").with(user("staff").roles("ADMIN"))).andExpect(status().isConflict());
         plan.setName("Tên mới"); plan.setActive(false); plans.saveAndFlush(plan);
-        mvc.perform(post(orders).with(customer(owner)).contentType("application/json").content(body)).andExpect(jsonPath("$.id").value(id));
-        mvc.perform(post(orders).with(customer(owner)).contentType("application/json").content(body.replace(key.toString(),java.util.UUID.randomUUID().toString())))
+        mvc.perform(post(orders).header("Idempotency-Key",key.toString()).with(customer(owner)).contentType("application/json").content(body)).andExpect(jsonPath("$.id").value(id));
+        mvc.perform(post(orders).header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(customer(owner)).contentType("application/json").content(body.replace(key.toString(),java.util.UUID.randomUUID().toString())))
                 .andExpect(status().isNotFound());
         mvc.perform(get(mine).with(customer(owner))).andExpect(jsonPath("$.length()").value(0));
         for(String action:java.util.List.of("confirm","process","ship","deliver","deliver"))

@@ -17,6 +17,9 @@ public class OrderDTO {
     private java.math.BigDecimal shippingFee;
     private List<OrderItemDTO> items;
     private String orderNumber;
+    private String checkoutKey;
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private boolean replay;
     private String shippingAddress;
     private com.petcarehub.entity.ShippingInfo shipping;
     private java.time.LocalDateTime expiresAt;

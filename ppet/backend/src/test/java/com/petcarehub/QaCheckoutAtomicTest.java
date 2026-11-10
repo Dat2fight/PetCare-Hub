@@ -57,7 +57,7 @@ class QaCheckoutAtomicTest {
                 .discountType(com.petcarehub.enums.DiscountType.PERCENTAGE)
                 .discountValue(BigDecimal.TEN).maxUses(1).build());
         var payload = new HashMap<>(body(p, 1));
-        payload.put("checkoutKey", UUID.randomUUID().toString());
+        var key = UUID.randomUUID().toString();
         payload.put("promotionCode", code);
         payload.put("pointsToUse", 500);
         var bytes = json.writeValueAsBytes(payload);
@@ -65,12 +65,13 @@ class QaCheckoutAtomicTest {
                 .contentType("application/json").content(bytes)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.total").value(400000)).andExpect(jsonPath("$.shippingFee").value(0));
         assertEquals(0, promotions.findById(promo.getId()).orElseThrow().getCurrentUses());
-        var response = mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+        var response = mvc.perform(post("/api/v1/orders").header("Idempotency-Key",key).with(user(caller(a,"CUSTOMER")))
                 .contentType("application/json").content(bytes)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.totalPrice").value(400000)).andReturn().getResponse();
         long id = json.readTree(response.getContentAsByteArray()).get("id").asLong();
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",key).with(user(caller(a,"CUSTOMER")))
                 .contentType("application/json").content(bytes)).andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.header().string("Idempotent-Replay","true"))
                 .andExpect(jsonPath("$.id").value(id));
         assertEquals(500, balances.findByCustomerId(a.getId()).orElseThrow().getAvailablePoints());
         mvc.perform(post("/api/v1/orders/quote").with(user(caller(b,"CUSTOMER")))
@@ -86,18 +87,32 @@ class QaCheckoutAtomicTest {
         payload.put("shipping", Map.of("recipientName", "🐶", "phone", "0123456789", "province", " ",
                 "district", "a".repeat(101), "ward", "", "addressLine", "abc", "note", "a".repeat(501)));
         long before = orders.count();
-        var response = mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+        var response = mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER")))
                 .contentType("application/json").content(json.writeValueAsBytes(payload))).andExpect(status().isBadRequest());
         for (String field : List.of("recipientName","phone","province","district","ward","addressLine","note"))
             response.andExpect(jsonPath("$.fieldErrors['shipping." + field + "']").isString());
         assertEquals(before, orders.count());
     }
 
+    @Test void keyIsMandatoryAndScopedToTheCustomerAndPayload() throws Exception {
+        String key = UUID.randomUUID().toString();
+        byte[] payload = json.writeValueAsBytes(body(p,1));
+        var path = "/api/v1/orders";
+        mvc.perform(post(path).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(payload))
+                .andExpect(status().isBadRequest());
+        for (var buyer : List.of(a,b))
+            mvc.perform(post(path).header("Idempotency-Key",key).with(user(caller(buyer,"CUSTOMER")))
+                    .contentType("application/json").content(payload)).andExpect(status().isOk());
+        mvc.perform(post(path).header("Idempotency-Key",key).with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsBytes(body(p,2)))).andExpect(status().isUnprocessableEntity());
+        assertEquals(1,inventory.findByProductId(p.getId()).orElseThrow().getQuantity());
+    }
+
     @Test void successfulOrderUsesServerPriceAndRemovesOnlyPurchasedCartQuantity() throws Exception {
         var cart=Cart.builder().customer(a).build();
         cart.addItem(CartItem.builder().product(p).itemType(OrderItemType.PRODUCT).quantity(3).build());
         cart.addItem(CartItem.builder().product(q).itemType(OrderItemType.PRODUCT).quantity(1).build());carts.saveAndFlush(cart);
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,2))))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,2))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").isNumber()).andExpect(jsonPath("$.userId").value(a.getId()))
                 .andExpect(jsonPath("$.status").value("PENDING")).andExpect(jsonPath("$.paymentStatus").value("PENDING"))
                 .andExpect(jsonPath("$.totalPrice").value(30020)).andExpect(jsonPath("$.items[0].price").value(10));
@@ -112,17 +127,17 @@ class QaCheckoutAtomicTest {
         for(String bad:List.of("{}","{\"items\":[]}","{\"shippingAddress\":\"qa_address\",\"items\":[{\"productId\":"+p.getId()+",\"quantity\":0}]}",
                 "{\"items\":[{\"productId\":"+p.getId()+",\"quantity\":1}]}",
                 "{\"shippingAddress\":\"qa_address\",\"items\":[{\"productId\":"+p.getId()+",\"petId\":1,\"quantity\":1}]}"))
-            mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(bad)).andExpect(status().isBadRequest());
-        mvc.perform(post("/api/v1/orders").contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"SALES_STAFF"))).contentType("application/json").content(json.writeValueAsBytes(body(p,1))))
+            mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(bad)).andExpect(status().isBadRequest());
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).contentType("application/json").content("{}")).andExpect(status().isUnauthorized());
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"SALES_STAFF"))).contentType("application/json").content(json.writeValueAsBytes(body(p,1))))
                 .andExpect(status().isForbidden());
     }
     @Test void stockConflictAndInactiveProductNeverCreateAnOrder() throws Exception {
         long before=orders.count();
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,4))))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,4))))
                 .andExpect(status().isConflict());
         p.setActive(false);products.save(p);
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,1))))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body(p,1))))
                 .andExpect(status().isNotFound());
         assertEquals(before,orders.count());assertEquals(3,inventory.findByProductId(p.getId()).orElseThrow().getQuantity());
     }
@@ -130,18 +145,39 @@ class QaCheckoutAtomicTest {
         var cart=Cart.builder().customer(a).build();cart.addItem(CartItem.builder().product(p).itemType(OrderItemType.PRODUCT).quantity(1).build());carts.saveAndFlush(cart);
         var body=new HashMap<>(body(p,1));body.put("items",List.of(Map.of("productId",p.getId(),"quantity",1),Map.of("productId",q.getId(),"quantity",2)));
         long before=orders.count();
-        mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body)))
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER"))).contentType("application/json").content(json.writeValueAsBytes(body)))
                 .andExpect(status().isConflict());
         assertEquals(before,orders.count());assertEquals(3,inventory.findByProductId(p.getId()).orElseThrow().getQuantity());
         new TransactionTemplate(transactions).executeWithoutResult(tx->assertEquals(1,carts.findByCustomerId(a.getId()).orElseThrow().getItems().size()));
     }
+    @Test void concurrentRetriesReturnTheSameCommittedOrder() throws Exception {
+        String key = UUID.randomUUID().toString();
+        byte[] payload = json.writeValueAsBytes(body(q, 1));
+        var pool = Executors.newFixedThreadPool(3);
+        var start = new CountDownLatch(1);
+        Callable<Long> checkout = () -> {
+            start.await();
+            var response = mvc.perform(post("/api/v1/orders").header("Idempotency-Key",key).with(user(caller(a,"CUSTOMER")))
+                    .contentType("application/json").content(payload)).andExpect(status().isOk()).andReturn().getResponse();
+            return json.readTree(response.getContentAsByteArray()).get("id").asLong();
+        };
+        long before = orders.count();
+        try {
+            var first = pool.submit(checkout); var second = pool.submit(checkout); var third = pool.submit(checkout);
+            start.countDown();
+            assertEquals(first.get(20,TimeUnit.SECONDS), second.get(20,TimeUnit.SECONDS));
+            assertEquals(first.get(), third.get(20,TimeUnit.SECONDS));
+            assertEquals(before + 1, orders.count());
+        } finally { start.countDown(); pool.shutdownNow(); }
+    }
+
     @Test void simultaneousOrdersForLastUnitCommitExactlyOnce() throws Exception {
         var pool=Executors.newFixedThreadPool(2);var ready=new CountDownLatch(2);var start=new CountDownLatch(1);
         long before=orders.count();
         java.util.function.Function<User,Callable<Boolean>> buy=u->()->{
             var principal=caller(u,"CUSTOMER");SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal,null,principal.getAuthorities()));
             var item=new OrderItemDTO();item.setProductId(q.getId());item.setQuantity(1);
-            var request=new OrderCreateRequest();request.setItems(List.of(item));request.setShipping(com.petcarehub.ShippingFixture.valid());request.setPaymentMethod("COD");
+            var request=new OrderCreateRequest();request.setCheckoutKey(java.util.UUID.randomUUID());request.setItems(List.of(item));request.setShipping(com.petcarehub.ShippingFixture.valid());request.setPaymentMethod("COD");
             ready.countDown();assertTrue(start.await(10,TimeUnit.SECONDS));
             try {service.createOrder(request);return true;}catch(IllegalStateException conflict){return false;}finally{SecurityContextHolder.clearContext();}
         };

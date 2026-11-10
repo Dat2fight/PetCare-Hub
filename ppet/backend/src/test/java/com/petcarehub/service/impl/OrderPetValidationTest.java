@@ -21,10 +21,10 @@ class OrderPetValidationTest {
         when(users.findById(1L)).thenReturn(Optional.of(new User()));
         Pet pet=Pet.builder().build();when(pets.findByIdForUpdate(2L)).thenReturn(Optional.of(pet));
         var item=new OrderItemDTO();item.setPetId(2L);item.setQuantity(1);
-        var request=new OrderCreateRequest();request.setItems(List.of(item));request.setShipping(com.petcarehub.ShippingFixture.valid());
+        var request=new OrderCreateRequest();request.setCheckoutKey(java.util.UUID.randomUUID());request.setItems(List.of(item));request.setShipping(com.petcarehub.ShippingFixture.valid());
         for(BigDecimal price:Arrays.asList(null,BigDecimal.ZERO,BigDecimal.ONE.negate())) {
             pet.setPrice(price);assertThrows(IllegalStateException.class,()->service.createOrder(request));
         }
-        verifyNoInteractions(stock,orders,products);verify(pets,never()).save(any());
+        verify(orders,never()).saveAndFlush(any()); verifyNoInteractions(stock,products);verify(pets,never()).save(any());
     }
 }

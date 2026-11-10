@@ -30,6 +30,12 @@ class SqlServerConstraintTest {
             assertEquals(2, statement.executeUpdate("UPDATE dbo.inventory SET quantity=quantity-1 WHERE quantity>=1"));
             assertEquals(0, statement.executeUpdate("UPDATE dbo.inventory SET quantity=quantity-1 WHERE quantity>=1"));
             statement.execute("INSERT INTO dbo.users(username,email,password_hash,first_name,last_name) VALUES('cart-test','cart@example.test','unused','Test','Cart')");
+            String insertOrder = "INSERT INTO dbo.orders(order_number,customer_id,checkout_key) SELECT ";
+            String customer = " FROM dbo.users WHERE username='cart-test'";
+            statement.execute(insertOrder + "'first',id,'ff6d6020-f21f-479f-960c-527fd65d3cba'" + customer);
+            assertThrows(SQLException.class, () -> statement.execute(insertOrder + "'replay',id,'ff6d6020-f21f-479f-960c-527fd65d3cba'" + customer));
+            statement.execute(insertOrder + "'legacy-a',id,NULL" + customer);
+            statement.execute(insertOrder + "'legacy-b',id,NULL" + customer);
             statement.execute("INSERT INTO dbo.carts(customer_id) SELECT id FROM dbo.users WHERE username='cart-test'");
             assertEquals(2, statement.executeUpdate("INSERT INTO dbo.cart_items(cart_id,product_id,item_type,quantity) SELECT c.id,p.id,'PRODUCT',1 FROM dbo.carts c CROSS JOIN dbo.products p WHERE p.sku IN ('audit-a','audit-b')"));
             assertThrows(SQLException.class, () -> statement.execute("INSERT INTO dbo.cart_items(cart_id,product_id,item_type,quantity) SELECT c.id,p.id,'PRODUCT',1 FROM dbo.carts c CROSS JOIN dbo.products p WHERE p.sku='audit-a'"));
@@ -83,7 +89,8 @@ class SqlServerConstraintTest {
 
     private void migrate(java.sql.Statement statement) throws Exception {
         for (String resource : new String[]{"migrations/001_inventory_nullable_unique.sql", "migrations/002_cart_product_unique.sql", "migrations/003_inventory_generated_unique.sql", "migrations/004_pet_purchase.sql",
-                "migrations/007_reviews.sql","migrations/008_wishlist.sql","migrations/009_package_orders.sql"})
+                "migrations/005_order_expiry.sql","migrations/006_checkout_pricing.sql","migrations/007_reviews.sql","migrations/008_wishlist.sql","migrations/009_package_orders.sql",
+                "migrations/010_inventory_actor.sql","migrations/011_order_shipping.sql"})
             runScript(statement, resource);
     }
 

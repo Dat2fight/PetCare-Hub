@@ -40,7 +40,7 @@ class PetPurchaseTest {
     void authenticate(User u,String role) { var p=caller(u,role); SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(p,null,p.getAuthorities())); }
     Pet sale() { return pets.save(Pet.builder().name("Sale pet").species(species.save(Species.builder().name(UUID.randomUUID().toString()).build())).price(new BigDecimal("1500.00")).imageUrl("/pet.png").build()); }
     OrderItemDTO item(Long id) { var i=new OrderItemDTO(); i.setPetId(id); i.setQuantity(1); return i; }
-    OrderCreateRequest request(OrderItemDTO... items) { var r=new OrderCreateRequest();r.setItems(List.of(items));r.setShipping(com.petcarehub.ShippingFixture.valid());return r; }
+    OrderCreateRequest request(OrderItemDTO... items) { var r=new OrderCreateRequest();r.setCheckoutKey(java.util.UUID.randomUUID());r.setItems(List.of(items));r.setShipping(com.petcarehub.ShippingFixture.valid());return r; }
     // Persist a legacy order fixture directly: the public creation flow must remain closed.
     Order existingOrder(Product product, Pet... reserved) {
         return new org.springframework.transaction.support.TransactionTemplate(transactionManager).execute(status -> {
@@ -68,7 +68,7 @@ class PetPurchaseTest {
         });
     }
     org.springframework.test.web.servlet.ResultActions postOrder(String body) throws Exception {
-        return mvc.perform(post("/api/v1/orders").with(user(caller(customer,"CUSTOMER"))).contentType("application/json").content(body));
+        return mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(customer,"CUSTOMER"))).contentType("application/json").content(body));
     }
     @BeforeEach void setup() { customer=account();pet=sale();authenticate(customer,"CUSTOMER"); }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
@@ -140,9 +140,9 @@ class PetPurchaseTest {
 
     @Test void onlyCustomerCanCreate() throws Exception {
         String body=json.writeValueAsString(request(item(pet.getId())));
-        SecurityContextHolder.clearContext();mvc.perform(post("/api/v1/orders").contentType("application/json").content(body)).andExpect(status().isUnauthorized());
+        SecurityContextHolder.clearContext();mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).contentType("application/json").content(body)).andExpect(status().isUnauthorized());
         for(String role:List.of("ADMIN","SALES_STAFF","WAREHOUSE_STAFF","VETERINARIAN"))
-            mvc.perform(post("/api/v1/orders").with(user(caller(customer,role))).contentType("application/json").content(body)).andExpect(status().isForbidden());
+            mvc.perform(post("/api/v1/orders").header("Idempotency-Key",java.util.UUID.randomUUID().toString()).with(user(caller(customer,role))).contentType("application/json").content(body)).andExpect(status().isForbidden());
     }
     @Test void mixedOrderPersistsAndCancelIsIdempotentAfterAnotherReservation() {
         var c=categories.save(ProductCategory.builder().name("Food").build());

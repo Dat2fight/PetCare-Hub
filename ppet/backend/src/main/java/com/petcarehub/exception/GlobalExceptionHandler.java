@@ -30,6 +30,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(CheckoutKeyConflictException.class)
+    public ResponseEntity<ErrorResponse> handleCheckoutKeyConflict(CheckoutKeyConflictException ex, WebRequest request) {
+        return response(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage(), request);
+    }
+
     @ExceptionHandler(BadRequestException.class)
     public ResponseEntity<ErrorResponse> handleBadRequest(BadRequestException ex, WebRequest request) {
         ErrorResponse error = new ErrorResponse(

@@ -72,15 +72,16 @@ public class OrderServiceImpl implements OrderService {
             if (item.getPetId() != null && !petIds.add(item.getPetId())) throw new BadRequestException("items[" + index + "].petId: Thú cưng bị trùng trong đơn");
         }
         users.findLockedById(customerId).orElseThrow();
-        String key = request.getCheckoutKey() == null ? null : request.getCheckoutKey().toString();
-        String fingerprint = key == null ? null : checkoutFingerprint(request);
-        if (key != null) {
-            var prior = orders.findByCustomerIdAndCheckoutKey(customerId, key);
-            if (prior.isPresent()) {
-                if (!fingerprint.equals(prior.get().getCheckoutFingerprint()))
-                    throw new IllegalStateException("Mã yêu cầu đã được dùng cho đơn khác");
-                return dto(prior.get());
-            }
+        if (request.getCheckoutKey() == null) throw new BadRequestException("Thiếu Idempotency-Key");
+        String key = request.getCheckoutKey().toString();
+        String fingerprint = checkoutFingerprint(request);
+        var prior = orders.findByCustomerIdAndCheckoutKey(customerId, key);
+        if (prior.isPresent()) {
+            if (!fingerprint.equals(prior.get().getCheckoutFingerprint()))
+                throw new CheckoutKeyConflictException();
+            var replay = dto(prior.get());
+            replay.setReplay(true);
+            return replay;
         }
         Order order = Order.builder().checkoutKey(key).checkoutFingerprint(fingerprint).customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
                 .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
@@ -159,7 +160,7 @@ public class OrderServiceImpl implements OrderService {
         var lines = request.getItems().stream()
                 .map(i -> i.getCarePackageId()==null ? java.util.Arrays.asList(i.getProductId(), i.getPetId(), i.getQuantity())
                         : java.util.Arrays.asList("CARE_PACKAGE",i.getCarePackageId(),i.getBeneficiaryPetId(),i.getQuantity()))
-                .toList();
+                .sorted(java.util.Comparator.comparing(Object::toString)).toList();
         var fields = java.util.Arrays.asList(request.getShipping(), request.getNotes(),
                 request.getPromotionCode(), request.getPointsToUse(), lines);
         try {
@@ -272,7 +273,7 @@ public class OrderServiceImpl implements OrderService {
         dto.setPointsDiscount(o.getPointsDiscount());
         dto.setShippingFee(o.getShippingFee());
         dto.setExpiresAt(o.getExpiresAt()); dto.setExpiredAt(o.getExpiredAt());
-        dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setShipping(o.getShipping());
+        dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setCheckoutKey(o.getCheckoutKey()); dto.setShipping(o.getShipping());
         dto.setShippingAddress(o.getShipping() == null ? o.getShippingAddress() : o.getShipping().formatted()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {
