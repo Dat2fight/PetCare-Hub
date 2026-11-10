@@ -1,0 +1,10 @@
+SET XACT_ABORT ON;
+BEGIN TRANSACTION;
+IF COL_LENGTH('dbo.orders', 'recipient_name') IS NULL ALTER TABLE dbo.orders ADD recipient_name nvarchar(100) NULL;
+IF COL_LENGTH('dbo.orders', 'delivery_phone') IS NULL ALTER TABLE dbo.orders ADD delivery_phone nvarchar(10) NULL;
+IF COL_LENGTH('dbo.orders', 'province') IS NULL ALTER TABLE dbo.orders ADD province nvarchar(100) NULL;
+IF COL_LENGTH('dbo.orders', 'district') IS NULL ALTER TABLE dbo.orders ADD district nvarchar(100) NULL;
+IF COL_LENGTH('dbo.orders', 'ward') IS NULL ALTER TABLE dbo.orders ADD ward nvarchar(100) NULL;
+IF COL_LENGTH('dbo.orders', 'address_line') IS NULL ALTER TABLE dbo.orders ADD address_line nvarchar(200) NULL;
+IF COL_LENGTH('dbo.orders', 'delivery_note') IS NULL ALTER TABLE dbo.orders ADD delivery_note nvarchar(500) NULL;
+COMMIT;

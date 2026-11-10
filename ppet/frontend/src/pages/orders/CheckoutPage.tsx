@@ -3,7 +3,8 @@ import { isAxiosError } from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
-import { newCheckoutKey, orderService } from '../../services/orderService';
+import { ShippingForm } from '../../components/orders/ShippingForm';
+import { newCheckoutKey, orderService, validateShipping, type ShippingInfo } from '../../services/orderService';
 import toast from 'react-hot-toast';
 interface Item { id:number; productId?:number; productName?:string; petId?:number; petName?:string; quantity:number; price:number }
 interface Quote {
@@ -13,6 +14,11 @@ interface Quote {
 const money = (v: number) => v.toLocaleString('vi-VN') + ' ₫';
 export const CheckoutPage = () => {
  const {user} = useAuth();
+ const [shipping,setShipping] = useState<ShippingInfo>(() => ({
+   recipientName: [user?.lastName, user?.firstName].filter(Boolean).join(' '), phone: user?.phone ?? '',
+   province: '', district: '', ward: '', addressLine: '', note: ''
+ }));
+ const [shippingErrors,setShippingErrors] = useState<Record<string,string>>({});
  const navigate=useNavigate();const [items,setItems]=useState<Item[]>([]);const [loading,setLoading]=useState(true);const [error,setError]=useState(false);const [busy,setBusy]=useState(false);
  const lastAttempt = useRef<{ payload: string; key: string }>();
  const submitting=useRef(false);const [submitError,setSubmitError]=useState('');
@@ -40,11 +46,11 @@ export const CheckoutPage = () => {
    }, 250);
    return () => { controller.abort(); clearTimeout(timer); };
  }, [items, points, promotionCode, retry]);
- const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(submitting.current || !quote || !items.length)return;submitting.current=true;setBusy(true);setSubmitError('');const data=new FormData(e.currentTarget);
+ const submit=async(e:FormEvent<HTMLFormElement>)=>{e.preventDefault();if(submitting.current || !quote || !items.length)return;const errors = validateShipping(shipping);setShippingErrors(errors);if(Object.keys(errors).length)return;
+  submitting.current=true;setBusy(true);setSubmitError('');
   try {
    const request = {
-    shippingAddress: [data.get('recipient'), data.get('phone'), data.get('shippingAddress')].map(value => String(value || '').trim()).join(', '),
-    notes: String(data.get('notes') || '').trim(),
+    shipping,
     paymentMethod: 'COD' as const, promotionCode, pointsToUse: points,
     items: items.map(i => ({ productId: i.productId, petId: i.petId, quantity: i.quantity }))
    };
@@ -56,7 +62,12 @@ export const CheckoutPage = () => {
    toast.success('Đã đặt đơn hàng COD');
    navigate(`/orders/${orderId}`, { replace: true });
   }
-  catch(error){const message=isAxiosError(error) && typeof error.response?.data?.message==='string' ? error.response.data.message : 'Không đặt được đơn hàng. Kiểm tra danh sách đơn nếu kết nối bị gián đoạn trước khi thử lại.';setSubmitError(message);toast.error(message);}finally{submitting.current=false;setBusy(false);}
+  catch(error){
+    if (isAxiosError(error) && error.response?.data?.fieldErrors) {
+      setShippingErrors(Object.fromEntries(Object.entries(error.response.data.fieldErrors)
+        .map(([key,value]) => [key.replace(/^shipping\./, ''), String(value)])));
+    }
+    const message=isAxiosError(error) && typeof error.response?.data?.message==='string' ? error.response.data.message : 'Không đặt được đơn hàng. Kiểm tra danh sách đơn nếu kết nối bị gián đoạn trước khi thử lại.';setSubmitError(message);toast.error(message);}finally{submitting.current=false;setBusy(false);}
  };
  if(loading)return <p className="p-8">Đang tải giỏ hàng…</p>;if(error)return <div role="alert" className="p-8">Không tải được giỏ hàng. <Link to="/cart">Quay lại giỏ hàng</Link></div>;
  return <div className="max-w-4xl mx-auto p-8"><h1 className="text-3xl font-bold mb-6">Đặt hàng</h1>{!items.length?<p>Giỏ hàng trống.</p>:<form onSubmit={submit} className="grid gap-5 bg-white p-6 rounded-2xl">
@@ -70,11 +81,8 @@ export const CheckoutPage = () => {
    <p>Giảm từ điểm {money(quote.pointsDiscount)}</p><p>Phí giao hàng {money(quote.shippingFee)}</p>
    <strong>Tổng thanh toán {money(quote.total)}</strong>
  </div> : quoteError ? <div role="alert">{quoteError} <button type="button" onClick={()=>setRetry(n=>n+1)}>Thử lại</button></div> : <p role="status">Đang tính tổng đơn…</p>}
- <label>Người nhận <input name="recipient" required maxLength={160} autoComplete="name" defaultValue={[user?.lastName,user?.firstName].filter(Boolean).join(' ')} className="block w-full border rounded p-2"/></label>
- <label>Số điện thoại <input type="tel" name="phone" required pattern="[+0-9 ]{8,20}" autoComplete="tel" defaultValue={user?.phone} className="block w-full border rounded p-2"/></label>
- <label>Địa chỉ giao hàng <textarea name="shippingAddress" required maxLength={1800} className="block border rounded w-full p-3"/></label>
+ <ShippingForm values={shipping} onChange={setShipping} errors={shippingErrors} />
  <label className="min-w-0">Phương thức thanh toán <select name="paymentMethod" className="block w-full min-w-0 max-w-full border rounded p-3"><option value="COD">Thanh toán khi nhận hàng (COD)</option></select></label>
- <label>Ghi chú <textarea name="notes" maxLength={2000} className="block w-full border rounded p-2"/></label>
  {items.some(i => i.petId) && <label><input type="checkbox" required /> Tôi đồng ý đặt đơn COD. Nếu sau 24 giờ đơn chưa được xác nhận, toàn bộ đơn sẽ bị hủy và thú cưng được nhả giữ chỗ.</label>}
  {submitError && <p role="alert" className="text-red-600">{submitError} <Link to="/orders">Xem đơn hàng</Link></p>}
  <button disabled={busy || !quote || draftCode.trim() !== promotionCode} className="bg-primary-600 text-white p-3 rounded-xl">{busy?'Đang đặt…':'Đặt hàng'}</button></form>}</div>;

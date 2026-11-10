@@ -39,7 +39,7 @@ class OrderFlowTest {
         product=products.save(Product.builder().category(category).name("Food").sku(UUID.randomUUID().toString()).price(BigDecimal.TEN).active(true).build());
         inventory.save(Inventory.builder().product(product).quantity(5).build());
         var item=new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
-        request=new OrderCreateRequest(); request.setItems(List.of(item)); request.setShippingAddress("Recipient, phone, address"); request.setPaymentMethod("COD");
+        request=new OrderCreateRequest(); request.setItems(List.of(item)); request.setShipping(com.petcarehub.ShippingFixture.valid()); request.setPaymentMethod("COD");
     }
     @AfterEach void clear() { SecurityContextHolder.clearContext(); }
     @Test void persistsServerPriceAndProtectedDetail() throws Exception {
@@ -48,7 +48,7 @@ class OrderFlowTest {
         assertEquals(3,inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(owner,"CUSTOMER"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.items[0].price").value(10))
-                .andExpect(jsonPath("$.shippingAddress").value(request.getShippingAddress())).andExpect(jsonPath("$.paymentStatus").value("PENDING"));
+                .andExpect(jsonPath("$.shippingAddress").value(request.getShipping().formatted())).andExpect(jsonPath("$.paymentStatus").value("PENDING"));
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(post("/api/v1/orders/{id}/cancel",order.getId()).with(user(caller(other,"CUSTOMER")))).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/orders/{id}",order.getId()).with(user(caller(other,"SALES_STAFF")))).andExpect(status().isOk());
@@ -83,9 +83,9 @@ class OrderFlowTest {
         mvc.perform(get("/api/v1/orders/{id}",id).with(user(caller(owner,"CUSTOMER"))))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id))
                 .andExpect(jsonPath("$.paymentMethod").value("COD"))
-                .andExpect(jsonPath("$.shippingAddress").value(request.getShippingAddress()))
+                .andExpect(jsonPath("$.shippingAddress").value(request.getShipping().formatted()))
                 .andExpect(jsonPath("$.items[0].productName").value("Food"));
-        long before=orders.count(); request.setShippingAddress(" ");
+        long before=orders.count(); request.setShipping(null);
         mvc.perform(post("/api/v1/orders").with(user(caller(owner,"CUSTOMER")))
                 .contentType("application/json").content(json.writeValueAsString(request))).andExpect(status().isBadRequest());
         assertEquals(before,orders.count());

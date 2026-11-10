@@ -18,6 +18,7 @@ public class OrderDTO {
     private List<OrderItemDTO> items;
     private String orderNumber;
     private String shippingAddress;
+    private com.petcarehub.entity.ShippingInfo shipping;
     private java.time.LocalDateTime expiresAt;
     private java.time.LocalDateTime expiredAt;
     private String notes;

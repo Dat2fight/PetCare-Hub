@@ -40,7 +40,7 @@ class QaCheckoutAtomicTest {
         var p=products.save(Product.builder().category(c).name("qa_food").sku("qa_"+UUID.randomUUID()).price(BigDecimal.TEN).active(true).build());
         inventory.save(Inventory.builder().product(p).quantity(stock).build());return p;
     }
-    Map<String,Object> body(Product product,int qty){return Map.of("shippingAddress","qa_Người nhận, qa_000, qa_Địa chỉ", "paymentMethod","COD",
+    Map<String,Object> body(Product product,int qty){return Map.of("shipping",ShippingFixture.valid(), "paymentMethod","COD",
             "userId",b.getId(),"total",0.01,"items",List.of(Map.of("productId",product.getId(),"quantity",qty,"price",0.01)));}
     @BeforeEach void setup(){a=account();b=account();p=product(3);q=product(1);}
     @AfterEach void clear(){SecurityContextHolder.clearContext();}
@@ -79,6 +79,18 @@ class QaCheckoutAtomicTest {
         assertEquals(1000, balances.findByCustomerId(a.getId()).orElseThrow().getAvailablePoints());
         assertEquals(0, promotions.findById(promo.getId()).orElseThrow().getCurrentUses());
         assertTrue(usages.findByOrderId(id).isEmpty());
+    }
+
+    @Test void malformedShippingReportsEachFieldWithoutCreatingOrder() throws Exception {
+        var payload = new HashMap<>(body(p, 1));
+        payload.put("shipping", Map.of("recipientName", "🐶", "phone", "0123456789", "province", " ",
+                "district", "a".repeat(101), "ward", "", "addressLine", "abc", "note", "a".repeat(501)));
+        long before = orders.count();
+        var response = mvc.perform(post("/api/v1/orders").with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsBytes(payload))).andExpect(status().isBadRequest());
+        for (String field : List.of("recipientName","phone","province","district","ward","addressLine","note"))
+            response.andExpect(jsonPath("$.fieldErrors['shipping." + field + "']").isString());
+        assertEquals(before, orders.count());
     }
 
     @Test void successfulOrderUsesServerPriceAndRemovesOnlyPurchasedCartQuantity() throws Exception {
@@ -129,7 +141,7 @@ class QaCheckoutAtomicTest {
         java.util.function.Function<User,Callable<Boolean>> buy=u->()->{
             var principal=caller(u,"CUSTOMER");SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(principal,null,principal.getAuthorities()));
             var item=new OrderItemDTO();item.setProductId(q.getId());item.setQuantity(1);
-            var request=new OrderCreateRequest();request.setItems(List.of(item));request.setShippingAddress("qa_address");request.setPaymentMethod("COD");
+            var request=new OrderCreateRequest();request.setItems(List.of(item));request.setShipping(com.petcarehub.ShippingFixture.valid());request.setPaymentMethod("COD");
             ready.countDown();assertTrue(start.await(10,TimeUnit.SECONDS));
             try {service.createOrder(request);return true;}catch(IllegalStateException conflict){return false;}finally{SecurityContextHolder.clearContext();}
         };

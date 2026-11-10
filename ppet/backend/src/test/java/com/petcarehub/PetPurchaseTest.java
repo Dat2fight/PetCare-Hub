@@ -40,7 +40,7 @@ class PetPurchaseTest {
     void authenticate(User u,String role) { var p=caller(u,role); SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken(p,null,p.getAuthorities())); }
     Pet sale() { return pets.save(Pet.builder().name("Sale pet").species(species.save(Species.builder().name(UUID.randomUUID().toString()).build())).price(new BigDecimal("1500.00")).imageUrl("/pet.png").build()); }
     OrderItemDTO item(Long id) { var i=new OrderItemDTO(); i.setPetId(id); i.setQuantity(1); return i; }
-    OrderCreateRequest request(OrderItemDTO... items) { var r=new OrderCreateRequest();r.setItems(List.of(items));r.setShippingAddress("Địa chỉ test");return r; }
+    OrderCreateRequest request(OrderItemDTO... items) { var r=new OrderCreateRequest();r.setItems(List.of(items));r.setShipping(com.petcarehub.ShippingFixture.valid());return r; }
     // Persist a legacy order fixture directly: the public creation flow must remain closed.
     Order existingOrder(Product product, Pet... reserved) {
         return new org.springframework.transaction.support.TransactionTemplate(transactionManager).execute(status -> {
@@ -75,7 +75,7 @@ class PetPurchaseTest {
 
     @Test void httpUsesServerIdentityAndPriceAndDoesNotTouchInventory() throws Exception {
         long before=transactions.count();
-        var body=Map.of("items",List.of(Map.of("petId",pet.getId(),"quantity",1,"price",0.01)),"shippingAddress","Địa chỉ test","customerId",999,"userId",999,"totalAmount",0.01);
+        var body=Map.of("items",List.of(Map.of("petId",pet.getId(),"quantity",1,"price",0.01)),"shipping",ShippingFixture.valid(),"customerId",999,"userId",999,"totalAmount",0.01);
         var response=postOrder(json.writeValueAsString(body)).andExpect(status().isOk())
                 .andExpect(jsonPath("$.userId").value(customer.getId())).andExpect(jsonPath("$.totalPrice").value(1500))
                 .andExpect(jsonPath("$.items[0].petId").value(pet.getId())).andExpect(jsonPath("$.items[0].petName").value("Sale pet"))

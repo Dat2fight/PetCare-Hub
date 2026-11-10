@@ -56,6 +56,9 @@ public class Order extends BaseEntity {
     @Column(name = "shipping_address", columnDefinition = "TEXT")
     private String shippingAddress;
 
+    @Embedded
+    private ShippingInfo shipping;
+
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 

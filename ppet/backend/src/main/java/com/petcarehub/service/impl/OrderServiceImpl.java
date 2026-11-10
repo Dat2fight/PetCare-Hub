@@ -59,8 +59,8 @@ public class OrderServiceImpl implements OrderService {
         Long customerId = ownership.userId();
         if (!ownership.hasRole("CUSTOMER") || java.util.stream.Stream.of("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN").anyMatch(ownership::hasRole))
             throw new org.springframework.security.access.AccessDeniedException("Chỉ khách hàng được đặt mua");
-        if (!PackageCheckout.requested(request) && (request.getShippingAddress() == null || request.getShippingAddress().isBlank() || request.getShippingAddress().length() > 2000))
-            throw new BadRequestException("Thông tin giao hàng là bắt buộc, tối đa 2000 ký tự");
+        if (!PackageCheckout.requested(request) && request.getShipping() == null)
+            throw new BadRequestException("Vui lòng điền thông tin giao hàng");
         if (request.getPaymentMethod() != null && !"COD".equals(request.getPaymentMethod()))
             throw new BadRequestException("Chỉ hỗ trợ thanh toán COD");
         if (request.getItems() == null || request.getItems().isEmpty()) throw new BadRequestException("Đơn hàng phải có sản phẩm");
@@ -84,7 +84,7 @@ public class OrderServiceImpl implements OrderService {
         }
         Order order = Order.builder().checkoutKey(key).checkoutFingerprint(fingerprint).customer(users.findById(customerId).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản")))
                 .orderNumber("PC-" + java.util.UUID.randomUUID()).status(OrderStatus.PENDING).paymentStatus(PaymentStatus.PENDING)
-                .paymentMethod("COD").shippingAddress(request.getShippingAddress()).notes(request.getNotes()).build();
+                .paymentMethod("COD").shipping(request.getShipping()).notes(request.getNotes()).build();
         if (PackageCheckout.requested(request)) {
             var line=packages.prepare(request,true);
             order.addItem(line);
@@ -160,7 +160,7 @@ public class OrderServiceImpl implements OrderService {
                 .map(i -> i.getCarePackageId()==null ? java.util.Arrays.asList(i.getProductId(), i.getPetId(), i.getQuantity())
                         : java.util.Arrays.asList("CARE_PACKAGE",i.getCarePackageId(),i.getBeneficiaryPetId(),i.getQuantity()))
                 .toList();
-        var fields = java.util.Arrays.asList(request.getShippingAddress(), request.getNotes(),
+        var fields = java.util.Arrays.asList(request.getShipping(), request.getNotes(),
                 request.getPromotionCode(), request.getPointsToUse(), lines);
         try {
             byte[] payload = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(fields);
@@ -272,7 +272,8 @@ public class OrderServiceImpl implements OrderService {
         dto.setPointsDiscount(o.getPointsDiscount());
         dto.setShippingFee(o.getShippingFee());
         dto.setExpiresAt(o.getExpiresAt()); dto.setExpiredAt(o.getExpiredAt());
-        dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setShippingAddress(o.getShippingAddress()); dto.setPaymentMethod(o.getPaymentMethod());
+        dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setShipping(o.getShipping());
+        dto.setShippingAddress(o.getShipping() == null ? o.getShippingAddress() : o.getShipping().formatted()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {
             OrderItemDTO d = new OrderItemDTO();

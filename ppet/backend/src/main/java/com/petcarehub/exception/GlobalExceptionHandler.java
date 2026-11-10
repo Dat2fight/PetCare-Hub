@@ -65,7 +65,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Failed",
                 fieldErrors.toString(),
-                request.getDescription(false).replace("uri=", "")
+                request.getDescription(false).replace("uri=", ""), java.util.UUID.randomUUID().toString(), fieldErrors
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
@@ -133,6 +133,6 @@ public class GlobalExceptionHandler {
         log.error("Unhandled error correlationId={}", correlationId, ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorResponse(
                 LocalDateTime.now(), 500, "Internal Server Error", "Đã xảy ra lỗi hệ thống",
-                request.getDescription(false).replace("uri=", ""), correlationId));
+                request.getDescription(false).replace("uri=", ""), correlationId, null));
     }
 }

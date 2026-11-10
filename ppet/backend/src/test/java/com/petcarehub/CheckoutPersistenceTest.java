@@ -36,7 +36,7 @@ class CheckoutPersistenceTest {
             Product product = products.save(Product.builder().category(category).name("Food").sku("CHECKOUT").price(BigDecimal.TEN).active(true).build());
             inventory.save(Inventory.builder().product(product).quantity(3).build());
             OrderItemDTO item = new OrderItemDTO(); item.setProductId(product.getId()); item.setQuantity(2); item.setPrice(0.01);
-            OrderCreateRequest request = new OrderCreateRequest(); request.setItems(List.of(item)); request.setShippingAddress("Địa chỉ thử nghiệm");
+            OrderCreateRequest request = new OrderCreateRequest(); request.setItems(List.of(item)); request.setShipping(com.petcarehub.ShippingFixture.valid());
             OrderDTO result = service.createOrder(request);
             assertNotNull(result.getId()); assertEquals(customer.getId(), result.getUserId()); assertEquals(30020.0, result.getTotalPrice());
             assertEquals(1, inventory.findByProductId(product.getId()).orElseThrow().getQuantity());
