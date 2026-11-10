@@ -1,50 +1,22 @@
 import { HeartButton, useWishlistStatus } from '../components/customer/Wishlist';
 import { useResource } from '../hooks/useResource';
 import { PublicPetDTO } from '../services/petManagementService';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
-import { Card } from '../components/common/Card';
-import { productService, Product, ProductCategory } from '../services/productService';
-import LoadingSpinner from '../components/common/LoadingSpinner';
+import type { Product, ProductCategory } from '../services/productService';
+import type { Service } from '../services/serviceService';
 import { ProductImage } from '../components/common/ProductImage';
-import { mockImages } from '../data/mockImages';
-import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield, FiClock, FiTruck } from 'react-icons/fi';
+import { FiHeart } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
   const featured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc');
   const hearts=useWishlistStatus('PET',featured.data?.content.map(p=>p.id) ?? []);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [categories, setCategories] = useState<ProductCategory[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [productsError, setProductsError] = useState<string | null>(null);
-  const [categoriesError, setCategoriesError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    productService.getAllProducts(0, 6)
-      .then(data => { if (!cancelled) setProducts(data.content); })
-      .catch(() => { if (!cancelled) setProductsError('Không thể tải sản phẩm. Vui lòng thử lại sau.'); })
-      .finally(() => { if (!cancelled) setLoadingProducts(false); });
-    productService.getAllCategories()
-      .then(data => { if (!cancelled) setCategories(data); })
-      .catch(() => { if (!cancelled) setCategoriesError('Không thể tải danh mục sản phẩm.'); });
-    return () => { cancelled = true; };
-  }, []);
-
-  const categoryCards = [
-    { name: 'Chó', icon: '🐶', bg: 'bg-orange-50', to: '/pets' },
-    { name: 'Mèo', icon: '🐱', bg: 'bg-blue-50', to: '/pets' },
-    ...categories.map((category, index) => ({
-      name: category.name,
-      icon: ['🥩', '🎾', '🎽', '🧴'][index % 4],
-      bg: ['bg-red-50', 'bg-primary-50', 'bg-purple-50', 'bg-cyan-50'][index % 4],
-      to: `/products?categoryId=${category.id}`,
-    })),
-    { name: 'Sức khỏe', icon: '💊', bg: 'bg-emerald-50', to: '/services' },
-    { name: 'Khác', icon: '✨', bg: 'bg-secondary-50', to: '/products' },
-  ];
+  const services = useResource<Service[]>('/services');
+  const products = useResource<{items: Product[]; bestSelling: boolean}>('/home/products');
+  const reviews = useResource<{id: number; displayName: string; rating: number; comment: string}[]>('/home/reviews');
+  const categories = useResource<ProductCategory[]>('/categories');
   return (
     <div className="bg-background min-h-screen">
       
@@ -80,8 +52,8 @@ export const HomePage: React.FC = () => {
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary-100/50 rounded-full blur-3xl -z-10"></div>
             
             <div className="relative w-full max-w-[600px] h-[500px]">
-              <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800" alt="Happy Golden Retriever" className="absolute right-10 bottom-0 w-[400px] h-[480px] object-cover rounded-[100px] rounded-br-[200px] shadow-2xl z-10 border-8 border-white" />
-              <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600" alt="Cute Cat" className="absolute left-10 bottom-10 w-[240px] h-[240px] object-cover rounded-full shadow-xl z-20 border-8 border-white" />
+              <img src="https://images.unsplash.com/photo-1548199973-03cce0bbc87b?auto=format&fit=crop&q=80&w=800" width={400} height={480} alt="Chó ngoài trời" className="absolute right-10 bottom-0 w-[400px] h-[480px] object-cover rounded-[100px] rounded-br-[200px] shadow-2xl z-10 border-8 border-white" />
+              <img src="https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=600" width={240} height={240} alt="Mèo" className="absolute left-10 bottom-10 w-[240px] h-[240px] object-cover rounded-full shadow-xl z-20 border-8 border-white" />
               
               <div className="absolute top-10 right-0 bg-secondary-100 text-secondary-600 font-bold p-6 rounded-[2rem] rounded-tl-none shadow-lg z-30 max-w-[150px] transform rotate-3">
                 <p className="text-center text-sm">Nơi khởi đầu cho những hành trình hạnh phúc!</p>
@@ -95,28 +67,6 @@ export const HomePage: React.FC = () => {
               <MdPets className="absolute top-1/3 right-1/4 text-primary-300 text-4xl rotate-12" />
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* 2. TRUST / BENEFIT STRIP */}
-      <section className="relative -mt-10 z-30 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-20">
-        <div className="bg-white rounded-3xl shadow-xs p-4 flex flex-col md:flex-row justify-between items-center divide-y md:divide-y-0 md:divide-x divide-gray-100 border border-gray-100">
-          {[
-            { icon: <FiTruck />, title: "Giao hàng toàn quốc", desc: "Nhanh chóng & an toàn" },
-            { icon: <FiShield />, title: "Thú cưng khỏe mạnh", desc: "Được kiểm tra sức khỏe" },
-            { icon: <FiCheckCircle />, title: "Dịch vụ chuyên nghiệp", desc: "Tận tâm & uy tín" },
-            { icon: <FiClock />, title: "Hỗ trợ 24/7", desc: "Luôn bên bạn" },
-          ].map((item, idx) => (
-            <div key={idx} className="flex items-center gap-4 px-6 py-4 w-full md:w-1/4 justify-center md:justify-start">
-              <div className="w-12 h-12 rounded-full bg-primary-50 text-primary-600 flex items-center justify-center shrink-0 text-xl">
-                {item.icon}
-              </div>
-              <div>
-                <h4 className="font-bold text-gray-900 text-sm">{item.title}</h4>
-                <p className="text-xs text-gray-500">{item.desc}</p>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
@@ -177,204 +127,38 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. POPULAR CATEGORIES */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-secondary-100 text-secondary-500 rounded-2xl flex items-center justify-center text-2xl">
-              <FiStar />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-1">Danh mục nổi bật</h2>
-              <p className="text-gray-500 text-sm">Khám phá đa dạng lựa chọn cho thú cưng của bạn</p>
-            </div>
-          </div>
-          <Link to="/products" className="text-primary-600 font-medium hover:text-primary-700 hidden sm:block text-sm">Xem tất cả →</Link>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
-          {categoryCards.map(cat => (
-            <Link to={cat.to} key={cat.to + cat.name} className={`${cat.bg} hover:brightness-95 rounded-[24px] p-6 flex flex-col items-center justify-center text-center transition-colors border border-white shadow-xs cursor-pointer`}>
-              <div className="text-4xl mb-3 drop-shadow-sm">{cat.icon}</div>
-              <h4 className="font-bold text-gray-900 text-sm mb-1">{cat.name}</h4>
-            </Link>
-          ))}
-        </div>
-        {categoriesError && <p role="alert" className="mt-4 text-red-500">{categoriesError}</p>}
-      </section>
-
-      {/* 6. PET CARE SERVICES */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-blue-100 text-blue-500 rounded-2xl flex items-center justify-center text-2xl">
-              <FiCheckCircle />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-1">Dịch vụ chăm sóc thú cưng</h2>
-              <p className="text-gray-500 text-sm">Dịch vụ chuyên nghiệp - Thú cưng luôn khỏe mạnh</p>
-            </div>
-          </div>
-          <Link to="/services" className="text-primary-600 font-medium hover:text-primary-700 hidden sm:block text-sm">Xem tất cả →</Link>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {[
-            { title: "Tắm & Grooming", desc: "Làm sạch, cắt tỉa, chăm sóc lông chuyên nghiệp", price: "200.000đ", image: mockImages.grooming, icon: "✂️" },
-            { title: "Khám thú y", desc: "Kiểm tra sức khỏe, tư vấn điều trị", price: "150.000đ", image: mockImages.vet, icon: "🏥" },
-            { title: "Gói chăm sóc định kỳ", desc: "Chọn quyền lợi và thời hạn phù hợp cho thú cưng", price: "", to: "/care-packages", image: mockImages.dogHero, icon: "🎁" },
-            { title: "Pet Sitting", desc: "Chăm sóc thú cưng khi bạn vắng nhà", price: "300.000đ", image: mockImages.dogGolden, icon: "🏠" },
-          ].map((srv, idx) => (
-            <Card key={idx} noPadding className="group border-gray-100 hover:border-primary-200 transition-colors h-full flex flex-col rounded-3xl overflow-hidden">
-              <div className="h-36 overflow-hidden relative">
-                <img src={srv.image} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt={srv.title} />
-              </div>
-              <div className="p-5 flex flex-col grow relative">
-                <div className="absolute -top-6 left-4 w-12 h-12 bg-white rounded-xl shadow-md flex items-center justify-center text-2xl border border-gray-50">
-                  {srv.icon}
-                </div>
-                <h3 className="font-bold text-gray-900 mt-6 mb-2">{srv.title}</h3>
-                <p className="text-xs text-gray-500 mb-4 line-clamp-2 leading-relaxed">{srv.desc}</p>
-                
-                <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-4">
-                  <span className="font-extrabold text-primary-600">{srv.price}</span>
-                  <Link to={srv.to || "/services"} className="text-xs font-semibold text-primary-600 border border-primary-200 px-3 py-1.5 rounded-full hover:bg-primary-50">
-                    {srv.to ? "Khám phá các gói →" : "Đặt lịch ngay →"}
-                  </Link>
-                </div>
-              </div>
-            </Card>
-          ))}
-          
-          {/* Promo Service Card */}
-          <div className="bg-primary-50 rounded-3xl p-6 flex flex-col items-center justify-center text-center relative overflow-hidden border border-primary-100 group cursor-pointer hover:shadow-lg transition-shadow">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-primary-200/50 rounded-full blur-2xl -mr-10 -mt-10"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-secondary-200/30 rounded-full blur-2xl -ml-10 -mb-10"></div>
-            
-            <div className="relative z-10">
-              <h3 className="text-xl font-extrabold text-primary-800 mb-3">Ưu đãi đặc biệt <br/> cho thành viên</h3>
-              <p className="text-primary-700 text-sm font-medium mb-6">Tích điểm - Nhận quà - Giảm giá</p>
-              <Link to="/membership">
-                <Button className="rounded-full px-6 shadow-md shadow-primary-500/20">Khám phá ngay →</Button>
-              </Link>
-            </div>
-            
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="absolute bottom-4 left-4 text-primary-300 opacity-50"><path d="M12 2v20"></path><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. BEST-SELLING PRODUCTS */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-end mb-8">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 bg-coral-50 text-coral-500 rounded-2xl flex items-center justify-center text-2xl">
-              <FiHeart />
-            </div>
-            <div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-1">Sản phẩm bán chạy</h2>
-              <p className="text-gray-500 text-sm">Những sản phẩm được yêu thích nhất hiện nay</p>
-            </div>
-          </div>
-          <Link to="/products" className="text-primary-600 font-medium hover:text-primary-700 hidden sm:block text-sm">Xem tất cả →</Link>
-        </div>
-
-        {loadingProducts ? (
-          <div className="flex justify-center py-12"><LoadingSpinner size="lg" /></div>
-        ) : productsError ? (
-          <p role="alert" className="text-center py-12 text-red-500">{productsError}</p>
-        ) : products.length === 0 ? (
-          <p className="text-center py-12 text-gray-500">Chưa có sản phẩm nào.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {products.map(product => (
-              <Link to={`/products/${product.id}`} key={product.id} className="block h-full">
-                <Card noPadding className="group h-full flex flex-col border-gray-100 hover:border-primary-200 transition-all rounded-3xl">
-                  <div className="relative aspect-square p-4 bg-white rounded-t-3xl overflow-hidden flex items-center justify-center">
-                    <ProductImage src={product.imageUrl} alt={product.name} className="w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-500" />
-                  </div>
-                  <div className="p-4 bg-gray-50/50 flex flex-col grow rounded-b-3xl border-t border-gray-100">
-                    <h3 className="font-bold text-[13px] text-gray-900 mb-1 line-clamp-2">{product.name}</h3>
-                    <p className="text-[11px] text-gray-500 mb-2 line-clamp-2">{product.description}</p>
-                    <div className="mt-auto font-extrabold text-primary-600 text-sm">
-                      {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-          </div>
-        )}
-      </section>
-
-      
-
-      {/* 9. CUSTOMER REVIEWS */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white rounded-[32px] shadow-xs border border-gray-100 p-8 md:p-12 flex flex-col lg:flex-row gap-12 items-center">
-          
-          <div className="lg:w-1/3 flex flex-col items-center lg:items-start text-center lg:text-left">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 bg-secondary-100 text-secondary-500 rounded-2xl flex items-center justify-center text-2xl">
-                <FiStar className="fill-current" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">Đánh giá từ khách hàng</h2>
-                <p className="text-gray-500 text-sm">Hàng ngàn khách hàng đã tin tưởng</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center gap-6 mt-8">
-              <div className="text-5xl font-extrabold text-gray-900">4.8<span className="text-2xl text-gray-400 font-bold">/5</span></div>
-              <div className="flex flex-col gap-1">
-                <div className="flex text-secondary-400 text-lg">
-                  <FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" />
-                </div>
-                <span className="text-sm text-gray-500 font-medium">Dựa trên 2.500+ đánh giá</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="lg:w-2/3 relative w-full">
-            <div className="absolute top-1/2 -left-6 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-primary-600 cursor-pointer z-10 border border-gray-100">
-              <FiChevronLeft size={24} />
-            </div>
-            <div className="absolute top-1/2 -right-6 -translate-y-1/2 w-12 h-12 bg-white rounded-full shadow-md flex items-center justify-center text-gray-400 hover:text-primary-600 cursor-pointer z-10 border border-gray-100">
-              <FiChevronRight size={24} />
-            </div>
-
-            <div className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-4 hide-scrollbar">
-              {[
-                { name: "Nguyễn Thị Mai", date: "12/04/2025", text: "\"Dịch vụ grooming rất chuyên nghiệp, bé nhà mình về rất sạch và thơm. Nhân viên thân thiện, nhiệt tình! Chắc chắn sẽ quay lại ủng hộ PetCare Hub thường xuyên.\"", avatar: mockImages.avatar1 },
-                { name: "Trần Văn Hùng", date: "05/04/2025", text: "\"Mình mua thức ăn cho cún ở đây suốt 1 năm nay, giá cả hợp lý, giao hàng nhanh chóng. Rất hài lòng với chất lượng sản phẩm.\"", avatar: mockImages.avatar2 },
-                { name: "Lê Minh Tuấn", date: "28/03/2025", text: "\"Tính năng tìm kiếm thú cưng phù hợp rất tuyệt vời. Mình đã tìm được một bé Corgi rất ngoan và khỏe mạnh thông qua gợi ý của PetCare Hub.\"", avatar: mockImages.placeholder }
-              ].map((review, idx) => (
-                <Card key={idx} className="bg-gray-50/50 border border-gray-100 p-8 rounded-3xl relative overflow-hidden min-w-full md:min-w-[calc(100%-12px)] snap-center shrink-0">
-                  <div className="absolute top-4 right-8 text-8xl text-gray-100 font-serif leading-none">"</div>
-                  
-                  <div className="flex items-start gap-4 mb-4 relative z-10">
-                    <img src={review.avatar} alt="Customer" className="w-12 h-12 rounded-full object-cover shadow-xs" />
-                    <div>
-                      <h4 className="font-bold text-gray-900">{review.name}</h4>
-                      <div className="flex text-secondary-400 text-sm mt-0.5">
-                        <FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" /><FiStar className="fill-current" />
-                      </div>
-                    </div>
-                    <span className="ml-auto text-xs text-gray-400 font-medium">{review.date}</span>
-                  </div>
-                  <p className="text-gray-600 relative z-10 leading-relaxed">
-                    {review.text}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      </section>
-
+      <HomeSection title="Danh mục sản phẩm" resource={categories} empty={categories.data?.length === 0}>
+        {categories.data?.map(category => <Link className="rounded-xl bg-white p-5" to={'/products?categoryId='+category.id} key={category.id}>{category.name}</Link>)}
+      </HomeSection>
+      <HomeSection title="Dịch vụ chăm sóc thú cưng" resource={services} empty={services.data?.length === 0}>
+        {services.data?.slice(0,6).map(service => <Link to={'/services/'+service.id} key={service.id} className="rounded-xl bg-white p-5">
+          <h3 className="font-bold">{service.name}</h3><p>{service.description}</p>
+          <p>{service.durationMinutes} phút · {service.price.toLocaleString('vi-VN')} ₫</p>
+        </Link>)}
+      </HomeSection>
+      <HomeSection title={products.data?.bestSelling ? 'Sản phẩm bán chạy' : 'Sản phẩm mới'} resource={products} empty={products.data?.items.length === 0}>
+        {products.data?.items.map(product => <Link key={product.id} to={'/products/'+product.id} className="rounded-xl bg-white p-5">
+          <ProductImage src={product.imageUrl} alt={product.name} width={320} height={240} className="aspect-[4/3] w-full object-contain" />
+          <h3 className="font-bold">{product.name}</h3><p>{product.price.toLocaleString('vi-VN')} ₫</p>
+        </Link>)}
+      </HomeSection>
+      <HomeSection title="Đánh giá từ khách hàng" resource={reviews} empty={reviews.data?.length === 0}>
+        {reviews.data?.map(review => <figure key={review.id} className="rounded-xl bg-white p-5">
+          <blockquote>{review.comment}</blockquote><figcaption>{review.displayName} · {review.rating}/5</figcaption>
+        </figure>)}
+      </HomeSection>
     </div>
   );
 };
+
+function HomeSection({ title, resource, empty, children }: { title: string; resource: { data?: unknown; error?: string; retry: () => void }; empty: boolean; children: React.ReactNode }) {
+  if (empty) return null;
+  return <section className="mb-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h2 className="mb-6 text-2xl font-bold">{title}</h2>
+    {resource.error ? <p role="alert">{resource.error} <button className="underline" onClick={resource.retry}>Thử lại</button></p>
+      : !resource.data ? <div role="status" aria-label={'Đang tải '+title} className="h-28 animate-pulse rounded-xl bg-gray-100" />
+      : <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{children}</div>}
+  </section>;
+}
 
 export default HomePage;

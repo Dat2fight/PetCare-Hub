@@ -13,6 +13,13 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
     @Override
     @org.springframework.data.jpa.repository.EntityGraph(attributePaths = "category")
     Page<Product> findAll(org.springframework.data.jpa.domain.Specification<Product> specification, Pageable pageable);
+    @org.springframework.data.jpa.repository.Query("""
+            select i.product.id from OrderItem i where i.product.active=true
+              and i.order.status=com.petcarehub.enums.OrderStatus.DELIVERED
+            group by i.product.id order by sum(i.quantity) desc, i.product.id desc
+            """)
+    java.util.List<Long> topDeliveredProductIds(Pageable limit);
+    java.util.List<Product> findTop6ByActiveTrueOrderByIdDesc();
     Optional<Product> findBySku(String sku);
     Page<Product> findByCategoryId(Long categoryId, Pageable pageable);
     Page<Product> findByCategoryIdAndActiveTrue(Long categoryId, Pageable pageable);

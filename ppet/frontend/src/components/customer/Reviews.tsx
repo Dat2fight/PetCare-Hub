@@ -70,6 +70,7 @@ export function MyReviews() {
 export function ServiceDetail() {
   const {id}=useParams();
   const service=useResource<{id:number;name:string;description:string;active:boolean}>('/services/'+id);
+  if(service.status === 404) return <div className="p-6"><p>Dịch vụ không còn khả dụng.</p><Link to="/services">Quay lại dịch vụ</Link></div>;
   if(service.error) return <button onClick={service.retry}>Không tải được dịch vụ. Thử lại</button>;
   if(!service.data) return <p>Đang tải…</p>;
   if(!service.data.active) return <p>Dịch vụ đã ngừng hoạt động.</p>;

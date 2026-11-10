@@ -59,6 +59,21 @@ class CatalogAuthorizationTest {
                 .andExpect(status().isForbidden());
     }
 
+    @Test @org.springframework.transaction.annotation.Transactional
+    void homeReviewsExposeOnlyModeratedTextAndAbbreviatedName(
+            @Autowired com.petcarehub.repository.UserRepository users,
+            @Autowired com.petcarehub.repository.ReviewRepository reviews) throws Exception {
+        var customer = users.save(com.petcarehub.entity.User.builder().username("qa_home").email("qa_home@example.test")
+                .firstName("Minh").lastName("An").passwordHash("unused").build());
+        for (boolean approved : new boolean[]{true, false})
+            reviews.save(com.petcarehub.entity.Review.builder().customer(customer).rating(4).approved(approved)
+                    .reviewableType("PRODUCT").reviewableId(approved ? 1L : 2L).comment(approved ? "qa_visible" : "qa_hidden").build());
+        mvc.perform(get("/api/v1/home/reviews")).andExpect(status().isOk())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].displayName").value("M."))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].comment").value("qa_visible"))
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[?(@.comment == 'qa_hidden')]").isEmpty())
+                .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath("$[0].email").doesNotExist());
+    }
     @Test void anonymousCanReadButCannotWriteCatalogs() throws Exception {
         for (String catalog : new String[]{"products", "categories", "promotions"}) {
             mvc.perform(get("/api/v1/" + catalog)).andExpect(status().isOk());

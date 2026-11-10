@@ -25,7 +25,7 @@ class EndpointSecurityMatrixTest {
     static final Set<String> PUBLIC = Set.of(
         "POST /auth/login", "POST /auth/register", "GET /pets", "GET /pets/{id}",
         "GET /products", "GET /products/{id}", "GET /categories", "GET /categories/{id}",
-        "GET /services", "GET /services/{id}", "GET /species", "GET /species/{speciesId}/breeds",
+        "GET /home/products", "GET /home/reviews", "GET /services", "GET /services/{id}", "GET /species", "GET /species/{speciesId}/breeds",
         "GET /promotions", "GET /promotions/{id}", "GET /promotions/validate/{code}",
         "GET /care-packages","GET /care-packages/{id}", "GET /reviews/summary", "GET /reviews", "GET /reviews/{id}");
     // Customer operations must obtain identity from the principal and enforce resource ownership.

@@ -1,3 +1,4 @@
+import { siteConfig } from '../../config/siteConfig';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MdPets } from 'react-icons/md';
@@ -38,19 +39,14 @@ const Footer: React.FC = () => {
             </ul>
           </div>
 
-          {/* App Col */}
-          <div>
-            <h3 className="font-bold text-gray-900 mb-6">Tải ứng dụng</h3>
-            <p className="text-gray-500 text-sm mb-4">Mua sắm và đặt lịch dễ dàng hơn trên ứng dụng di động.</p>
-            <div className="space-y-3">
-              <button disabled aria-disabled="true" title="Sắp ra mắt" className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
-                <span className="font-semibold text-sm">App Store — Sắp ra mắt</span>
-              </button>
-              <button disabled aria-disabled="true" title="Sắp ra mắt" className="w-full bg-gray-900 text-white rounded-xl py-2.5 px-4 flex items-center justify-center hover:bg-gray-800 transition-colors">
-                <span className="font-semibold text-sm">Google Play — Sắp ra mắt</span>
-              </button>
-            </div>
-          </div>
+          <section>
+            <h3 className="font-bold mb-6">Liên hệ</h3>
+            <dl className="text-sm space-y-2">
+              {Object.entries({ 'Điện thoại': siteConfig.hotline, 'Địa chỉ': siteConfig.address,
+                'Email': siteConfig.email, 'Giờ mở cửa': siteConfig.hours }).map(([label, value]) =>
+                <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}
+            </dl>
+          </section>
 
         </div>
 
