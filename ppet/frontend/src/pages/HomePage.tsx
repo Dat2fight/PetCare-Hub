@@ -13,7 +13,7 @@ import { FiHeart, FiStar, FiChevronRight, FiChevronLeft, FiCheckCircle, FiShield
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
-  const featured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE');
+  const featured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc');
   const hearts=useWishlistStatus('PET',featured.data?.content.map(p=>p.id) ?? []);
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<ProductCategory[]>([]);
@@ -121,7 +121,7 @@ export const HomePage: React.FC = () => {
       </section>
 
       {/* 3. FEATURED PETS */}
-      <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {featured.data?.content.length !== 0 && <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-end mb-8">
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 bg-primary-100 text-primary-600 rounded-2xl flex items-center justify-center text-2xl">
@@ -136,17 +136,16 @@ export const HomePage: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-          {featured.error ? <p role="alert">{featured.error} <button onClick={featured.retry}>Thử lại</button></p> : !featured.data ? <p>Đang tải…</p> :
-            !featured.data.content.length ? <p>Chưa có thú cưng đang bán.</p> : featured.data.content.map(pet=>(
+          {featured.error ? <p role="alert">{featured.error} <button onClick={featured.retry}>Thử lại</button></p> : !featured.data ? <div role="status" aria-label="Đang tải thú cưng" className="aspect-[4/3] animate-pulse rounded-xl bg-gray-100" /> : featured.data.content.map(pet=>(
               <article key={pet.id} className="relative rounded-2xl bg-white shadow-sm p-3">
                 <Link to={`/pets/${pet.id}`}>
-                  {pet.imageUrl && <img src={pet.imageUrl} alt="" className="w-full aspect-[4/3] object-cover rounded-xl"/>}
+                  <ProductImage src={pet.imageUrl} alt={pet.name} width={320} height={240} className="w-full aspect-[4/3] object-cover rounded-xl"/>
                   <h3 className="font-bold mt-3">{pet.name}</h3><p>{pet.breedName || pet.speciesName}</p>
-                  <p className="text-primary-700">{pet.price?.toLocaleString('vi-VN')} ₫</p>
+                  {pet.price != null && <p className="text-primary-700">{pet.price.toLocaleString('vi-VN')} ₫</p>}
                 </Link><div className="absolute top-4 right-4"><HeartButton type="PET" id={pet.id} status={hearts}/></div>
               </article>))}
         </div>
-      </section>
+      </section>}
 
       {/* 4. PET MATCHING CTA */}
       <section className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

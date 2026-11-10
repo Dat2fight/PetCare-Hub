@@ -73,6 +73,13 @@ class PrivatePetDataTest {
                 .param("availability","SOLD").param("size","10000"))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.size").value(100)).andExpect(jsonPath("$.totalElements").value(1));
     }
+    @Test void featuredPetsUseNewestRealCatalogIdAndPrice() throws Exception {
+        var newest = pets.save(Pet.builder().name("qa_featured").species(animal).price(BigDecimal.TEN).build());
+        mvc.perform(get("/api/v1/pets").param("speciesId", animal.getId().toString()).param("availabilityStatus","AVAILABLE")
+                .param("size","1").param("sort","id,desc")).andExpect(status().isOk())
+                .andExpect(jsonPath("$.content[0].id").value(newest.getId())).andExpect(jsonPath("$.content[0].price").value(10));
+    }
+
     @Test void reservedPetDetailIsPublicButNeverListedForSale() throws Exception {
         mvc.perform(get("/api/v1/pets/"+reserved.getId())).andExpect(status().isOk())
                 .andExpect(jsonPath("$.availabilityStatus").value("RESERVED"))
