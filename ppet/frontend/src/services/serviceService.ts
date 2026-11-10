@@ -20,8 +20,8 @@ export const serviceService = {
         return response.data;
     },
 
-    getServiceById: async (id: number): Promise<Service> => {
-        const response = await apiClient.get<Service>(`/services/${id}`);
+    getServiceById: async (id: number, signal?: AbortSignal): Promise<Service> => {
+        const response = await apiClient.get<Service>(`/services/${id}`, { signal });
         return response.data;
     }
 };

@@ -13,5 +13,6 @@ public interface ServiceManagementService {
     ServiceEntityDTO getServiceById(Long id);
     List<ServiceEntityDTO> getAllServices();
     List<ServiceEntityDTO> getServicesByType(ServiceType type);
+    List<ServiceEntityDTO> getManagedServices(Boolean active);
     void deleteService(Long id);
 }

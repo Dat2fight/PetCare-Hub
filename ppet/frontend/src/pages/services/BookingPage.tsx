@@ -5,6 +5,7 @@ import { FiCalendar, FiClock } from 'react-icons/fi';
 import { serviceService, Service } from '../../services/serviceService';
 import { bookingService } from '../../services/bookingService';
 import { useAuth } from '../../contexts/AuthContext';
+import axios from 'axios';
 import toast from 'react-hot-toast';
 
 import { petManagementService, PetDTO } from '../../services/petManagementService';
@@ -40,6 +41,8 @@ export const BookingPage: React.FC = () => {
   }, [petsRetry]);
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [notes, setNotes] = useState('');
+  const [serviceError, setServiceError] = useState('');
+  const [serviceRetry, setServiceRetry] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
@@ -53,20 +56,20 @@ export const BookingPage: React.FC = () => {
       return;
     }
 
-    const loadData = async () => {
-      try {
-        const s = await serviceService.getServiceById(Number(serviceId));
-        setService(s);
-      } catch (error) {
-        console.error(error);
-        toast.error('Không tải được thông tin dịch vụ');
-        navigate('/services');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadData();
-  }, [serviceId, navigate]);
+    const controller = new AbortController();
+    setLoading(true);
+    setServiceError('');
+    setService(null);
+    serviceService.getServiceById(Number(serviceId), controller.signal)
+      .then(data => { if (!controller.signal.aborted) setService(data); })
+      .catch(error => {
+        if (controller.signal.aborted) return;
+        setServiceError(axios.isAxiosError(error) && error.response?.status === 404
+          ? 'Dịch vụ không còn khả dụng.' : 'Không tải được thông tin dịch vụ.');
+      })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false); });
+    return () => controller.abort();
+  }, [serviceId, navigate, serviceRetry]);
 
   useEffect(() => {
     if (!serviceId || !selectedDate) return;
@@ -99,13 +102,21 @@ export const BookingPage: React.FC = () => {
       toast.success('Đặt lịch thành công!');
       navigate('/services');
     } catch (error) {
-      console.error(error);
-      toast.error('Có lỗi xảy ra khi đặt lịch. Vui lòng thử lại sau.');
+      const data = axios.isAxiosError(error) ? error.response?.data : undefined;
+      toast.error((data?.message || 'Không đặt được lịch. Vui lòng thử lại.') +
+        (data?.correlationId ? ' Mã lỗi: ' + data.correlationId : ''));
     } finally {
       setSubmitting(false);
     }
   };
 
+  if (serviceError) return (
+    <main className="mx-auto max-w-xl p-6">
+      <p role="alert">{serviceError}</p>
+      <Button onClick={() => setServiceRetry(value => value + 1)}>Thử lại</Button>
+      <Button variant="outline" onClick={() => navigate('/services')}>Quay lại dịch vụ</Button>
+    </main>
+  );
   if (loading || !service) {
     return <div className="min-h-screen py-20 flex justify-center"><div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div></div>;
   }

@@ -60,13 +60,14 @@ public class ServiceManagementServiceImpl implements ServiceManagementService {
     @Override
     @Transactional(readOnly = true)
     public ServiceEntityDTO getServiceById(Long id) {
-        return mapToDTO(getServiceEntity(id));
+        return serviceEntityRepository.findByIdAndActiveTrue(id).map(this::mapToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Dịch vụ không còn khả dụng"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<ServiceEntityDTO> getAllServices() {
-        return serviceEntityRepository.findAll().stream()
+        return serviceEntityRepository.findByActiveTrue().stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -74,7 +75,7 @@ public class ServiceManagementServiceImpl implements ServiceManagementService {
     @Override
     @Transactional(readOnly = true)
     public List<ServiceEntityDTO> getServicesByType(ServiceType type) {
-        return serviceEntityRepository.findByServiceType(type).stream()
+        return serviceEntityRepository.findByServiceTypeAndActiveTrue(type).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -84,6 +85,13 @@ public class ServiceManagementServiceImpl implements ServiceManagementService {
     public void deleteService(Long id) {
         ServiceEntity entity = getServiceEntity(id);
         serviceEntityRepository.delete(entity);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ServiceEntityDTO> getManagedServices(Boolean active) {
+        var services = active == null ? serviceEntityRepository.findAll() : serviceEntityRepository.findByActive(active);
+        return services.stream().map(this::mapToDTO).toList();
     }
 
     private ServiceEntity getServiceEntity(Long id) {

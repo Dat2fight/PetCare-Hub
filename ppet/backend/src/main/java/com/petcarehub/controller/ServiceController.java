@@ -33,6 +33,12 @@ public class ServiceController {
         return ResponseEntity.ok(serviceManagementService.getAllServices());
     }
 
+    @GetMapping("/manage")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SALES_STAFF')")
+    public List<ServiceEntityDTO> manage(@RequestParam(required = false) Boolean active) {
+        return serviceManagementService.getManagedServices(active);
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ServiceEntityDTO> getServiceById(@PathVariable Long id) {
         log.info("Fetching service by id: {}", id);

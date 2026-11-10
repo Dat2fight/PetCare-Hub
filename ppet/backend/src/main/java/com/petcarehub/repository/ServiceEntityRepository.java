@@ -8,6 +8,8 @@ import java.util.List;
 
 @Repository
 public interface ServiceEntityRepository extends JpaRepository<ServiceEntity, Long> {
-    List<ServiceEntity> findByServiceType(ServiceType serviceType);
+    List<ServiceEntity> findByServiceTypeAndActiveTrue(ServiceType serviceType);
+    List<ServiceEntity> findByActive(boolean active);
+    java.util.Optional<ServiceEntity> findByIdAndActiveTrue(Long id);
     List<ServiceEntity> findByActiveTrue();
 }

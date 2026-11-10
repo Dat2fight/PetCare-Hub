@@ -50,7 +50,7 @@ class EndpointSecurityMatrixTest {
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
         "GET /care-packages/manage","GET /care-packages/subscriptions/me","GET /wishlist", "GET /wishlist/status", "GET /reviews/me", "GET /reviews/pending", "GET /reviews/eligibility", "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
-        "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage",
+        "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage", "GET /services/manage",
         "GET /appointments", "GET /appointments/me", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
         "GET /medical-records/{id}", "GET /medical-records/pet/{petId}",
         "GET /vaccinations/{id}", "GET /vaccinations/pet/{petId}",

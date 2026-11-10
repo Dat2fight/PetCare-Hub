@@ -37,6 +37,28 @@ class CatalogAuthorizationTest {
                     .andExpect(status().is(allowed ? 204 : 403));
         }
     }
+    @Autowired com.petcarehub.repository.ServiceEntityRepository services;
+
+    @Test @org.springframework.transaction.annotation.Transactional
+    void inactiveServiceVisibility() throws Exception {
+        var inactive = services.save(com.petcarehub.entity.ServiceEntity.builder().name("qa_hidden")
+                .serviceType(com.petcarehub.enums.ServiceType.GROOMING).durationMinutes(30)
+                .price(java.math.BigDecimal.TEN).active(false).build());
+        for (String query : new String[]{"", "?type=GROOMING", "?active=false"}) {
+            mvc.perform(get("/api/v1/services" + query)).andExpect(status().isOk())
+                    .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath(
+                            "$[?(@.name == 'qa_hidden')]").isEmpty());
+        }
+        mvc.perform(get("/api/v1/services/" + inactive.getId())).andExpect(status().isNotFound());
+        for (String role : new String[]{"ADMIN", "SALES_STAFF"}) {
+            mvc.perform(get("/api/v1/services/manage").param("active","false").with(user("staff").roles(role)))
+                    .andExpect(status().isOk()).andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
+                            .jsonPath("$[?(@.name == 'qa_hidden')]").isNotEmpty());
+        }
+        mvc.perform(get("/api/v1/services/manage").with(user("client").roles("CUSTOMER")))
+                .andExpect(status().isForbidden());
+    }
+
     @Test void anonymousCanReadButCannotWriteCatalogs() throws Exception {
         for (String catalog : new String[]{"products", "categories", "promotions"}) {
             mvc.perform(get("/api/v1/" + catalog)).andExpect(status().isOk());
