@@ -16,7 +16,7 @@ class AppointmentServiceImplTest {
     final UserRepository users = mock(UserRepository.class);
     final EntityManager em = mock(EntityManager.class);
     final PetRepository pets = mock(PetRepository.class);
-    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets), java.time.Clock.systemDefaultZone());
+    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets), java.time.Clock.systemDefaultZone(), mock(NotificationRepository.class));
 
     @Test void invalidDurationsTerminateAndAvailabilityUsesRealConflicts() {
         ServiceEntity treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).build();
@@ -63,7 +63,7 @@ class AppointmentServiceImplTest {
         settings.setOpeningTime(LocalTime.MIDNIGHT);
         settings.setClosingTime(LocalTime.of(2, 0));
         var booking = new AppointmentServiceImpl(appointments, pets, users, em, settings,
-                new com.petcarehub.security.Ownership(pets), clock);
+                new com.petcarehub.security.Ownership(pets), clock, mock(NotificationRepository.class));
         var treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).durationMinutes(30).build();
         when(em.find(ServiceEntity.class, 1L)).thenReturn(treatment);
         var staff = User.builder().enabled(true).roles(Set.of(Role.builder().name(RoleType.VETERINARIAN).build())).build();

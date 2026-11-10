@@ -52,6 +52,27 @@ class QaAppointmentScopeTest {
         mvc.perform(get("/api/v1/appointments").header("Authorization",token(admin)))
                 .andExpect(status().isOk()).andExpect(jsonPath("$.length()").value(2));
     }
+    @Test void repeatedCancellationReleasesSlotAndNotifiesOnce(@Autowired NotificationRepository notices) throws Exception {
+        long before = notices.count();
+        var path = "/api/v1/appointments/" + apA.getId();
+        mvc.perform(get(path).header("Authorization",token(a))).andExpect(jsonPath("$.cancellable").value(true))
+                .andExpect(jsonPath("$.code").value("LH%06d".formatted(apA.getId())));
+        for (int i=0; i<2; i++) mvc.perform(post(path + "/cancel").header("Authorization",token(a)))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("CANCELLED"));
+        org.junit.jupiter.api.Assertions.assertEquals(before + 1, notices.count());
+        mvc.perform(get("/api/v1/appointments/me?filter=cancelled").header("Authorization",token(a)))
+                .andExpect(jsonPath("$.content[0].id").value(apA.getId()));
+    }
+
+    @Test void cancellationDeadlineIsEnforcedOnBothRoutes(@Autowired Clock clock) throws Exception {
+        var shortly = LocalDateTime.now(clock).plusMinutes(30);
+        apA.setAppointmentDate(shortly.toLocalDate()); apA.setStartTime(shortly.toLocalTime()); appointments.saveAndFlush(apA);
+        var path="/api/v1/appointments/"+apA.getId();
+        mvc.perform(post(path+"/cancel").header("Authorization",token(a))).andExpect(status().isConflict());
+        mvc.perform(put(path+"/status").header("Authorization",token(a)).contentType("application/json")
+                .content("{\"status\":\"CANCELLED\"}")).andExpect(status().isConflict());
+    }
+
     @Test void bookingUsesOnlyOwnedPetAndAuthenticatedCustomer() throws Exception {
         long before=appointments.count();
         var unowned=pets.save(Pet.builder().name("qa_sale").species(petA.getSpecies()).price(BigDecimal.TEN).availabilityStatus(AvailabilityStatus.AVAILABLE).build());
@@ -66,6 +87,8 @@ class QaAppointmentScopeTest {
         org.junit.jupiter.api.Assertions.assertEquals(before+1,appointments.count());
     }
     @Test void customerCannotDiscoverOrCancelAnotherCustomersAppointment() throws Exception {
+        mvc.perform(get("/api/v1/appointments/"+apB.getId()).header("Authorization",token(a))).andExpect(status().isNotFound());
+        mvc.perform(post("/api/v1/appointments/"+apB.getId()+"/cancel").header("Authorization",token(a))).andExpect(status().isNotFound());
         mvc.perform(get("/api/v1/appointments/user/{id}",b.getId()).header("Authorization",token(a))).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/appointments/pet/{id}",petB.getId()).header("Authorization",token(a)))
                 .andExpect(status().isNotFound()).andExpect(content().string(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("qa_private_B"))));

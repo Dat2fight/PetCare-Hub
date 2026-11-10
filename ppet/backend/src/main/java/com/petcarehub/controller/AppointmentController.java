@@ -28,7 +28,22 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentService.getAllAppointments(pageable));
     }
 
-    @GetMapping("/me")
+    @GetMapping(value="/me", params="filter")
+    public org.springframework.data.domain.Page<AppointmentDTO> schedule(@RequestParam String filter, org.springframework.data.domain.Pageable pageable) {
+        return appointmentService.mySchedule(filter, pageable);
+    }
+
+    @GetMapping("/{id}")
+    public AppointmentDTO detail(@PathVariable Long id) { return appointmentService.myDetail(id); }
+
+    public record CancelRequest(@jakarta.validation.constraints.Size(max=500) String reason) {}
+
+    @PostMapping("/{id}/cancel")
+    public AppointmentDTO cancel(@PathVariable Long id, @Valid @RequestBody(required=false) CancelRequest request) {
+        return appointmentService.cancelMine(id, request == null ? null : request.reason());
+    }
+
+    @GetMapping(value="/me", params="!filter")
     public ResponseEntity<List<AppointmentDTO>> getMyAppointments(org.springframework.data.domain.Pageable pageable) {
         return ResponseEntity.ok(appointmentService.getAppointmentsByUser(ownership.userId(), pageable));
     }

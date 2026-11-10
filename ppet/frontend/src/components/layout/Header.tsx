@@ -6,7 +6,7 @@ import apiClient from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
 
 const navigation = [['/', 'Trang chủ'], ['/pets', 'Thú cưng'], ['/products', 'Sản phẩm'], ['/services', 'Dịch vụ'], ['/care-packages','Gói chăm sóc'], ['/pet-matching', 'Tìm thú cưng phù hợp']];
-const accountLinks = [['/my-care-packages','Gói của tôi'],['/wishlist','Yêu thích'],['/my-reviews','Đánh giá của tôi'],['/profile', 'Hồ sơ cá nhân'], ['/my-pets', 'Thú cưng của tôi'], ['/orders', 'Đơn hàng'], ['/loyalty', 'Điểm thưởng']];
+const accountLinks = [['/my-care-packages','Gói của tôi'],['/wishlist','Yêu thích'],['/my-reviews','Đánh giá của tôi'],['/profile', 'Hồ sơ cá nhân'], ['/my-pets', 'Thú cưng của tôi'], ['/my-appointments','Lịch hẹn của tôi'], ['/orders', 'Đơn hàng'], ['/loyalty', 'Điểm thưởng']];
 const touch = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-primary-50 focus-visible:outline-primary-600';
 
 export default function Header() {

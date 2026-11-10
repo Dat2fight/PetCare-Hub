@@ -16,5 +16,7 @@ public class BookingProperties {
     private LocalTime closingTime = LocalTime.of(17, 0);
     @jakarta.validation.constraints.Min(1)
     private int lockTimeoutMs = 5000;
+    @jakarta.validation.constraints.Min(0)
+    private int cancellationNoticeHours = 2;
     private long minimumNoticeMinutes = 0;
 }

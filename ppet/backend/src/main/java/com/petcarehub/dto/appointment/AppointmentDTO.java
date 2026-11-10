@@ -13,4 +13,14 @@ public class AppointmentDTO {
     private LocalDateTime appointmentTime;
     private String status;
     private String notes;
+    private String code;
+    private String serviceName;
+    private String petName;
+    private String staffName;
+    private java.math.BigDecimal price;
+    private String timezone;
+    private java.time.Instant startsAt;
+    private java.time.Instant endsAt;
+    private LocalDateTime cancelUntil;
+    private boolean cancellable;
 }

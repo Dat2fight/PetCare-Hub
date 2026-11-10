@@ -25,6 +25,19 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     Page<Appointment> findByPetIdAndCustomerId(Long petId, Long customerId, Pageable pageable);
     Page<Appointment> findByCustomerId(Long customerId, Pageable pageable);
 
+    java.util.Optional<Appointment> findByIdAndCustomerId(Long id, Long customerId);
+
+    @Query("""
+            from Appointment a where a.customer.id=:customerId and (
+              (:filter='cancelled' and a.status=com.petcarehub.enums.AppointmentStatus.CANCELLED) or
+              (:filter='upcoming' and a.status in (com.petcarehub.enums.AppointmentStatus.SCHEDULED,com.petcarehub.enums.AppointmentStatus.CONFIRMED,com.petcarehub.enums.AppointmentStatus.IN_PROGRESS)
+                and (a.appointmentDate>:date or (a.appointmentDate=:date and a.endTime>:time))) or
+              (:filter='past' and a.status<>com.petcarehub.enums.AppointmentStatus.CANCELLED and
+                (a.status in (com.petcarehub.enums.AppointmentStatus.COMPLETED,com.petcarehub.enums.AppointmentStatus.NO_SHOW)
+                  or a.appointmentDate<:date or (a.appointmentDate=:date and a.endTime<=:time))))
+            """)
+    Page<Appointment> customerSchedule(Long customerId, String filter, LocalDate date, LocalTime time, Pageable pageable);
+
     Page<Appointment> findByStaffId(Long staffId, Pageable pageable);
 
     List<Appointment> findByAppointmentDateAndStaffId(LocalDate date, Long staffId);

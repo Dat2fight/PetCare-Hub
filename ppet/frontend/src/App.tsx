@@ -30,6 +30,7 @@ import { CartPage } from './pages/orders/CartPage';
 import { CheckoutPage } from './pages/orders/CheckoutPage';
 import { OrderTrackingPage } from './pages/orders/OrderTrackingPage';
 import { ServiceListPage } from './pages/services/ServiceListPage';
+import { AppointmentConfirmation, MyAppointments } from './pages/services/MyAppointments';
 import { BookingPage } from './pages/services/BookingPage';
 import { MyPetsPage } from './pages/pets/MyPetsPage';
 import { PetHealthHistoryPage } from './pages/pets/PetHealthHistoryPage';
@@ -68,6 +69,8 @@ function App() {
               <Route path="/my-reviews" element={<ProtectedRoute roles={['CUSTOMER']}><MyReviews /></ProtectedRoute>} />
               <Route path="/services/:id" element={<ServiceDetail />} />
               <Route path="/services" element={<ServiceListPage />} />
+              <Route path="/appointments/:id/confirmation" element={<ProtectedRoute><AppointmentConfirmation/></ProtectedRoute>} />
+              <Route path="/my-appointments" element={<ProtectedRoute><MyAppointments/></ProtectedRoute>} />
               <Route path="/services/booking" element={<ProtectedRoute><BookingPage /></ProtectedRoute>} />
               <Route path="/my-pets" element={<ProtectedRoute><MyPetsPage /></ProtectedRoute>} />
               <Route path="/my-pets/:id/health" element={<ProtectedRoute><PetHealthHistoryPage /></ProtectedRoute>} />

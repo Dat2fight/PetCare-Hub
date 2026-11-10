@@ -24,6 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
 class AppointmentAuthorizationTest {
+    @org.springframework.boot.test.mock.mockito.MockBean com.petcarehub.repository.NotificationRepository notifications;
     @Autowired MockMvc mvc;
     @MockBean AppointmentRepository appointments;
     @MockBean PetRepository pets;

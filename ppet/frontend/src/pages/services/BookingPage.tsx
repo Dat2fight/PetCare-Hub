@@ -93,14 +93,13 @@ export const BookingPage: React.FC = () => {
     try {
       const dateTimeString = `${selectedDate}T${selectedTime}:00`;
       
-      await bookingService.bookAppointment({
+      const appointment = await bookingService.bookAppointment({
         petId: selectedPet.id,
         serviceId: service.id,
         appointmentTime: dateTimeString,
         notes: notes
       });
-      toast.success('Đặt lịch thành công!');
-      navigate('/services');
+      navigate('/appointments/' + appointment.id + '/confirmation', { replace: true });
     } catch (error) {
       const data = axios.isAxiosError(error) ? error.response?.data : undefined;
       toast.error((data?.message || 'Không đặt được lịch. Vui lòng thử lại.') +

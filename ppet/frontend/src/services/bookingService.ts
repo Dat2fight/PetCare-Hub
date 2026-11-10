@@ -7,7 +7,9 @@ export interface Appointment {
     staffId?: number;
     customerId?: number;
     appointmentTime: string; // ISO datetime string
-    status: 'SCHEDULED' | 'COMPLETED' | 'CANCELLED';
+    status: 'SCHEDULED' | 'CONFIRMED' | 'IN_PROGRESS' | 'NO_SHOW' | 'COMPLETED' | 'CANCELLED';
+    code: string; serviceName: string; petName: string; staffName: string; price: number;
+    startsAt: string; endsAt: string; timezone: string; cancelUntil: string; cancellable: boolean;
     notes?: string;
     createdAt?: string;
 }

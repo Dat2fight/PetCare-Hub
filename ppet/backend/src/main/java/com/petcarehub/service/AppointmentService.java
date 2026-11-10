@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface AppointmentService {
+    AppointmentDTO myDetail(Long id);
+    AppointmentDTO cancelMine(Long id, String reason);
+    org.springframework.data.domain.Page<AppointmentDTO> mySchedule(String filter, org.springframework.data.domain.Pageable pageable);
     AppointmentDTO bookAppointment(AppointmentCreateRequest request);
     AppointmentDTO updateAppointmentStatus(Long id, AppointmentUpdateRequest request);
     List<AppointmentDTO> getAllAppointments(org.springframework.data.domain.Pageable pageable);

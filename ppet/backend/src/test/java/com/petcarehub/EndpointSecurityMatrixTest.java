@@ -31,7 +31,7 @@ class EndpointSecurityMatrixTest {
     // Customer operations must obtain identity from the principal and enforce resource ownership.
     static final Set<String> CUSTOMER_WRITES = Set.of(
         "POST /cart/items", "PUT /cart/items/{itemId}", "DELETE /cart/items/{itemId}", "DELETE /cart",
-        "POST /orders/quote", "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "PUT /appointments/{id}/status",
+        "POST /orders/quote", "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "POST /appointments/{id}/cancel", "PUT /appointments/{id}/status",
         "PUT /reviews/me/{id}", "DELETE /reviews/me/{id}", "POST /wishlist", "DELETE /wishlist/{id}", "POST /reviews", "PUT /users/me", "POST /pets/my-pets", "PUT /pets/my-pets/{id}",
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
@@ -51,7 +51,7 @@ class EndpointSecurityMatrixTest {
     static final Set<String> PRIVATE_READS = Set.of(
         "GET /care-packages/manage","GET /care-packages/subscriptions/me","GET /wishlist", "GET /wishlist/status", "GET /reviews/me", "GET /reviews/pending", "GET /reviews/eligibility", "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
         "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage", "GET /services/manage",
-        "GET /appointments", "GET /appointments/me", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
+        "GET /appointments", "GET /appointments/{id}", "GET /appointments/me", "GET /appointments/user/{userId}", "GET /appointments/pet/{petId}", "GET /appointments/slots",
         "GET /medical-records/{id}", "GET /medical-records/pet/{petId}",
         "GET /vaccinations/{id}", "GET /vaccinations/pet/{petId}",
         "GET /treatments/{id}", "GET /treatments/record/{recordId}",
@@ -101,7 +101,8 @@ class EndpointSecurityMatrixTest {
         register(evidence,"PrivatePetDataTest#privatePetEndpointRequiresOwnerOrClinicalRole", "GET /pets/my-pets/{id}");
         register(evidence,"PrivatePetDataTest#personalPetUpdatesCheckOwnershipAndIgnoreProtectedFields", "PUT /pets/my-pets/{id}");
         register(evidence,"QaAppointmentScopeTest#customerCannotDiscoverOrCancelAnotherCustomersAppointment",
-                "GET /appointments/user/{userId}","GET /appointments/pet/{petId}","PUT /appointments/{id}/status");
+                "GET /appointments/user/{userId}","GET /appointments/pet/{petId}","PUT /appointments/{id}/status",
+                "GET /appointments/{id}","POST /appointments/{id}/cancel");
         register(evidence,"PrivatePetDataTest#clinicalDetailsAndHistoriesRejectOtherCustomersAndPreserveClinicalAccess",
                 "GET /medical-records/{id}","GET /medical-records/pet/{petId}","GET /vaccinations/{id}","GET /vaccinations/pet/{petId}");
         register(evidence,"TreatmentFlowTest#veterinarianAndAdminCrudPersistsAllRequiredFields", "GET /treatments/{id}","GET /treatments/record/{recordId}");

@@ -40,6 +40,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final com.petcarehub.config.BookingProperties booking;
     private final com.petcarehub.security.Ownership ownership;
     private final java.time.Clock clock;
+    private final com.petcarehub.repository.NotificationRepository notifications;
     
     @Override
     @Transactional
@@ -106,10 +107,11 @@ public class AppointmentServiceImpl implements AppointmentService {
         boolean staff = ownership.hasRole("ADMIN")
                 || ((ownership.hasRole("SALES_STAFF") || ownership.hasRole("VETERINARIAN"))
                     && appointment.getStaff() != null && appointment.getStaff().getId().equals(currentUserId));
-        if (!staff && (appointment.getCustomer() == null || !appointment.getCustomer().getId().equals(currentUserId)
-                || request.getStatus() != AppointmentStatus.CANCELLED
-                || !LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()).isAfter(LocalDateTime.now(clock))))
-            throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền đổi trạng thái lịch hẹn");
+        if (!staff) {
+            if (request.getStatus() != AppointmentStatus.CANCELLED)
+                throw new org.springframework.security.access.AccessDeniedException("Bạn không có quyền đổi trạng thái lịch hẹn");
+            return cancelOwned(appointment, request.getNotes());
+        }
         if (request.getStatus() != null) {
             if (!appointment.getStatus().canTransitionTo(request.getStatus())) throw new IllegalStateException("Không thể chuyển trạng thái lịch hẹn");
             appointment.setStatus(request.getStatus());
@@ -192,6 +194,41 @@ public class AppointmentServiceImpl implements AppointmentService {
         return Boolean.TRUE.equals(staff.getEnabled()) && staff.getRoles().stream().anyMatch(r -> r.getName() == service.getServiceType().staffRole());
     }
 
+    @Override @Transactional(readOnly = true)
+    public AppointmentDTO myDetail(Long id) {
+        return appointmentRepository.findByIdAndCustomerId(id, ownership.userId()).map(this::mapToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+    }
+
+    @Override @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<AppointmentDTO> mySchedule(String filter, org.springframework.data.domain.Pageable pageable) {
+        if (!List.of("upcoming","past","cancelled").contains(filter)) throw new BadRequestException("Bộ lọc lịch hẹn không hợp lệ");
+        var now = LocalDateTime.now(clock);
+        var direction = filter.equals("upcoming") ? org.springframework.data.domain.Sort.Direction.ASC : org.springframework.data.domain.Sort.Direction.DESC;
+        var sorted = org.springframework.data.domain.PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(),
+                org.springframework.data.domain.Sort.by(direction,"appointmentDate","startTime","id"));
+        return appointmentRepository.customerSchedule(ownership.userId(), filter, now.toLocalDate(), now.toLocalTime(), sorted).map(this::mapToDTO);
+    }
+
+    @Override @Transactional
+    public AppointmentDTO cancelMine(Long id, String reason) {
+        var appointment = appointmentRepository.findAccessibleLockedById(id, ownership.userId(), false, false)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy lịch hẹn"));
+        return cancelOwned(appointment, reason);
+    }
+
+    private AppointmentDTO cancelOwned(Appointment appointment, String reason) {
+        if (appointment.getStatus() == AppointmentStatus.CANCELLED) return mapToDTO(appointment);
+        if (!mapToDTO(appointment).isCancellable()) throw new IllegalStateException("Đã quá hạn hủy hoặc lịch không còn cho phép hủy");
+        appointment.setStatus(AppointmentStatus.CANCELLED);
+        if (reason != null && !reason.isBlank()) appointment.setNotes(reason.strip());
+        appointmentRepository.save(appointment);
+        notifications.save(com.petcarehub.entity.Notification.builder().user(appointment.getCustomer())
+                .type(com.petcarehub.enums.NotificationType.SYSTEM).title("Đã hủy lịch hẹn")
+                .message("Lịch hẹn LH%06d đã được hủy.".formatted(appointment.getId())).build());
+        return mapToDTO(appointment);
+    }
+
     private AppointmentDTO mapToDTO(Appointment appointment) {
         AppointmentDTO dto = new AppointmentDTO();
         dto.setId(appointment.getId());
@@ -202,6 +239,20 @@ public class AppointmentServiceImpl implements AppointmentService {
         dto.setAppointmentTime(LocalDateTime.of(appointment.getAppointmentDate(), appointment.getStartTime()));
         dto.setStatus(appointment.getStatus() != null ? appointment.getStatus().name() : null);
         dto.setNotes(appointment.getNotes());
+        dto.setCode("LH%06d".formatted(appointment.getId()));
+        dto.setPetName(appointment.getPet() == null ? null : appointment.getPet().getName());
+        if (appointment.getService() != null) {
+            dto.setServiceName(appointment.getService().getName());
+            dto.setPrice(appointment.getService().getPrice());
+        }
+        if (appointment.getStaff() != null) dto.setStaffName(java.util.stream.Stream.of(appointment.getStaff().getLastName(),
+                appointment.getStaff().getFirstName()).filter(java.util.Objects::nonNull).collect(Collectors.joining(" ")));
+        dto.setTimezone(clock.getZone().getId());
+        dto.setStartsAt(dto.getAppointmentTime().atZone(clock.getZone()).toInstant());
+        if (appointment.getEndTime() != null) dto.setEndsAt(appointment.getAppointmentDate().atTime(appointment.getEndTime()).atZone(clock.getZone()).toInstant());
+        dto.setCancelUntil(dto.getAppointmentTime().minusHours(booking.getCancellationNoticeHours()));
+        dto.setCancellable((appointment.getStatus() == AppointmentStatus.SCHEDULED || appointment.getStatus() == AppointmentStatus.CONFIRMED)
+                && !LocalDateTime.now(clock).isAfter(dto.getCancelUntil()));
         return dto;
     }
 }
