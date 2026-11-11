@@ -96,6 +96,16 @@ export interface Order {
   status: OrderStatus
   totalPrice: number
   shippingAddress: string
+  shipping?: {note?:string}
+  shippingFee?: number
+  subtotal?: number
+  discountAmount?: number
+  pointsDiscount?: number
+  confirmedAt?: string
+  processingAt?: string
+  shippedAt?: string
+  deliveredAt?: string
+  cancelledAt?: string
   notes?: string | null
   paymentMethod: string
   paymentStatus: string

@@ -171,6 +171,18 @@ class QaCheckoutAtomicTest {
         } finally { start.countDown(); pool.shutdownNow(); }
     }
 
+    @Test void staleQuoteReturns409AndLeavesStockAndCartUntouched() throws Exception {
+        var payload = new HashMap<>(body(p,1));
+        var quote = mvc.perform(post("/api/v1/orders/quote").with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsBytes(payload))).andExpect(status().isOk()).andReturn();
+        payload.put("quoteVersion",json.readTree(quote.getResponse().getContentAsByteArray()).get("quoteVersion").asText());
+        p.setPrice(BigDecimal.valueOf(150)); products.saveAndFlush(p);
+        long before = orders.count();
+        mvc.perform(post("/api/v1/orders").header("Idempotency-Key",UUID.randomUUID().toString()).with(user(caller(a,"CUSTOMER")))
+                .contentType("application/json").content(json.writeValueAsBytes(payload))).andExpect(status().isConflict());
+        assertEquals(before, orders.count()); assertEquals(3,inventory.findByProductId(p.getId()).orElseThrow().getQuantity());
+    }
+
     @Test void simultaneousOrdersForLastUnitCommitExactlyOnce() throws Exception {
         var pool=Executors.newFixedThreadPool(2);var ready=new CountDownLatch(2);var start=new CountDownLatch(1);
         long before=orders.count();

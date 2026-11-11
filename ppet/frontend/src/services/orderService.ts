@@ -33,6 +33,7 @@ export interface OrderCreateRequest {
   checkoutKey: string;
   promotionCode?: string;
   pointsToUse?: number;
+  quoteVersion?: string;
 }
 // Web Crypto exposes getRandomValues on HTTP development origins as well.
 export function newCheckoutKey(): string {

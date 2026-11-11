@@ -48,7 +48,7 @@ function PackagePurchase({plan}:{plan:Plan}) {
       sessionStorage.setItem(storage,checkoutKey);
       const order=await orderService.create({items:[{carePackageId:plan.id,beneficiaryPetId:Number(petId),quantity:1}],paymentMethod:'COD',checkoutKey});
       sessionStorage.removeItem(storage);
-      navigate('/orders/'+order.id,{replace:true});
+      navigate('/orders/'+order.id+'/confirmation',{replace:true});
     } catch(err) {
       toast.error(isAxiosError(err) ? err.response?.data?.message || 'Chưa xác nhận được đơn. Vui lòng thử lại.' : 'Chưa thể tạo đơn.');
     } finally {lock.current=false;setBusy(false);}

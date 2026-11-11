@@ -59,7 +59,12 @@ class OrderFlowTest {
         authenticate(other,"SALES_STAFF");
         assertThrows(com.petcarehub.exception.InvalidStateTransitionException.class,()->service.shipOrder(order.getId()));
         service.confirmOrder(order.getId()); service.processOrder(order.getId()); service.shipOrder(order.getId());
-        var delivered=service.deliverOrder(order.getId()); assertEquals("DELIVERED",delivered.getStatus()); assertEquals("COMPLETED",delivered.getPaymentStatus());
+        var delivered=service.deliverOrder(order.getId()); assertNotNull(delivered.getConfirmedAt());
+        assertNotNull(delivered.getProcessingAt());
+        assertNotNull(delivered.getShippedAt());
+        assertNotNull(delivered.getDeliveredAt());
+        assertFalse(delivered.getDeliveredAt().isBefore(delivered.getConfirmedAt()));
+        assertEquals("DELIVERED",delivered.getStatus()); assertEquals("COMPLETED",delivered.getPaymentStatus());
         assertTrue(orders.summarizeRevenue(LocalDateTime.now().minusDays(1),LocalDateTime.now().plusDays(1)).getRevenue().compareTo(BigDecimal.valueOf(20))>=0);
         authenticate(owner,"CUSTOMER"); assertThrows(com.petcarehub.exception.InvalidStateTransitionException.class,()->service.cancelOrder(order.getId()));
     }

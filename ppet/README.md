@@ -432,3 +432,9 @@ Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu v�
 Đặt cùng múi giờ IANA cho `APP_BOOKING_TIMEZONE` ở backend và `VITE_BUSINESS_TIMEZONE` khi build frontend. Mặc định là `Asia/Ho_Chi_Minh`. Thời gian lịch và đơn đã lưu tiếp tục được đọc theo giờ địa phương. Đồng hồ nghiệp vụ được dùng cho đặt lịch, ngày khám và tiêm, tuổi thú cưng, ưu đãi, báo cáo, thời hạn đơn/gói, dấu thời gian lưu và JWT/WebSocket. Timestamp chẩn đoán của health và lỗi HTTP vẫn theo máy chạy. NEEDS DECISION — schema cũ có default SQL dùng UTC cho lệnh INSERT trực tiếp. Cần xác định nguồn ghi trước khi chuyển đổi dữ liệu lịch sử.
 
 Khi nâng cấp từ migration 009, sao lưu, thử 010 rồi 011 trên bản sao, sau đó triển khai backend và frontend tương thích cùng đợt. Xem [API](docs/api.md) và [đối soát dữ liệu](docs/database.md).
+
+### Kiểm chứng hardening ngày 11/11/2026
+
+Nhánh feature/hardening-2-experience chứa hai giai đoạn đầu. Xem [báo cáo](docs/hardening/REPORT.md). Trước khi chạy bản mới trên SQL Server, áp dụng lần lượt 010, 011, 012 lên bản sao đã sao lưu để xác minh schema.
+
+VITE_SITE_HOTLINE, VITE_SITE_ADDRESS, VITE_SITE_EMAIL, VITE_SITE_HOURS cấu hình liên hệ lúc build. Giá trị trống hiển thị “Chưa cập nhật”. Khách vào /my-appointments để xem/hủy lịch. Checkout có bước xem lại, theo dõi kết quả khi mất phản hồi và trang xác nhận riêng.

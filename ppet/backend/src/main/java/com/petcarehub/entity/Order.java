@@ -76,6 +76,12 @@ public class Order extends BaseEntity {
     // Local business time in Asia/Ho_Chi_Minh; legacy unknown dates remain null.
     @Column(name = "paid_at")
     private java.time.LocalDateTime paidAt;
+    private java.time.LocalDateTime confirmedAt;
+    private java.time.LocalDateTime processingAt;
+    private java.time.LocalDateTime shippedAt;
+    private java.time.LocalDateTime deliveredAt;
+    private java.time.LocalDateTime cancelledAt;
+
 
     @Column(columnDefinition = "TEXT")
     private String notes;

@@ -9,7 +9,7 @@ import toast from 'react-hot-toast';
 import { OrdersPage } from './OrdersPage';
 
 const statusNames: Record<string,string> = { PENDING:'Chờ xác nhận', CONFIRMED:'Đã xác nhận', PROCESSING:'Đang chuẩn bị', SHIPPING:'Đang giao', DELIVERED:'Đã giao', CANCELLED:'Đã hủy' };
-export const OrderTrackingPage = () => {
+export const OrderTrackingPage = ({ confirmation = false }: { confirmation?: boolean }) => {
   const { id }=useParams(); const [params]=useSearchParams(); const orderId=id || params.get('orderId');
   const [order,setOrder]=useState<Order|null>(null); const [loading,setLoading]=useState(true);
   const [error,setError]=useState(''); const [retry,setRetry]=useState(0); const [busy,setBusy]=useState(false); const mutating=useRef(false);
@@ -32,12 +32,24 @@ export const OrderTrackingPage = () => {
   if(!orderId)return <OrdersPage/>;
   return <div className="max-w-4xl mx-auto p-8"><Link to="/orders" className="text-primary-600">← Đơn hàng của tôi</Link>
     {loading ? <p>Đang tải…</p> : error ? <p role="alert">{error} <button onClick={()=>setRetry(n=>n+1)}>Thử lại</button></p> : order && <article className="bg-white rounded-2xl p-6 mt-4 space-y-4">
-      <h1 className="text-2xl font-bold break-words">Đơn {order.orderNumber}</h1><p>{order.expiredAt ? 'Đã hết hạn' : statusNames[order.status] || order.status}</p>
+      <h1 className="text-2xl font-bold break-words">{confirmation ? 'Xác nhận đơn' : 'Đơn'} DH{String(order.id).padStart(6,'0')}</h1><p>{order.expiredAt ? 'Đã hết hạn' : statusNames[order.status] || order.status}</p>
       {order.expiresAt && order.status === 'PENDING' && <p>Hết hạn lúc {order.expiresAt.replace('T', ' ').slice(0, 16)} (giờ Việt Nam)</p>}
       <p>Ngày đặt: {formatBusinessTime(order.createdAt, true)}</p>{order.shippingAddress && <p>Giao đến: {order.shippingAddress}</p>}
       {order.items.some(i=>i.carePackageId) && order.paymentStatus==='COMPLETED' && <Link className="underline" to="/my-care-packages">Xem gói đã kích hoạt</Link>}
       <p>{order.paymentMethod} · {order.paymentStatus==='COMPLETED' ? 'Đã thanh toán' : order.paymentStatus==='PENDING' ? 'Chưa thanh toán' : order.paymentStatus}</p>
       <OrderItems items={order.items}/>{order.notes && <p>Ghi chú: {order.notes}</p>}
+      {order.shipping?.note && <p>Ghi chú giao hàng: {order.shipping.note}</p>}
+      {order.subtotal != null && <p>Tiền hàng: {order.subtotal.toLocaleString('vi-VN')} ₫</p>}
+      {!!order.discountAmount && <p>Giảm theo mã: {order.discountAmount.toLocaleString('vi-VN')} ₫</p>}
+      {!!order.pointsDiscount && <p>Giảm từ điểm: {order.pointsDiscount.toLocaleString('vi-VN')} ₫</p>}
+      {order.shippingFee != null && <p>Phí giao hàng: {order.shippingFee.toLocaleString('vi-VN')} ₫</p>}
+      <h2 className="font-bold">Lịch sử đơn hàng</h2><ol>
+        {Object.entries({'Đã đặt':order.createdAt,'Đã xác nhận':order.confirmedAt,'Đang chuẩn bị':order.processingAt,
+          'Đang giao':order.shippedAt,'Đã giao':order.deliveredAt,'Đã hủy':order.cancelledAt || order.expiredAt}).map(([label,time]) =>
+          time && <li key={label}>{label} · {formatBusinessTime(time,true)}</li>)}
+      </ol>
+      {confirmation && <div>{order.status === 'PENDING' && <p>Cửa hàng sẽ kiểm tra và xác nhận đơn.</p>}
+        <Link to={'/orders/'+order.id} className="underline">Theo dõi đơn hàng</Link></div>}
       <p className="font-bold">Tổng đơn: {order.totalPrice.toLocaleString('vi-VN')} ₫</p>
       {['PENDING','CONFIRMED','PROCESSING'].includes(order.status) && <button disabled={busy} onClick={cancel} className="border rounded p-3">{busy?'Đang hủy…':'Hủy đơn hàng'}</button>}
     </article>}

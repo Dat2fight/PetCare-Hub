@@ -24,6 +24,12 @@ public class OrderDTO {
     private com.petcarehub.entity.ShippingInfo shipping;
     private java.time.LocalDateTime expiresAt;
     private java.time.LocalDateTime expiredAt;
+    private java.time.LocalDateTime confirmedAt;
+    private java.time.LocalDateTime processingAt;
+    private java.time.LocalDateTime shippedAt;
+    private java.time.LocalDateTime deliveredAt;
+    private java.time.LocalDateTime cancelledAt;
+
     private String notes;
     private String paymentMethod;
     private String paymentStatus;

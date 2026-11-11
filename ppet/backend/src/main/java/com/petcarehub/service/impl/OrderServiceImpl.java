@@ -35,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
     public OrderQuote quote(QuoteRequest request) {
         Long userId = ownership.userId();
         if (PackageCheckout.requested(request)) return packages.quote(packages.prepare(request,false));
+        var lines = new java.util.ArrayList<OrderQuote.Line>();
         BigDecimal merchandise = BigDecimal.ZERO;
         BigDecimal animals = BigDecimal.ZERO;
         for (OrderItemDTO line : request.getItems()) {
@@ -43,14 +44,18 @@ public class OrderServiceImpl implements OrderService {
                         .orElseThrow(() -> new ResourceNotFoundException("Thú cưng không còn khả dụng"));
                 if (pet.getPrice() == null || pet.getPrice().signum() <= 0 || pet.getReservedOrder() != null)
                     throw new IllegalStateException("Thú cưng chưa sẵn sàng để đặt");
+                lines.add(new OrderQuote.Line("PET", pet.getId(), 1, pet.getPrice()));
                 animals = animals.add(pet.getPrice());
             } else {
                 Product product = products.findById(line.getProductId()).filter(p -> Boolean.TRUE.equals(p.getActive()))
                         .orElseThrow(() -> new ResourceNotFoundException("Sản phẩm đã ngừng bán"));
+                if (!inventory.checkStock(product.getId(), line.getQuantity()))
+                    throw new IllegalStateException("Không đủ tồn kho cho " + product.getName());
+                lines.add(new OrderQuote.Line("PRODUCT", product.getId(), line.getQuantity(), product.getPrice()));
                 merchandise = merchandise.add(product.getPrice().multiply(BigDecimal.valueOf(line.getQuantity())));
             }
         }
-        return pricing.calculate(userId, merchandise.add(animals), merchandise, request.getPromotionCode(), request.getPointsToUse(), false);
+        return pricing.calculate(userId, merchandise.add(animals), merchandise, request.getPromotionCode(), request.getPointsToUse(), false).withLines(lines);
     }
 
     @Override
@@ -119,6 +124,12 @@ public class OrderServiceImpl implements OrderService {
             total = total.add(subtotal);
         }
         var summary = pricing.calculate(customerId, total, total.subtract(petTotal), request.getPromotionCode(), request.getPointsToUse(), true);
+        if (request.getQuoteVersion() != null) {
+            var lines = order.getItems().stream().map(i -> new OrderQuote.Line(i.getItemType().name(),
+                    i.getPet() == null ? i.getProduct().getId() : i.getPet().getId(), i.getQuantity(), i.getUnitPrice())).toList();
+            if (!summary.withLines(lines).getQuoteVersion().equals(request.getQuoteVersion()))
+                throw new IllegalStateException("Báo giá đã thay đổi. Tổng mới " + summary.total().toPlainString() + " ₫. Vui lòng xem lại đơn.");
+        }
         order.setSubtotal(total);
         order.setDiscountAmount(summary.discount());
         order.setPointsUsed(summary.pointsApplied());
@@ -162,7 +173,7 @@ public class OrderServiceImpl implements OrderService {
                         : java.util.Arrays.asList("CARE_PACKAGE",i.getCarePackageId(),i.getBeneficiaryPetId(),i.getQuantity()))
                 .sorted(java.util.Comparator.comparing(Object::toString)).toList();
         var fields = java.util.Arrays.asList(request.getShipping(), request.getNotes(),
-                request.getPromotionCode(), request.getPointsToUse(), lines);
+                request.getPromotionCode(), request.getPointsToUse(), request.getQuoteVersion(), lines);
         try {
             byte[] payload = new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsBytes(fields);
             return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(payload));
@@ -201,14 +212,14 @@ public class OrderServiceImpl implements OrderService {
     }
     @Override public OrderDTO confirmOrder(Long id) { requireStaff(); Order o=locked(id);
         if (isDue(o, java.time.LocalDateTime.now(clock))) throw new IllegalStateException("Đơn hàng đã quá hạn xác nhận");
-        state(o).confirm(o); return dto(orders.save(o)); }
-    @Override public OrderDTO processOrder(Long id) { requireStaff(); Order o=locked(id); state(o).process(o); return dto(orders.save(o)); }
-    @Override public OrderDTO shipOrder(Long id) { requireStaff(); Order o=locked(id); state(o).ship(o); return dto(orders.save(o)); }
+        state(o).confirm(o); o.setConfirmedAt(java.time.LocalDateTime.now(clock)); return dto(orders.save(o)); }
+    @Override public OrderDTO processOrder(Long id) { requireStaff(); Order o=locked(id); state(o).process(o); o.setProcessingAt(java.time.LocalDateTime.now(clock)); return dto(orders.save(o)); }
+    @Override public OrderDTO shipOrder(Long id) { requireStaff(); Order o=locked(id); state(o).ship(o); o.setShippedAt(java.time.LocalDateTime.now(clock)); return dto(orders.save(o)); }
     @Override public OrderDTO deliverOrder(Long id) {
         requireStaff(); Order o=locked(id);
         var packageLine=o.getItems().stream().filter(i -> i.getCarePackage()!=null).findFirst();
         if (packageLine.isPresent() && o.getStatus()==OrderStatus.DELIVERED && o.getPaymentStatus()==PaymentStatus.COMPLETED) return dto(o);
-        var reserved = reservedPets(o); state(o).deliver(o);
+        var reserved = reservedPets(o); state(o).deliver(o); o.setDeliveredAt(java.time.LocalDateTime.now(clock));
         for (Pet pet : reserved) {
             pet.setOwner(o.getCustomer()); pet.setAvailabilityStatus(AvailabilityStatus.SOLD); pet.setReservedOrder(null); pets.save(pet);
         }
@@ -249,7 +260,7 @@ public class OrderServiceImpl implements OrderService {
         if (o.getStatus() == OrderStatus.CANCELLED && o.getItems().stream().anyMatch(item -> item.getPet() != null)) return dto(o);
         if (o.getStatus() == OrderStatus.DELIVERED) throw new InvalidStateTransitionException("Không thể hủy đơn đã giao");
         pricing.release(o);
-        var reserved = reservedPets(o); state(o).cancel(o);
+        var reserved = reservedPets(o); state(o).cancel(o); o.setCancelledAt(java.time.LocalDateTime.now(clock));
         for (Pet pet : reserved) {
             pet.setAvailabilityStatus(AvailabilityStatus.AVAILABLE); pet.setReservedOrder(null); pets.save(pet);
         }
@@ -274,6 +285,11 @@ public class OrderServiceImpl implements OrderService {
         dto.setShippingFee(o.getShippingFee());
         dto.setExpiresAt(o.getExpiresAt()); dto.setExpiredAt(o.getExpiredAt());
         dto.setNotes(o.getNotes()); dto.setOrderNumber(o.getOrderNumber()); dto.setCheckoutKey(o.getCheckoutKey()); dto.setShipping(o.getShipping());
+        dto.setConfirmedAt(o.getConfirmedAt());
+        dto.setProcessingAt(o.getProcessingAt());
+        dto.setShippedAt(o.getShippedAt());
+        dto.setDeliveredAt(o.getDeliveredAt());
+        dto.setCancelledAt(o.getCancelledAt());
         dto.setShippingAddress(o.getShipping() == null ? o.getShippingAddress() : o.getShipping().formatted()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {

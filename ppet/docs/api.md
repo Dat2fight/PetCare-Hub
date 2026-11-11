@@ -170,3 +170,14 @@ Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích h
 `GET /api/v1/services` và chi tiết công khai chỉ hiển thị dịch vụ đang hoạt động. ADMIN và SALES_STAFF dùng `GET /api/v1/services/manage?active=false` để tra cứu dịch vụ ngừng.
 
 `GET /api/v1/appointments/slots?date=YYYY-MM-DD&serviceId=…&petId=…` loại thời gian trùng của thú cưng thuộc người gọi. Khi đặt, hệ thống khóa thú cưng trước nhân viên. Hai lịch kề nhau được phép. Lịch đã kết thúc, đã hủy hoặc vắng mặt giải phóng khung giờ.
+
+## Hành trình sau mua
+
+- POST /orders/quote trả lines và quoteVersion. Checkout gửi lại quoteVersion để phát hiện giá hoặc ưu đãi/phí giao thay đổi, nhận 409 và xem báo giá mới. Backend luôn tự tính tiền. Trường phiên bản tùy chọn để giữ tương thích caller cũ, giao diện checkout luôn gửi.
+- GET /orders/{id} và danh sách đơn thêm confirmedAt, processingAt, shippedAt, deliveredAt, cancelledAt. Đơn lịch sử có thể để trống mốc chưa từng ghi. Trang /orders/:id/confirmation tải đơn thật, refresh được.
+- GET /home/products công khai, tối đa 6 sản phẩm active, xếp theo lượng hàng trong đơn DELIVERED. bestSelling=false khi dùng mới nhất.
+- GET /home/reviews công khai, tối đa 3 đánh giá approved, tên viết tắt, bỏ ID người viết và email.
+- GET /appointments/{id} chỉ chủ lịch, sai chủ trả 404. DTO thêm tên dịch vụ/thú cưng/nhân viên, giá, mã LH, timezone, startsAt/endsAt dạng instant, cancelUntil, cancellable.
+- GET /appointments/me?filter=upcoming|past|cancelled&page=0&size=10 trả Page. Thiếu filter giữ response mảng cũ.
+- POST /appointments/{id}/cancel nhận reason tùy chọn. Chủ lịch được hủy trước hạn server tính. Hủy lại trả cùng kết quả. Chỉ tạo một thông báo. PUT status cũ dùng cùng chính sách cho khách.
+- APP_BOOKING_CANCELLATIONNOTICEHOURS=2 cấu hình hạn hủy. Mốc server được dùng để tạo ICS trên trình duyệt.

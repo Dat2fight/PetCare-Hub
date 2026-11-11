@@ -518,3 +518,9 @@ WHERE NOT EXISTS (SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,qu
 AND NOT EXISTS (SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=b.id
  EXCEPT SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quantity,unit_price FROM dbo.order_items WHERE order_id=a.id);
 ```
+
+## Mốc trạng thái đơn hàng
+
+012_order_timeline.sql thêm năm cột nullable vào orders cho thời điểm xác nhận, chuẩn bị, giao, hoàn tất và hủy. Script chạy sau 011, có thể chạy lại. Đơn cũ giữ NULL vì chưa có bằng chứng về thời điểm thực tế. Các mốc được ghi cùng transaction cập nhật trạng thái.
+
+Bộ test SQL Server đã đăng ký cả hai file tiền tố 004, cùng 005 đến 012. Môi trường hiện tại chưa có Docker nên test SQL Server chưa chạy. Kết quả H2 và đối chiếu metadata cần được xác minh thêm trên SQL Server.
