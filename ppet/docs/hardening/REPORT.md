@@ -13,7 +13,7 @@ Kiểm chứng 11/11/2026. Nền 43ce3ca. Giai đoạn 1 ở feature/hardening-1
 | A3 | ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ, hoàn thiện | Home đã dùng API. Thêm sort mới nhất, ẩn rỗng, kích thước/fallback ảnh | API unowned AVAILABLE, ID/giá thật, mới nhất đứng trước | c469b6a |
 | B1 | ĐÃ XONG | Giá dịch vụ/review/số liệu tĩnh. Thay API, bán chạy từ DELIVERED, siteConfig | Approved, tên viết tắt; fallback mới nhất và bán chạy sau giao hàng trên trình duyệt | 029a85d |
 | B2 | ĐÃ XONG | Đặt xong quay về danh sách. Thêm xác nhận, lịch cá nhân, hủy trước 2h, thông báo, ICS | Refresh, 404 sai chủ, hủy lại một notification, sát giờ 409 ở route mới/cũ, tải ICS | 7f12968 |
-| B3 | ĐÃ XONG | Quote/phí/điểm đã có. Thêm xem lại, phiên bản báo giá, xác nhận, timeline thực | Giá đổi 409 không tạo đơn/trừ kho, mất phản hồi chỉ một đơn chung, refresh, lưu mốc trạng thái | commit B3 ở log nhánh |
+| B3 | ĐÃ XONG | Quote/phí/điểm đã có. Thêm xem lại, phiên bản báo giá, xác nhận, timeline thực | Giá đổi 409 không tạo đơn/trừ kho, mất phản hồi chỉ một đơn chung, refresh, lưu mốc trạng thái | 188eae1 |
 
 Các test hồi quy đã chạy green. Chưa lưu log red riêng từng mục trước khi sửa. Test cũ đổi fixture/kỳ vọng do header bắt buộc, ShippingInfo, actor kho thật và quy tắc một pet chỉ có một lịch đồng thời.
 
@@ -61,7 +61,7 @@ Biến mới gồm APP_BOOKING_TIMEZONE, APP_BOOKING_LOCKTIMEOUTMS, APP_BOOKING_
 ## Quét và phần còn lại
 
 - LocalDateTime.now() ở timestamp lỗi/health dùng chẩn đoán.
-- mockImages là nguồn ảnh minh họa ở auth, dịch vụ, gói chăm sóc. Home không còn nhập mockImages.
+- mockImages là nguồn ảnh minh họa ở auth, dịch vụ, gói chăm sóc. Home không còn nhập mockImages. Đã xóa mockProducts.ts sau khi xác nhận không có caller.
 - Sắp cập nhật ở chính sách, Sắp ra mắt ở khôi phục mật khẩu/social login là phần cũ, thuộc giai đoạn 5.
 - Không có href="#" trong frontend source.
 - NEEDS DECISION về timezone lịch sử vì default SQL dùng UTC còn LocalDateTime cũ theo máy. Mặc định đọc giờ Việt Nam theo Q2.
