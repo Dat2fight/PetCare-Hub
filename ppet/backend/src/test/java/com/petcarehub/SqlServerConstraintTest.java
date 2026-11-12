@@ -2,22 +2,22 @@ package com.petcarehub;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Tag("integration")
 @EnabledIfEnvironmentVariable(named="RUN_SQLSERVER_TESTS", matches="true")
-@Testcontainers(disabledWithoutDocker=true)
 class SqlServerConstraintTest {
-    @Container static final MSSQLServerContainer<?> sql = new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2022-latest").acceptLicense();
+    static SqlServerTestDatabase sql;
+    @BeforeAll static void startSqlServer() { sql = SqlServerTestDatabase.start(); }
+    @AfterAll static void stopSqlServer() throws SQLException { if (sql != null) sql.close(); }
+
     @Test void nullableUniqueIndexesAndNonnegativeStock() throws Exception {
-        // Container-only scratch database; never connects to the developer's SQL Server.
-        try (var connection=DriverManager.getConnection(sql.getJdbcUrl(),sql.getUsername(),sql.getPassword()); var statement=connection.createStatement()) {
+        // Fresh isolated database per test; application databases are never selected.
+        try (var connection=sql.connect(sql.newDatabase()); var statement=connection.createStatement()) {
             runScript(statement, "schema-sqlserver.sql");
             assertEquals(0, count(statement, "SELECT COUNT(*) FROM sys.indexes WHERE object_id=OBJECT_ID('dbo.inventory') AND is_unique=1 AND has_filter=0 AND is_primary_key=0"));
             for (int repeat = 0; repeat < 2; repeat++) migrate(statement);
@@ -52,8 +52,7 @@ class SqlServerConstraintTest {
     }
 
     @Test void migratesGeneratedLegacyUniquenessWithoutLosingExistingStock() throws Exception {
-        try (var connection=DriverManager.getConnection(sql.getJdbcUrl(),sql.getUsername(),sql.getPassword()); var statement=connection.createStatement()) {
-            statement.execute("CREATE DATABASE inventory_legacy_test"); connection.setCatalog("inventory_legacy_test");
+        try (var connection=sql.connect(sql.newDatabase()); var statement=connection.createStatement()) {
             runScript(statement, "schema-sqlserver.sql");
             statement.execute("DROP INDEX UX_inventory_pet_present ON dbo.inventory");
             statement.execute("DROP INDEX UX_inventory_product_present ON dbo.inventory");
@@ -72,8 +71,7 @@ class SqlServerConstraintTest {
     }
 
     @Test void cartMigrationRejectsDuplicatesWithoutDeletingDataOrLeavingTransactionOpen() throws Exception {
-        try (var connection=DriverManager.getConnection(sql.getJdbcUrl(),sql.getUsername(),sql.getPassword()); var statement=connection.createStatement()) {
-            statement.execute("CREATE DATABASE cart_legacy_test"); connection.setCatalog("cart_legacy_test");
+        try (var connection=sql.connect(sql.newDatabase()); var statement=connection.createStatement()) {
             runScript(statement, "schema-sqlserver.sql");
             statement.execute("DROP INDEX UX_cart_items_cart_product_present ON dbo.cart_items");
             statement.execute("INSERT INTO dbo.users(username,email,password_hash,first_name,last_name) VALUES('dup-test','dup@example.test','unused','Test','Cart')");

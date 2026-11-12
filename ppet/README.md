@@ -116,7 +116,7 @@ Từ giai đoạn 3, đọc [runbook Flyway](docs/migrations.md) trước khi kh
 - Database bị drift/thiếu bảng nền: dừng và đối soát; Hibernate validate không kiểm thay cho index/constraint. Không dùng ddl-auto update, schema/reset để chữa nhanh.
 - reset-demo-sqlserver.sql có thao tác mất dữ liệu, chỉ dành cho database demo tách biệt.
 
-Các số lượng bảng/user/catalog trong báo cáo cũ là ảnh chụp thời điểm trước đó. Giai đoạn 3 không đọc hoặc thay đổi database đang dùng. Kiểm chứng container còn phụ thuộc Docker; xem báo cáo kết quả ở cuối tài liệu.
+Các số lượng bảng/user/catalog trong báo cáo cũ là ảnh chụp thời điểm trước đó. Giai đoạn 3 không đọc hoặc thay đổi database đang dùng. Kiểm chứng SQL Server dùng database test riêng trên máy cục bộ; xem báo cáo kết quả ở cuối tài liệu.
 
 Chọn **một** cách seed:
 
@@ -399,4 +399,4 @@ VITE_SITE_HOTLINE, VITE_SITE_ADDRESS, VITE_SITE_EMAIL, VITE_SITE_HOURS cấu hì
 
 ### Migration giai đoạn 3 (12/11/2026)
 
-Flyway bật mặc định/dev; H2 test tắt Flyway. Không đổi API hay frontend. Biến mới: FLYWAY_ENABLED, FLYWAY_BASELINE_ON_MIGRATE (false), FLYWAY_BASELINE_VERSION (1). Xem [runbook](docs/migrations.md), [kiểm kê](docs/hardening/SCHEMA-INVENTORY.md) và [báo cáo](docs/hardening/REPORT.md). Chưa áp dụng migration trên database thật. Các test SQL Server cần Docker Linux containers; chưa coi giai đoạn 3 hoàn tất kiểm chứng khi chưa chạy được bộ này.
+Flyway bật mặc định/dev; H2 test tắt Flyway. Không đổi API hay frontend. Biến mới: FLYWAY_ENABLED, FLYWAY_BASELINE_ON_MIGRATE (false), FLYWAY_BASELINE_VERSION (1). Xem [runbook](docs/migrations.md), [kiểm kê](docs/hardening/SCHEMA-INVENTORY.md) và [báo cáo](docs/hardening/REPORT.md). Chưa áp dụng migration trên database thật. Các test SQL Server đã chạy trên database test riêng của SQL Server cài sẵn theo yêu cầu người dùng. Không cần Docker: từ ppet/backend chạy .\tools\test-sqlserver.ps1 (cần JDBC auth DLL hoặc credential test riêng). Các database test được tạo và dọn riêng; xem runbook để cấu hình.

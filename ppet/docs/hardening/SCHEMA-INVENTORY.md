@@ -78,3 +78,5 @@ Bảng sai lệch phía trên là snapshot trước sửa. Chuỗi Unicode chuy�
 Giữ precision timestamp/time hiện hữu: datetime2(0)/(7) và time(0) phía SQL, mặc định metadata Hibernate datetime2(6)/time. JDBC cùng kiểu nhưng validate không xác minh độ chính xác; không đổi timestamp/timezone dữ liệu chỉ để làm metadata giống hệt. Wishlist SQL cho updated_at NULL nhưng BaseEntity yêu cầu giá trị khi ghi mới; không backfill lịch sử. Numeric và decimal là kiểu tương đương SQL Server. Đây là các khác biệt đã ghi nhận, không khẳng định mọi metadata trùng tuyệt đối.
 
 Kiểm kê là từ script và metadata ngoại tuyến. Chưa có bằng chứng live schema do ORM cũ tạo trùng schema nền, nên không tự nhận tất cả DB hiện hữu đủ điều kiện baseline. Drift ngoài các khác biệt đã xử lý phải được đối soát trên bản sao trước onboarding.
+
+Kiểm chứng SQL Server 17.0.1000.7 sau đó đã thành công trên DB test tách biệt: V1–V15 + Hibernate validate, round-trip Unicode/giá lớn/URL dài, baseline dữ liệu cũ và kiểm constraint. Đây là schema của fixture do test tạo, không phải snapshot của database petcarehub hiện hữu; vẫn phải kiểm kê bản sao DB thật trước onboarding.

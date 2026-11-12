@@ -185,3 +185,5 @@ Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích h
 ## Giai đoạn 3 — migration có phiên bản
 
 Không thêm endpoint, đổi DTO hoặc quyền truy cập. Backend bật Flyway trước Hibernate validate; database cũ chưa baseline sẽ bị chặn khởi động. Cần hoàn thành [onboarding database](migrations.md) trước khi triển khai backend. Chuỗi Unicode, tiền decimal(18,2), URL 500 ký tự và idempotency key được ánh xạ theo schema SQL Server; các giới hạn API hiện có vẫn áp dụng.
+
+Kiểm chứng C1 bổ sung dùng SQL Server cục bộ tách database test, không thay endpoint/DTO/quyền hay datasource runtime. Hướng dẫn tại [migration](migrations.md).

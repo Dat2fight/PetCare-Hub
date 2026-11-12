@@ -7,43 +7,39 @@ import org.flywaydb.core.Flyway;
 import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.junit.jupiter.api.io.TempDir;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.testcontainers.containers.MSSQLServerContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-/** Every URL is derived from this disposable container, never from DB_URL. */
+/** Every URL is created by the guarded test lifecycle, never from DB_URL. */
 @Tag("integration")
 @EnabledIfEnvironmentVariable(named = "RUN_SQLSERVER_TESTS", matches = "true")
-@Testcontainers // Explicit opt-in must fail, rather than silently pass, when Docker is unavailable.
 class FlywayMigrationTest {
-    @Container
-    static final MSSQLServerContainer<?> sql =
-            new MSSQLServerContainer<>("mcr.microsoft.com/mssql/server:2022-latest").acceptLicense();
+    static SqlServerTestDatabase sql;
+    @BeforeAll static void startSqlServer() { sql = SqlServerTestDatabase.start(); }
+    @AfterAll static void stopSqlServer() throws SQLException { if (sql != null) sql.close(); }
 
     @Test void emptyDatabaseStartsApplicationWithValidateAndPersistsVietnamese() throws Exception {
         String url = newDatabase();
         try (var context = new SpringApplicationBuilder(PetCareHubApplication.class).run(
                 "--spring.profiles.active=test", "--server.port=0",
                 "--spring.datasource.url=" + url,
-                "--spring.datasource.username=" + sql.getUsername(),
-                "--spring.datasource.password=" + sql.getPassword(),
+                "--spring.datasource.username=" + sql.username(),
+                "--spring.datasource.password=" + sql.password(),
                 "--spring.datasource.driver-class-name=com.microsoft.sqlserver.jdbc.SQLServerDriver",
                 "--spring.flyway.enabled=true", "--spring.flyway.baseline-on-migrate=false",
                 "--spring.jpa.hibernate.ddl-auto=validate",
@@ -126,7 +122,7 @@ class FlywayMigrationTest {
         String last = "V15__unicode_descriptions.sql";
         Files.write(directory.resolve(last), resource("db/migration/" + last));
         Files.writeString(directory.resolve(last), "\nSELECT 42;\n", java.nio.file.StandardOpenOption.APPEND);
-        Flyway changed = Flyway.configure().dataSource(url, sql.getUsername(), sql.getPassword())
+        Flyway changed = Flyway.configure().dataSource(url, sql.username(), sql.password())
                 .defaultSchema("dbo").locations("filesystem:" + directory.toAbsolutePath()).load();
         assertThrows(FlywayException.class, changed::validate);
     }
@@ -195,19 +191,15 @@ class FlywayMigrationTest {
     }
 
     private static String newDatabase() throws SQLException {
-        String name = "qa_flyway_" + UUID.randomUUID().toString().replace("-", "");
-        try (var c = connect(sql.getJdbcUrl()); var s = c.createStatement()) {
-            s.execute("CREATE DATABASE " + name);
-        }
-        return sql.getJdbcUrl() + ";databaseName=" + name;
+        return sql.newDatabase();
     }
 
     private static Connection connect(String url) throws SQLException {
-        return DriverManager.getConnection(url, sql.getUsername(), sql.getPassword());
+        return sql.connect(url);
     }
 
     private static Flyway flyway(String url) {
-        return Flyway.configure().dataSource(url, sql.getUsername(), sql.getPassword())
+        return Flyway.configure().dataSource(url, sql.username(), sql.password())
                 .defaultSchema("dbo").schemas("dbo").createSchemas(false).baselineVersion("1")
                 .baselineOnMigrate(false).cleanDisabled(true).locations("classpath:db/migration").load();
     }

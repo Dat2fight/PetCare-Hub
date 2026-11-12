@@ -51,32 +51,53 @@ Không đưa mật khẩu vào script/log hoặc command line. Có thể tách t
 - Thêm test nâng cấp có dữ liệu, trường hợp lỗi, chạy lần hai và khởi động Hibernate validate. Kiểm không mất dữ liệu ngoài ORM.
 - Không dùng ddl-auto update để che drift; không chạy schema-sqlserver.sql hoặc SQLQuery3.sql vào DB đã được Flyway quản lý.
 
-## Kiểm thử
+## Kiểm thử không cần Docker
 
-Từ ppet/backend, test mặc định chạy H2 và kiểm mapping/checksum ngoại tuyến:
+Người dùng đã chọn SQL Server cài sẵn thay cho yêu cầu container của kế hoạch ban đầu. Cả FlywayMigrationTest và SqlServerConstraintTest dùng chung SqlServerTestDatabase; code runtime không thay đổi.
 
-```powershell
-.\mvnw.cmd test
-```
-
-Máy có Docker Linux containers đang chạy, đủ RAM và được phép tải SQL Server image:
+Từ ppet/backend, chạy toàn bộ bộ test (bao gồm SQL Server):
 
 ```powershell
-$env:RUN_SQLSERVER_TESTS = 'true'
-try {
-    .\mvnw.cmd '-Dtest=FlywayMigrationTest,SqlServerConstraintTest' test
-    if ($LASTEXITCODE -ne 0) { throw 'SQL Server integration failed' }
-} finally {
-    Remove-Item Env:RUN_SQLSERVER_TESTS -ErrorAction SilentlyContinue
-}
+.\tools\test-sqlserver.ps1
 ```
 
-FlywayMigrationTest chỉ tạo URL từ MSSQLServerContainer; không đọc DB_URL để thử. Bao phủ database trống + ứng dụng validate + round-trip Unicode/giá lớn/URL dài, baseline DB cũ một phần/toàn bộ, dữ liệu và bảng ngoài ORM còn nguyên, chạy lại không thay đổi, checksum lỗi phải chặn, clean bị cấm, duplicate cart chặn migration và phục hồi sau đối soát. Opt-in nhưng thiếu Docker sẽ FAIL, tránh hiểu nhầm là đã chạy thành công. SQL Server tests không opt-in được skip trong bộ test thường.
+Script dùng localhost:1433 và Windows Authentication. Tài khoản Windows cần quyền CREATE DATABASE và quản lý các DB vừa tạo. Cần DLL chính chủ Microsoft mssql-jdbc_auth-12.6.4.x64.dll tương ứng JDBC 12.6.4, đặt ở backend/target hoặc chỉ rõ thư mục chứa DLL:
+
+```powershell
+.\tools\test-sqlserver.ps1 -Port 1433 -AuthDirectory 'C:\path\to\jdbc-auth\x64'
+```
+
+DLL là dependency máy chạy, không commit vào repo; Maven clean xóa target nên nên cất DLL ở thư mục driver riêng cho sử dụng lâu dài. Script bổ sung PATH chỉ trong tiến trình rồi khôi phục, hỗ trợ đường dẫn chứa dấu cách. Không cần nạp DLL khi dùng SQL Authentication: cấp SQLSERVER_TEST_USERNAME và SQLSERVER_TEST_PASSWORD qua môi trường/secret manager rồi chạy:
+
+```powershell
+.\tools\test-sqlserver.ps1 -SqlAuthentication
+```
+
+Không truyền mật khẩu qua tham số script, không lấy credential hoặc URL từ DB_URL/DB_USERNAME/DB_PASSWORD của ứng dụng. Môi trường thiếu DLL/quyền/kết nối phải thất bại rõ, không bỏ qua test.
+
+### Cách ly database
+
+- Local mode chỉ chấp nhận loopback localhost và số cổng 1–65535; không nhận JDBC URL, tên database hoặc server tùy ý.
+- Kết nối master chỉ để CREATE DATABASE và đọc metadata/dọn DB test; mọi fixture/migration/JPA chạy trong DB mới petcarehub_test_<UUID>.
+- Không tái sử dụng DB có sẵn. CREATE phải thành công; tên ngẫu nhiên, database_id và create_date được ghi nhận trong bộ nhớ lượt test.
+- Teardown chỉ DROP tên đúng định dạng, thuộc lượt test và còn khớp identity. Không quét/xóa theo wildcard, không dùng SINGLE_USER WITH ROLLBACK IMMEDIATE để ép ngắt kết nối.
+- Nếu tiến trình bị kill hoặc cleanup thất bại, có thể còn DB test; xem log và đối chiếu tên/identity trước khi quản trị viên dọn thủ công. Không tự xóa các DB cùng prefix của lượt khác.
+- Script khôi phục toàn bộ biến test/PATH sau khi chạy. Không đụng schema/reset/demo của petcarehub.
+
+Chạy Maven trực tiếp cũng được: RUN_SQLSERVER_TESTS=true, SQLSERVER_TEST_MODE=local, SQLSERVER_TEST_ALLOW_CREATE=true, SQLSERVER_TEST_PORT=1433; cấu hình Windows DLL hoặc hai credential test riêng. Lệnh mvn test bình thường không bật RUN_SQLSERVER_TESTS vẫn bỏ qua 8 integration test và chạy các test H2/guard/mapping/checksum.
+
+Chế độ container còn được giữ cho CI: RUN_SQLSERVER_TESTS=true và SQLSERVER_TEST_MODE=container, Docker Linux containers hoạt động. Không cần dùng chế độ này trên máy hiện tại; opt-in nhưng thiếu Docker sẽ FAIL.
+
+### Bằng chứng kiểm chứng ngày 12/11/2026
+
+SQL Server cục bộ phiên bản 17.0.1000.7: 5 test Flyway, 3 test constraint và 3 guard test đều pass. Lượt đầy đủ qua tools/test-sqlserver.ps1: 262 test, không failure/error/skipped. Database trống chạy V1–V15, ứng dụng khởi động Hibernate validate, đọc lại Unicode/giá lớn/URL dài đúng. Baseline fixture một phần/toàn bộ lên V15 giữ nguyên dữ liệu; chạy lại không đổi; checksum sai và clean bị chặn; duplicate cart chặn migration và retry sau đối soát thành công. Sau chạy không còn database petcarehub_test_*.
+
+Flyway 10.10.0 theo BOM vẫn cảnh báo SQL Server 17 mới hơn phiên bản 16 đã được nhà cung cấp kiểm thử. Kết quả trên xác nhận các luồng dự án đã chạy trên máy này; không thay thế chứng nhận mọi tính năng của phiên bản thư viện. Giữ dependency hiện tại trong phạm vi thay môi trường test; cần đánh giá nâng cấp Flyway/Spring Boot theo đợt dependency riêng.
 
 ## Sự cố và hồi phục
 
 - Database không rỗng chưa có history: dừng, kiểm đích/backup/schema rồi mới baseline; không tự bật baseline để vượt lỗi.
-- Migration lỗi: dừng writer, xem log/history và trạng thái schema. Script tự transaction có thể để failed history; xác minh rollback và dữ liệu trước khi sửa nguyên nhân. Chỉ dùng repair để xóa failed entry sau khi đã đối soát; không dùng repair để chấp nhận checksum bị đổi. Test retry chỉ thực hiện repair trên container dùng một lần.
+- Migration lỗi: dừng writer, xem log/history và trạng thái schema. Script tự transaction có thể để failed history; xác minh rollback và dữ liệu trước khi sửa nguyên nhân. Chỉ dùng repair để xóa failed entry sau khi đã đối soát; không dùng repair để chấp nhận checksum bị đổi. Test retry chỉ thực hiện repair trên database test do chính lượt đó tạo.
 - Migration đã thành công: sửa bằng phiên bản mới (forward-only), không chỉnh file cũ. Nếu không khắc phục an toàn được, dừng ghi và restore backup đã thử cùng phiên bản ứng dụng tương thích. Ghi nhận nguy cơ mất các ghi phát sinh sau backup.
 - clean-disabled=true luôn giữ; không dùng clean/reset demo để hồi phục. reset-demo-sqlserver.sql chỉ dành cho DB demo tách biệt có thể bỏ đi và không thuộc lịch sử Flyway.
-- NEEDS DECISION: lịch sử DATETIME2(0) có default UTC nhưng app ghi giờ kinh doanh Việt Nam. Không chuyển timezone hoặc đổi precision dữ liệu trong giai đoạn này. Kiểm container/đối soát nguồn ghi trước mọi thay đổi lịch sử.
+- NEEDS DECISION: lịch sử DATETIME2(0) có default UTC nhưng app ghi giờ kinh doanh Việt Nam. Không chuyển timezone hoặc đổi precision dữ liệu trong giai đoạn này. Kiểm dữ liệu lịch sử/đối soát nguồn ghi trước mọi thay đổi lịch sử.

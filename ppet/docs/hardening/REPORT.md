@@ -1,5 +1,8 @@
 # Báo cáo hardening giai đoạn 1 và 2
 
+**Cập nhật mới nhất 12/11/2026:** C1 đã kiểm chứng thành công bằng SQL Server cục bộ tách database test theo lựa chọn mới của người dùng. Toàn bộ 262 test pass, không skip; các phần ghi thiếu Docker/MỘT PHẦN bên dưới là lịch sử trước lần kiểm chứng này. Xem mục cuối và docs/migrations.md.
+
+
 Kiểm chứng 11/11/2026. Nền 43ce3ca. Giai đoạn 1 ở feature/hardening-1-core, giai đoạn 2 kế thừa ở feature/hardening-2-experience.
 
 | Mục | Kết quả | Nguyên nhân và thay đổi | Kiểm chứng | Commit |
@@ -107,3 +110,24 @@ Trước nâng cấp DB thật: người vận hành sao lưu, kiểm restore, k
 Quét cuối: các LocalDateTime.now() chẩn đoán, mockImages minh họa, nhãn Sắp ra mắt/Sắp cập nhật và NEEDS DECISION lịch sử còn theo phần Quét và phần còn lại ở trên. Không có href="#" trong frontend source. Các bản sao Flyway giữ nguyên comment lịch sử/manual/NEEDS DECISION của nguồn để bảo toàn nội dung; đó không phải chỉ dẫn triển khai hiện hành. Quy trình hiện hành ở docs/migrations.md. Khôi phục mật khẩu, chính sách và SEO vẫn thuộc giai đoạn sau.
 
 Git diff --cached --check báo hai whitespace có sẵn trong V1 (dòng 252 và dòng trống cuối file); giữ nguyên để bảo toàn byte của schema nguồn. Cả 14 blob migration đã stage khớp byte với blob nguồn và SHA-256 trong manifest.
+
+## C1 bổ sung — SQL Server cục bộ thay Docker (12/11/2026)
+
+| Mục | Trạng thái | Thực hiện và kiểm chứng |
+|---|---|---|
+| Thay môi trường test | ĐÃ XONG | Theo yêu cầu người dùng, dùng SQL Server cài sẵn localhost:1433. Không dùng DB_URL hoặc petcarehub. Container giữ tùy chọn cho CI. |
+| Cách ly/dọn DB | ĐÃ XONG | SqlServerTestDatabase tạo DB mới petcarehub_test_<UUID>; guard tên, ownership lượt chạy, database_id và create_date trước DROP; không force-disconnect. 3 test guard pass. |
+| Migration và validate | ĐÃ XONG | 5 Flyway test pass: fresh V1–V15 + ứng dụng Hibernate validate; legacy một phần/toàn bộ baseline 1 lên V15 giữ dữ liệu; checksum lỗi chặn; duplicate cart chặn rồi retry sau đối soát. |
+| Constraint SQL Server | ĐÃ XONG | 3 test filtered uniqueness/NULL, stock không âm, inventory uniqueness cũ, duplicate cart/transaction pass trên engine SQL Server. |
+| Test độc lập | ĐÃ XONG | Lượt đầy đủ phát hiện RevenueRepositoryTest thiếu AuditConfig trong DataJpaTest, phụ thuộc listener của context khác. Bổ sung import AuditConfig và Clock test riêng; không đổi code doanh thu runtime. |
+| Kiểm tra cuối | ĐÃ XONG | Script tools/test-sqlserver.ps1 chạy Maven JDK 17.0.12: 262 test, 0 failure, 0 error, 0 skipped. TypeScript, lint, frontend build pass. |
+
+Commit triển khai trước: cd15f74. Phần thay môi trường test, guard, script, fixture auditing và tài liệu nằm trong commit test(C1): verify migrations on isolated local SQL Server databases, cùng nhánh feature/hardening-3-migrations. Không push, merge hay sửa các migration đã commit.
+
+Cấu hình test mới: RUN_SQLSERVER_TESTS, SQLSERVER_TEST_MODE=local, SQLSERVER_TEST_ALLOW_CREATE=true, SQLSERVER_TEST_PORT=1433; tùy chọn SQLSERVER_TEST_USERNAME/PASSWORD (riêng test). Script đặt và khôi phục các biến cùng PATH. Dùng Windows Authentication với Microsoft JDBC auth DLL 12.6.4 x64 đã có trên máy; DLL không commit. Đường dẫn có dấu cách được xử lý qua PATH, không nối vào argLine của Java. Thông tin cụ thể trong .env.example và docs/migrations.md.
+
+Bằng chứng: target/migration-local.log (11 test gồm 8 integration + 3 guard), target/migration-local-full.log (262 test). Các file XML Surefire ghi 5/3 integration test đều không skip. Kiểm metadata master sau cả lượt đầu và lượt đầy đủ đều còn 0 DB test. RevenueRepositoryTest chạy riêng sau đó cũng pass (target/revenue-isolated.log). Dữ liệu thật không được dùng làm fixture hoặc thay đổi. API/DTO, quyền, frontend và datasource runtime không đổi.
+
+Engine kiểm chứng là SQL Server 17.0.1000.7. Flyway 10.10.0 theo BOM cảnh báo phiên bản này mới hơn SQL Server 16 được nhà cung cấp kiểm thử; các luồng nêu trên đã chạy thành công tại đây. Việc nâng cấp dependency để mở rộng phạm vi hỗ trợ cần đợt riêng. Không suy ra database petcarehub thật đã đủ điều kiện baseline: vẫn cần backup/restore bản sao và kiểm kê trước triển khai.
+
+Giai đoạn 3 hoàn tất phần triển khai và kiểm chứng theo phương án SQL Server riêng đã được người dùng chọn. Các test concurrency SQL Server mở rộng và CI bắt buộc còn thuộc giai đoạn 4.

@@ -80,3 +80,7 @@ Bản gốc schema-sqlserver.sql và migration thủ công được giữ làm t
 ## Phạm vi đã duyệt
 
 Duyệt cấu trúc V1–V14, baseline 1 trên DB hiện hữu đủ điều kiện, giữ toàn bộ dữ liệu/bảng ngoài mapping và hiệu chỉnh Unicode/precision theo hướng mở rộng. Sau duyệt sẽ triển khai trên container/bản sao, gửi kết quả trước mọi thao tác trên DB đang dùng.
+
+## Điều chỉnh đã được người dùng duyệt, 12/11/2026
+
+Người dùng yêu cầu thay Docker bằng database thử nghiệm riêng trên SQL Server đã cài. Bộ test dùng database mới petcarehub_test_<UUID> và guard tên/ownership/database_id/create_date, tự dọn đúng database của lượt chạy. Không nhận tên database ứng dụng. 5 test Flyway và 3 constraint đã chạy thành công trên SQL Server 17.0.1000.7; đây là bằng chứng thay thế kiểm chứng container ở kế hoạch ban đầu. Chế độ container giữ tùy chọn cho CI.

@@ -528,3 +528,5 @@ Bộ test SQL Server đã đăng ký cả hai file tiền tố 004, cùng 005 đ
 ## Giai đoạn 3: Flyway (12/11/2026)
 
 V1–V14 đăng ký toàn bộ schema và migration thủ công, gồm cả hai file 004. V15 mở rộng hai description thành NVARCHAR(MAX). Mapping Unicode/giá/URL/khóa checkout và nullable được đồng bộ. Không sửa nguồn SQL cũ, xóa bảng dư hay backfill mốc thời gian. Xem [runbook](migrations.md), [kiểm kê](hardening/SCHEMA-INVENTORY.md) và [báo cáo](hardening/REPORT.md). Database thực chưa được áp migration trong giai đoạn này.
+
+Kiểm chứng bổ sung: Flyway/constraint tests đã chạy bằng database mới petcarehub_test_<UUID> trên SQL Server cục bộ 17.0.1000.7, không dùng petcarehub. Cơ chế tạo/dọn có guard được mô tả trong docs/migrations.md; Docker là tùy chọn cho CI.

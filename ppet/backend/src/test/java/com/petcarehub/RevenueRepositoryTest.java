@@ -8,13 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Bean;
+import org.springframework.boot.test.context.TestConfiguration;
+import com.petcarehub.config.AuditConfig;
+import java.time.Clock;
+import java.time.ZoneId;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 @ActiveProfiles("test")
+@Import({AuditConfig.class, RevenueRepositoryTest.AuditTestConfig.class})
 class RevenueRepositoryTest {
+    // A JPA slice must configure auditing itself, not inherit another test context's listener.
+    @TestConfiguration
+    static class AuditTestConfig {
+        @Bean Clock businessClock() { return Clock.system(ZoneId.of("Asia/Ho_Chi_Minh")); }
+    }
     @Autowired TestEntityManager em;
     @Autowired OrderRepository orders;
     @Test void sumsOnlyPaidNonCancelledOrdersInRange() {
