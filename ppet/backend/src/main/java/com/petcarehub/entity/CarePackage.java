@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -23,13 +27,15 @@ public class CarePackage {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Nationalized
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 
     @Column(name = "duration_months", nullable = false)

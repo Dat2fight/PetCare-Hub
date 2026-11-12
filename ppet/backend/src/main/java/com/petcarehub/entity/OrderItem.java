@@ -1,5 +1,7 @@
 package com.petcarehub.entity;
 
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -41,6 +43,7 @@ public class OrderItem {
     private CarePackage carePackage;
     @ManyToOne(fetch=FetchType.LAZY) @JoinColumn(name="beneficiary_pet_id")
     private Pet beneficiaryPet;
+    @Nationalized
     private String packageName;
     private Integer packageMonths;
     private Boolean packageGrooming;
@@ -50,9 +53,9 @@ public class OrderItem {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
+    @Column(name = "unit_price", nullable = false, precision = 18, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal subtotal;
 }

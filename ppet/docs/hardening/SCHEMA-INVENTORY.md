@@ -70,3 +70,11 @@ Ba bảng ngoài ORM là user_addresses, pet_images và product_images. Ngoài r
 - Nhiều SQL default dùng SYSUTCDATETIME(), trong khi business Clock hiện ghi giờ Việt Nam. Giữ nguyên lịch sử đến khi biết nguồn ghi và có quy tắc đối soát.
 - Có index tra cứu email/username/sku cùng cột đã UNIQUE. Có thể dư về hiệu năng, chưa đo chi phí và chưa đề xuất xóa.
 - SQL có deleted_at nhưng phần lớn entity chưa triển khai soft delete. Baseline phải giữ cột và ghi nhận nghiệp vụ hiện tại, không tự thay semantics.
+
+## Kết quả xử lý C1, 12/11/2026
+
+Bảng sai lệch phía trên là snapshot trước sửa. Chuỗi Unicode chuyển sang Nationalized, nội dung dài sang Length.LONG32; tiền decimal(18,2), URL 500, checkout key/fingerprint 36/64; payment_status và updated_at theo NOT NULL. V15 mở rộng roles.description/loyalty_transactions.description sang NVARCHAR(MAX). Script nền và bảng ngoài ORM giữ nguyên.
+
+Giữ precision timestamp/time hiện hữu: datetime2(0)/(7) và time(0) phía SQL, mặc định metadata Hibernate datetime2(6)/time. JDBC cùng kiểu nhưng validate không xác minh độ chính xác; không đổi timestamp/timezone dữ liệu chỉ để làm metadata giống hệt. Wishlist SQL cho updated_at NULL nhưng BaseEntity yêu cầu giá trị khi ghi mới; không backfill lịch sử. Numeric và decimal là kiểu tương đương SQL Server. Đây là các khác biệt đã ghi nhận, không khẳng định mọi metadata trùng tuyệt đối.
+
+Kiểm kê là từ script và metadata ngoại tuyến. Chưa có bằng chứng live schema do ORM cũ tạo trùng schema nền, nên không tự nhận tất cả DB hiện hữu đủ điều kiện baseline. Drift ngoài các khác biệt đã xử lý phải được đối soát trên bản sao trước onboarding.

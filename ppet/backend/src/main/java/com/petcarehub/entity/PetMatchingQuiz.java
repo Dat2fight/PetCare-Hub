@@ -1,5 +1,7 @@
 package com.petcarehub.entity;
 
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -30,36 +32,45 @@ public class PetMatchingQuiz {
     @JoinColumn(name = "customer_id", nullable = false)
     private User customer;
 
+    @Nationalized
     @Column(name = "living_environment", length = 100)
     private String livingEnvironment;
 
+    @Nationalized
     @Column(name = "house_size", length = 100)
     private String houseSize;
 
     @Column(name = "has_children")
     private Boolean hasChildren;
 
+    @Nationalized
     @Column(name = "children_age_range", length = 100)
     private String childrenAgeRange;
 
+    @Nationalized
     @Column(name = "activity_level", length = 100)
     private String activityLevel;
 
     @Column(name = "daily_care_hours", precision = 4, scale = 2)
     private BigDecimal dailyCareHours;
 
+    @Nationalized
     @Column(name = "pet_experience", length = 100)
     private String petExperience;
 
+    @Nationalized
     @Column(name = "size_preference", length = 100)
     private String sizePreference;
 
+    @Nationalized
     @Column(name = "energy_preference", length = 100)
     private String energyPreference;
 
+    @Nationalized
     @Column(name = "grooming_tolerance", length = 100)
     private String groomingTolerance;
 
+    @Nationalized
     @Column(name = "noise_tolerance", length = 100)
     private String noiseTolerance;
 

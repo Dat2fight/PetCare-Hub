@@ -48,7 +48,8 @@ PetCare-Hub/
         schema-sqlserver.sql
         data-sqlserver.sql
         reset-demo-sqlserver.sql
-        migrations/         001 → 002 → 003
+        migrations/         Lịch sử SQL thủ công 001–012
+        db/migration/       Flyway V1–V15 (đường nâng cấp chính)
       src/test/resources/application-test.yml
     frontend/
       package.json
@@ -106,57 +107,21 @@ Lệnh clone chưa được thực thi lại trong phiên kiểm chứng. Không
 
 ## 4. Chuẩn bị database
 
-### Database có sẵn — cách đã dùng
+### Database mới và database có sẵn
 
-Đọc bằng Windows Authentication, không truyền mật khẩu vào câu lệnh:
+Từ giai đoạn 3, đọc [runbook Flyway](docs/migrations.md) trước khi khởi động. Flyway tự chạy các migration còn thiếu rồi Hibernate validate, không còn chạy script thủ công theo danh sách trong các báo cáo cũ.
 
-```powershell
-Set-Location D:\PetCare-Hub
-sqlcmd -S localhost,1433 -E -C -b -Q "SET NOCOUNT ON; SELECT name FROM sys.databases WHERE name='petcarehub';"
-sqlcmd -S localhost,1433 -E -C -b -d petcarehub -Q "SET NOCOUNT ON; SELECT COUNT(*) AS table_count FROM sys.tables; SELECT COUNT(*) AS users_count FROM dbo.users; SELECT COUNT(*) AS species_count FROM dbo.species;"
-```
+- Database trống: quản trị viên tạo DB riêng, cấu hình DB_URL/DB_USERNAME/DB_PASSWORD; giữ FLYWAY_BASELINE_ON_MIGRATE=false. Flyway tạo schema V1–V15.
+- Database có dữ liệu: sao lưu, restore ra bản sao, kiểm kê schema rồi baseline một lần. Mặc định baseline 1 chỉ khi đủ cấu trúc V1; V2–V15 sẽ nâng cấp các phần còn thiếu. Không bật baseline tự động cố định.
+- Database bị drift/thiếu bảng nền: dừng và đối soát; Hibernate validate không kiểm thay cho index/constraint. Không dùng ddl-auto update, schema/reset để chữa nhanh.
+- reset-demo-sqlserver.sql có thao tác mất dữ liệu, chỉ dành cho database demo tách biệt.
 
-`-E` dùng Windows login hiện tại; `-C` chấp nhận chứng chỉ local; `-b` trả lỗi khi SQL thất bại. Nếu Windows login không có quyền, nhờ người quản trị cấp quyền hoặc dùng SSMS với tài khoản được cấp. Backend dùng SQL login là một kết nối khác, không được suy ra rằng `-E` thành công thì backend chắc chắn đăng nhập được.
-
-Phiên này có 32 bảng, 5 users trước smoke test, 6 species. Không chạy lại schema/seed/reset. Profile dev dùng `ddl-auto: validate`, không tự tạo bảng.
-
-Database máy kiểm chứng còn `UQ_inventory_pet`, `UQ_inventory_product` không filter, chưa có filtered index của migrations 001–003. App vẫn validate/start được nhưng điều đó **không chứng minh** các ràng buộc inventory/cart đã đúng. Trước khi kiểm thử đầy đủ hoặc triển khai: backup, dừng writer, review dữ liệu và áp dụng migration có kiểm soát. Phiên này không sửa database đó.
-
-### Database mới — thứ tự chuẩn bị, chưa thực thi trong phiên
-
-Chỉ dùng database **mới/rỗng**. Ví dụ tạo database riêng để không đụng dữ liệu cũ:
-
-```powershell
-Set-Location D:\PetCare-Hub
-sqlcmd -S localhost,1433 -E -C -b -Q "IF DB_ID(N'petcarehub_local_new') IS NOT NULL THROW 50000, 'Database exists; stop and inspect it', 1; CREATE DATABASE petcarehub_local_new;"
-if ($LASTEXITCODE -ne 0) { throw 'Không tạo database; dừng tại đây' }
-$dbName = 'petcarehub_local_new'
-$sqlRoot = Join-Path (Get-Location) 'ppet\backend\src\main\resources'
-$scripts = @(
-    'schema-sqlserver.sql',
-    'migrations\001_inventory_nullable_unique.sql',
-    'migrations\002_cart_product_unique.sql',
-    'migrations\003_inventory_generated_unique.sql'
-)
-foreach ($script in $scripts) {
-    sqlcmd -S localhost,1433 -E -C -b -d $dbName -f 65001 -i (Join-Path $sqlRoot $script)
-    if ($LASTEXITCODE -ne 0) { throw "SQL thất bại tại $script; không chạy tiếp" }
-}
-```
-
-Đổi `databaseName` trong `SPRING_DATASOURCE_URL` ở mục 6 sang database vừa tạo. Không chạy cả `SQLQuery3.sql` và quy trình trên: SQLQuery3.sql là script tạo petcarehub riêng, không nằm trong quy trình này.
-
-- `schema-sqlserver.sql`: tạo bảng, không phải công cụ nâng cấp database có sẵn; không chạy lại.
-- `001`: filtered UNIQUE inventory và CHECK quantity không âm.
-- `002`: filtered UNIQUE cart/product; dừng nếu có dòng trùng.
-- `003`: thay các UNIQUE inventory không filter do Hibernate trước đây tạo; có DROP constraint/index, không DROP bảng.
-- `reset-demo-sqlserver.sql`: **DROP TABLE, mất dữ liệu**; không dùng cho hướng dẫn chạy thường ngày.
-- Database có dữ liệu: chỉ xem xét migration sau backup/review/dừng writer; không chạy schema/reset để “sửa nhanh”. Dữ liệu âm/trùng phải được đối soát, không tự xóa.
+Các số lượng bảng/user/catalog trong báo cáo cũ là ảnh chụp thời điểm trước đó. Giai đoạn 3 không đọc hoặc thay đổi database đang dùng. Kiểm chứng container còn phụ thuộc Docker; xem báo cáo kết quả ở cuối tài liệu.
 
 Chọn **một** cách seed:
 
 1. Java `DataSeeder`: bật profile dev, khi species rỗng sẽ thêm roles, species/breeds, product categories, services, care packages. Không tạo admin, user mẫu hay sản phẩm. Species có dữ liệu thì bỏ qua toàn bộ seed; không có biến `SEED_DEMO`.
-2. SQL demo tùy chọn: schema → 001 → 002 → 003 → `data-sqlserver.sql` → chạy backend/bootstrap. Cần SQLCMD mode, `APP_PROFILE=dev`, `DEMO_PASSWORD_HASH` là BCrypt của mật khẩu do bạn tự cấp; users/roles phải rỗng. Không tạo admin. Không dùng thêm SQL demo sau Java seed. Chưa chạy phương án này trong phiên; không có mật khẩu/hash mẫu để sao chép.
+2. SQL demo tùy chọn: Flyway migrate trên database demo trống → `data-sqlserver.sql` → chạy backend/bootstrap. Cần SQLCMD mode, `APP_PROFILE=dev`, `DEMO_PASSWORD_HASH` là BCrypt của mật khẩu do bạn tự cấp; users/roles phải rỗng. Không tạo admin. Không dùng thêm SQL demo sau Java seed. Chưa chạy phương án này trong phiên; không có mật khẩu/hash mẫu để sao chép.
 
 ## 5. Biến môi trường và JWT
 
@@ -351,7 +316,7 @@ Script build vẫn là `tsc -b && vite build`, output ở `dist`. Cache TypeScri
 | Khóa CHANGE_ME/ngắn/đã lộ bị từ chối | Cấp khóa ngẫu nhiên mới ít nhất 32 byte; không đưa giá trị lỗi vào báo cáo. |
 | Cổng 8081/5173 bị chiếm | Dùng Get-NetTCPConnection ở mục 11 xác định PID, chỉ dừng tiến trình của mình. Nếu đổi backend bằng SERVER_PORT, đổi cả target Vite proxy; đổi frontend phải đổi CORS. |
 | SQL Server không kết nối | Kiểm tra service, TCP/IP, host/port, firewall, databaseName và SQL login/mixed mode. Không in DB_PASSWORD. `sqlcmd -E` không kiểm chứng mật khẩu SQL login. |
-| Schema missing table/column | Dev chỉ validate. Database mới cần schema và migration đúng thứ tự; database có dữ liệu cần backup/review, không reset hoặc bật ddl-auto=update để che lỗi. |
+| Schema missing table/column | Dev chỉ validate. Database mới cần Flyway V1–V15; database có dữ liệu cần backup/review/baseline theo docs/migrations.md, không reset hoặc bật ddl-auto=update để che lỗi. |
 | CORS | Dùng localhost thống nhất, origin gồm scheme + host + port, không path. Local dùng proxy; deploy cần origin chính xác trong APP_CORS_ALLOWED_ORIGINS. |
 | 401 sau đổi JWT | Token cũ không hợp lệ; đăng nhập lại. Tất cả instance cùng môi trường cần cùng khóa mới. |
 | Trang trắng, global is not defined | Giữ cấu hình dependency optimizer SockJS trong vite.config.ts; restart Vite và reload trang. |
@@ -404,9 +369,9 @@ Không commit .env thật, khóa, token, mật khẩu, hash demo hoặc log. .en
 
 Các báo cáo trước có giới hạn kiểm chứng và việc còn lại riêng; smoke test local không thay thế kiểm thử nghiệp vụ/concurrency/deploy.
 
-Trước khi chạy bản có hết hạn giữ chỗ, áp dụng cả hai migration 004 rồi chạy migration 005_order_expiry.sql bằng sqlcmd -I -b -f 65001 trên database đã chọn. Hibernate kiểm tra schema khi khởi động. app.order-expiry.hold-hours mặc định 24, app.order-expiry.interval-ms mặc định 60000.
+Lịch sử migration hết hạn giữ chỗ: hai file 004 và 005_order_expiry.sql đã được đăng ký thành Flyway V5–V7; không chạy thủ công sau onboarding. Hibernate kiểm tra schema khi khởi động. app.order-expiry.hold-hours mặc định 24, app.order-expiry.interval-ms mặc định 60000.
 
-Sau migration 005, áp dụng 006_checkout_pricing.sql. app.checkout.shipping-fee mặc định 30000, app.checkout.free-shipping-from mặc định 500000, app.checkout.promotion-per-customer mặc định 1. Đổi 1 điểm lấy 100đ, tối đa 50% tiền sản phẩm sau voucher.
+006_checkout_pricing.sql đã được đăng ký thành Flyway V8. app.checkout.shipping-fee mặc định 30000, app.checkout.free-shipping-from mặc định 500000, app.checkout.promotion-per-customer mặc định 1. Đổi 1 điểm lấy 100đ, tối đa 50% tiền sản phẩm sau voucher.
 
 Khách có thể đánh giá sản phẩm sau khi nhận hàng hoặc dịch vụ sau khi hoàn thành lịch hẹn. Mở **Đánh giá của tôi** trong menu tài khoản để sửa, xóa và theo dõi kết quả duyệt.
 
@@ -416,14 +381,7 @@ Dùng nút tim trên thẻ hoặc trang chi tiết để lưu mục. Trong **Yê
 
 Khách mở **Dịch vụ → Gói chăm sóc định kỳ**, chọn gói và thú cưng của mình, rồi đặt đơn tiền mặt. Sau khi nhân viên xác nhận thu tiền, khách xem quyền lợi và hạn dùng trong **Gói của tôi**. Các gói mới không tự gia hạn.
 
-Trước khi khởi động bản mới với SQL Server, sao lưu database đích đã có migration 006. Từ thư mục `ppet/backend/src/main/resources/migrations`, đặt `$dbName` thành tên database triển khai và chạy theo thứ tự sau bằng PowerShell với tài khoản tích hợp đã được cấp quyền.
-
-```powershell
-foreach ($script in '007_reviews.sql','008_wishlist.sql','009_package_orders.sql') {
-    sqlcmd -S localhost,1433 -E -C -I -b -f 65001 -d $dbName -i $script
-    if ($LASTEXITCODE -ne 0) { throw "Migration failed: $script" }
-}
-```
+Migration thủ công 007–009 đã đăng ký thành Flyway V9–V11. Dùng [runbook](docs/migrations.md) để nâng cấp database đã có dữ liệu; không chạy danh sách SQL thủ công sau onboarding.
 
 Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu và kiểm thử ở [báo cáo giai đoạn 3](docs/phase-3-customer.md).
 
@@ -431,10 +389,14 @@ Giai đoạn này dùng cấu hình hiện tại. Chi tiết API, dữ liệu v�
 
 Đặt cùng múi giờ IANA cho `APP_BOOKING_TIMEZONE` ở backend và `VITE_BUSINESS_TIMEZONE` khi build frontend. Mặc định là `Asia/Ho_Chi_Minh`. Thời gian lịch và đơn đã lưu tiếp tục được đọc theo giờ địa phương. Đồng hồ nghiệp vụ được dùng cho đặt lịch, ngày khám và tiêm, tuổi thú cưng, ưu đãi, báo cáo, thời hạn đơn/gói, dấu thời gian lưu và JWT/WebSocket. Timestamp chẩn đoán của health và lỗi HTTP vẫn theo máy chạy. NEEDS DECISION — schema cũ có default SQL dùng UTC cho lệnh INSERT trực tiếp. Cần xác định nguồn ghi trước khi chuyển đổi dữ liệu lịch sử.
 
-Khi nâng cấp từ migration 009, sao lưu, thử 010 rồi 011 trên bản sao, sau đó triển khai backend và frontend tương thích cùng đợt. Xem [API](docs/api.md) và [đối soát dữ liệu](docs/database.md).
+Migration 010–012 tương ứng Flyway V12–V14. Sao lưu và thử nâng cấp bằng Flyway trên bản sao, sau đó triển khai backend và frontend tương thích cùng đợt. Xem [API](docs/api.md) và [đối soát dữ liệu](docs/database.md).
 
 ### Kiểm chứng hardening ngày 11/11/2026
 
-Nhánh feature/hardening-2-experience chứa hai giai đoạn đầu. Xem [báo cáo](docs/hardening/REPORT.md). Trước khi chạy bản mới trên SQL Server, áp dụng lần lượt 010, 011, 012 lên bản sao đã sao lưu để xác minh schema.
+Nhánh feature/hardening-2-experience chứa hai giai đoạn đầu. Xem [báo cáo](docs/hardening/REPORT.md). Hướng dẫn migration thủ công của hai giai đoạn đầu được thay thế bằng runbook Flyway ở giai đoạn 3.
 
 VITE_SITE_HOTLINE, VITE_SITE_ADDRESS, VITE_SITE_EMAIL, VITE_SITE_HOURS cấu hình liên hệ lúc build. Giá trị trống hiển thị “Chưa cập nhật”. Khách vào /my-appointments để xem/hủy lịch. Checkout có bước xem lại, theo dõi kết quả khi mất phản hồi và trang xác nhận riêng.
+
+### Migration giai đoạn 3 (12/11/2026)
+
+Flyway bật mặc định/dev; H2 test tắt Flyway. Không đổi API hay frontend. Biến mới: FLYWAY_ENABLED, FLYWAY_BASELINE_ON_MIGRATE (false), FLYWAY_BASELINE_VERSION (1). Xem [runbook](docs/migrations.md), [kiểm kê](docs/hardening/SCHEMA-INVENTORY.md) và [báo cáo](docs/hardening/REPORT.md). Chưa áp dụng migration trên database thật. Các test SQL Server cần Docker Linux containers; chưa coi giai đoạn 3 hoàn tất kiểm chứng khi chưa chạy được bộ này.

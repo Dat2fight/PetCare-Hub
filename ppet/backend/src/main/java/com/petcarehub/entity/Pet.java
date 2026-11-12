@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -19,6 +23,7 @@ import java.time.LocalDate;
 @Data
 public class Pet extends BaseEntity {
 
+    @Nationalized
     @Column(length = 100)
     private String name;
 
@@ -33,22 +38,25 @@ public class Pet extends BaseEntity {
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Nationalized
     @Column(length = 20)
     private String gender;
 
+    @Nationalized
     @Column(length = 100)
     private String color;
 
     @Column(precision = 5, scale = 2)
     private BigDecimal weight;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String description;
 
-    @Column(name = "image_url")
+    @Column(length = 500, name = "image_url")
     private String imageUrl;
 
     @Enumerated(EnumType.STRING)

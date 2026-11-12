@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -32,28 +36,32 @@ public class Order extends BaseEntity {
     @Builder.Default
     private OrderStatus status = OrderStatus.PENDING;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal subtotal;
 
-    @Column(name = "discount_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "discount_amount", nullable = false, precision = 18, scale = 2)
     @Builder.Default
     private BigDecimal discountAmount = BigDecimal.ZERO;
 
+    @Nationalized
     private String promotionCode;
+    @Column(length = 36)
     private String checkoutKey;
+    @Column(length = 64)
     private String checkoutFingerprint;
     private Integer pointsUsed;
     private BigDecimal pointsDiscount;
     private BigDecimal shippingFee;
 
-    @Column(name = "tax_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "tax_amount", nullable = false, precision = 18, scale = 2)
     @Builder.Default
     private BigDecimal taxAmount = BigDecimal.ZERO;
 
-    @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
+    @Column(name = "total_amount", nullable = false, precision = 18, scale = 2)
     private BigDecimal totalAmount;
 
-    @Column(name = "shipping_address", columnDefinition = "TEXT")
+    @Nationalized
+    @Column(name = "shipping_address", length = Length.LONG32)
     private String shippingAddress;
 
     @Embedded
@@ -63,7 +71,7 @@ public class Order extends BaseEntity {
     private String paymentMethod;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", length = 50)
+    @Column(name = "payment_status", nullable = false, length = 50)
     @Builder.Default
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
@@ -83,7 +91,8 @@ public class Order extends BaseEntity {
     private java.time.LocalDateTime cancelledAt;
 
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String notes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)

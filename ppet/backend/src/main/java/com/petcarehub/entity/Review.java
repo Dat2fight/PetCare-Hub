@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -27,11 +31,14 @@ public class Review extends BaseEntity {
 
     @Column(nullable = false)
     private Integer rating;
+    @Nationalized
     private String moderationState;
+    @Nationalized
     @Column(length=500)
     private String moderationReason;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String comment;
 
     @Column(nullable = false)

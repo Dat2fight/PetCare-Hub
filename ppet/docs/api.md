@@ -181,3 +181,7 @@ Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích h
 - GET /appointments/me?filter=upcoming|past|cancelled&page=0&size=10 trả Page. Thiếu filter giữ response mảng cũ.
 - POST /appointments/{id}/cancel nhận reason tùy chọn. Chủ lịch được hủy trước hạn server tính. Hủy lại trả cùng kết quả. Chỉ tạo một thông báo. PUT status cũ dùng cùng chính sách cho khách.
 - APP_BOOKING_CANCELLATIONNOTICEHOURS=2 cấu hình hạn hủy. Mốc server được dùng để tạo ICS trên trình duyệt.
+
+## Giai đoạn 3 — migration có phiên bản
+
+Không thêm endpoint, đổi DTO hoặc quyền truy cập. Backend bật Flyway trước Hibernate validate; database cũ chưa baseline sẽ bị chặn khởi động. Cần hoàn thành [onboarding database](migrations.md) trước khi triển khai backend. Chuỗi Unicode, tiền decimal(18,2), URL 500 ký tự và idempotency key được ánh xạ theo schema SQL Server; các giới hạn API hiện có vẫn áp dụng.

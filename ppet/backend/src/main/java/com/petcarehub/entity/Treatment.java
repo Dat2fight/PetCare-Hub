@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -25,12 +29,15 @@ public class Treatment {
     @JoinColumn(name = "medical_record_id", nullable = false)
     private MedicalRecord medicalRecord;
 
+    @Nationalized
     @Column(nullable = false, length = 100)
     private String medication;
 
+    @Nationalized
     @Column(nullable = false, length = 100)
     private String dosage;
 
+    @Nationalized
     @Column(nullable = false, length = 100)
     private String frequency;
 
@@ -48,6 +55,7 @@ public class Treatment {
     @Builder.Default
     private TreatmentStatus status = TreatmentStatus.ACTIVE;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String notes;
 }

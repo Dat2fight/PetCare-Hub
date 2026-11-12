@@ -1,5 +1,7 @@
 package com.petcarehub.entity;
 
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -28,16 +30,18 @@ public class User extends BaseEntity {
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
+    @Nationalized
     @Column(name = "first_name", nullable = false, length = 100)
     private String firstName;
 
+    @Nationalized
     @Column(name = "last_name", nullable = false, length = 100)
     private String lastName;
 
     @Column(length = 20)
     private String phone;
 
-    @Column(name = "avatar_url")
+    @Column(length = 500, name = "avatar_url")
     private String avatarUrl;
 
     @Column(nullable = false)

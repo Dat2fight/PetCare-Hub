@@ -69,4 +69,41 @@ Biến mới gồm APP_BOOKING_TIMEZONE, APP_BOOKING_LOCKTIMEOUTMS, APP_BOOKING_
 - Liên hệ doanh nghiệp đang hiển thị Chưa cập nhật.
 - Chưa xác minh SQL Server container, Flyway, CI mới, pháp lý, khôi phục mật khẩu hoặc Lighthouse.
 
-Giai đoạn 3 cần duyệt kế hoạch văn bản trước thay công cụ migration. Kế hoạch và đối chiếu metadata gửi riêng để duyệt.
+Kế hoạch giai đoạn 3 đã được duyệt bằng yêu cầu tiếp tục triển khai. Kết quả thực hiện được ghi bên dưới.
+
+## Giai đoạn 3 — C1, ngày 12/11/2026
+
+| Mục | Trạng thái | Kết quả và nguyên nhân | Kiểm chứng | Commit |
+|---|---|---|---|---|
+| C1 cấu hình/history | ĐÃ XONG phần triển khai | Chưa có Flyway; đăng ký V1–V14 không đổi SQL cũ, V15 mở rộng description; baseline mặc định tắt, clean bị cấm, sql.init never | MigrationResourcesTest kiểm toàn bộ bản sao/checksum/sidecar và mặc định an toàn | feat(C1): version SQL Server migrations and align entity mappings |
+| C1 mapping | ĐÃ XONG phần triển khai | Unicode TEXT/VARCHAR, tiền precision 10, URL 255, key 255 khác schema; sửa annotation, không cắt dữ liệu | SchemaMappingTest RED trước sửa, GREEN sau sửa; đối chiếu metadata ngoại tuyến các sai lệch không thời gian khớp script sau V15 | cùng commit C1 |
+| C1 ddl-auto | ĐÃ ĐƯỢC SỬA TRƯỚC ĐÓ | Default/dev đã validate, báo cáo gốc nói update là lỗi thời. Giữ validate, test create-drop và tắt Flyway | Bộ test H2 qua; không thêm profile update | cùng commit C1 |
+| C1 SQL Server | MỘT PHẦN | Đã viết 5 test Flyway integration; máy không có Docker hợp lệ | Lượt opt-in FAIL trước khi khởi động container: Could not find a valid Docker environment; chưa chạy migrate hoặc Hibernate validate trên SQL Server | cùng commit C1 |
+
+Nhánh feature/hardening-3-migrations. Không push/merge/rebase. SQL schema/reset/seed và các migration thủ công cũ không đổi. Không truy cập hoặc mutation database đang dùng. .worktrees/ có trước nhiệm vụ không nằm trong commit.
+
+### Kết quả kiểm thử
+
+- Maven với JDK 17.0.12: 259 test, 251 pass, 0 failure, 0 error, 8 skipped (3 SQL Server cũ + 5 Flyway mới). Log lượt đầy đủ: backend/target/migration-tests.log; số tổng được lưu trong migration-test-counts.txt trước lượt opt-in.
+- Lượt riêng RUN_SQLSERVER_TESTS=true, FlywayMigrationTest: 1 lỗi khởi tạo do thiếu Docker, 0 test migration nghiệp vụ đã chạy. Log backend/target/migration-docker.log. Không coi skip hoặc lỗi môi trường này là bằng chứng migration thành công.
+- npx tsc --noEmit, npm run lint, npm run build: PASS. 224 module, JS 450.93 kB/gzip 143.68 kB. Không có thay đổi UI, không lặp lại kiểm responsive giai đoạn 2 và chưa đo C3.
+- SchemaMappingTest ban đầu fail với các kiểu/độ dài cũ; log red tại backend/target/migration-red.log. Sau sửa green trong bộ đầy đủ. Các artifact target không commit.
+- EndpointSecurityMatrixTest cùng toàn bộ kiểm thử bảo mật/ownership đã chạy trong bộ Maven; không thêm endpoint nên allowlist giữ nguyên.
+
+### Phạm vi và cách áp dụng
+
+Dependency Flyway core + sqlserver 10.10.0 theo BOM Spring Boot 3.3.13. V1–V14 sao chép byte-for-byte trong checkout; SHA-256 trong manifest chuẩn hóa LF để không phụ thuộc Git CRLF. Sidecar tắt transaction ngoài của Flyway với script tự BEGIN/COMMIT. V15 chỉ mở rộng roles.description và loyalty_transactions.description sang NVARCHAR(MAX), idempotent.
+
+Mapping: Nationalized cho Unicode và Length.LONG32 cho text dài; precision tiền 18; URL 500; key/fingerprint 36/64; nullable audit/payment theo SQL. Product.weight giữ precision 10 đúng schema. Giữ timestamp/time precision/default/timezone cũ và bảng ngoài ORM; chi tiết tại SCHEMA-INVENTORY.md. Không tự sửa DB do ORM tạo bị drift mà chưa được kiểm kê.
+
+Biến mới ở backend/.env.example: FLYWAY_ENABLED=true, FLYWAY_BASELINE_ON_MIGRATE=false, FLYWAY_BASELINE_VERSION=1. Không đổi API/DTO/role/frontend. Default/dev bật Flyway trước validate; H2 test tắt Flyway. Database có sẵn chưa có history sẽ bị chặn đến khi onboarding có kiểm soát. README, docs/api.md, docs/database.md và docs/migrations.md đã cập nhật; phần giới thiệu database ghi nhầm PostgreSQL được sửa thành SQL Server.
+
+### Việc còn lại và điều kiện hoàn tất
+
+C1 tổng thể là MỘT PHẦN vì chưa có bằng chứng SQL Server. Cần Docker Linux containers hoạt động và chạy lệnh trong docs/migrations.md để kiểm database trống + startup validate, baseline một phần/toàn bộ giữ dữ liệu, Unicode/giá lớn/URL dài, constraints/rollback, checksum và retry sau đối soát. CI bắt buộc DB checks thuộc giai đoạn 4, chưa triển khai trong đợt này.
+
+Trước nâng cấp DB thật: người vận hành sao lưu, kiểm restore, kiểm kê schema và chọn baseline theo runbook, thử bản sao thành công rồi mới chạy lên đích trong cửa sổ dừng ghi. Baseline 1 chỉ dành cho DB đủ V1; baseline 14 chỉ khi đã chứng minh đủ V1–V14. Giữ toàn bộ dữ liệu và đối soát các nghi vấn bằng truy vấn ở docs/database.md; không tự backfill hoặc xóa.
+
+Quét cuối: các LocalDateTime.now() chẩn đoán, mockImages minh họa, nhãn Sắp ra mắt/Sắp cập nhật và NEEDS DECISION lịch sử còn theo phần Quét và phần còn lại ở trên. Không có href="#" trong frontend source. Các bản sao Flyway giữ nguyên comment lịch sử/manual/NEEDS DECISION của nguồn để bảo toàn nội dung; đó không phải chỉ dẫn triển khai hiện hành. Quy trình hiện hành ở docs/migrations.md. Khôi phục mật khẩu, chính sách và SEO vẫn thuộc giai đoạn sau.
+
+Git diff --cached --check báo hai whitespace có sẵn trong V1 (dòng 252 và dòng trống cuối file); giữ nguyên để bảo toàn byte của schema nguồn. Cả 14 blob migration đã stage khớp byte với blob nguồn và SHA-256 trong manifest.

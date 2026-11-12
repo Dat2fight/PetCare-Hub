@@ -2,9 +2,9 @@
 
 ## 1. Database Overview
 
-The PetCare Hub platform utilizes a robust, relational **PostgreSQL** database. The database is strictly designed following normalization principles up to the Third Normal Form (3NF) to minimize redundancy and ensure data integrity.
+The application uses **Microsoft SQL Server**. The tables below describe the logical model; authoritative DDL is versioned in backend/src/main/resources/db/migration. Follow [the Flyway runbook](migrations.md) for new databases and existing-data onboarding. Older manual migration instructions below are historical mappings, not deployment commands.
 
-*   **Primary Keys**: All tables use `BIGSERIAL` (BIGINT auto-increment) as the primary key.
+*   **Primary Keys**: All tables use `BIGINT IDENTITY(1,1)` as the primary key.
 *   **Audit Trail**: Standard audit columns (`created_at` and `updated_at`) are present on all core tables to track data modifications.
 
 ---
@@ -524,3 +524,7 @@ AND NOT EXISTS (SELECT product_id,pet_id,care_package_id,beneficiary_pet_id,quan
 012_order_timeline.sql thêm năm cột nullable vào orders cho thời điểm xác nhận, chuẩn bị, giao, hoàn tất và hủy. Script chạy sau 011, có thể chạy lại. Đơn cũ giữ NULL vì chưa có bằng chứng về thời điểm thực tế. Các mốc được ghi cùng transaction cập nhật trạng thái.
 
 Bộ test SQL Server đã đăng ký cả hai file tiền tố 004, cùng 005 đến 012. Môi trường hiện tại chưa có Docker nên test SQL Server chưa chạy. Kết quả H2 và đối chiếu metadata cần được xác minh thêm trên SQL Server.
+
+## Giai đoạn 3: Flyway (12/11/2026)
+
+V1–V14 đăng ký toàn bộ schema và migration thủ công, gồm cả hai file 004. V15 mở rộng hai description thành NVARCHAR(MAX). Mapping Unicode/giá/URL/khóa checkout và nullable được đồng bộ. Không sửa nguồn SQL cũ, xóa bảng dư hay backfill mốc thời gian. Xem [runbook](migrations.md), [kiểm kê](hardening/SCHEMA-INVENTORY.md) và [báo cáo](hardening/REPORT.md). Database thực chưa được áp migration trong giai đoạn này.

@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -32,6 +36,7 @@ public class Vaccination {
     @JoinColumn(name = "veterinarian_id", nullable = false)
     private User veterinarian;
 
+    @Nationalized
     @Column(name = "vaccine_name", nullable = false, length = 100)
     private String vaccineName;
 
@@ -44,7 +49,8 @@ public class Vaccination {
     @Column(name = "next_due_date")
     private LocalDate nextDueDate;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String notes;
 
     @CreatedDate

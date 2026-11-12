@@ -1,6 +1,6 @@
-# Kế hoạch Flyway cần duyệt
+# Kế hoạch Flyway đã duyệt
 
-Ngày 11/11/2026. Trạng thái CHỜ DUYỆT theo Giai đoạn 3 mục 2 trong yêu cầu gốc. Nhánh feature/hardening-3-migrations chứa kế hoạch, kiểm kê và phần dọn fixture không dùng còn lại từ B1. Flyway chưa được thêm hoặc chạy.
+Ngày 11/11/2026. Người dùng đã duyệt bằng yêu cầu tiếp tục triển khai giai đoạn 3; triển khai ngày 11–12/11/2026. Nhánh feature/hardening-3-migrations chứa kế hoạch, kiểm kê và phần dọn fixture không dùng còn lại từ B1. Flyway đã được thêm; chưa chạy trên database thật. Kết quả và giới hạn kiểm chứng ở REPORT.md.
 
 Mặc định và dev hiện đều dùng ddl-auto validate. Test H2 dùng create-drop. Vì vậy bước C1 tập trung vào lịch sử migration, baseline và đồng bộ mapping/schema. Testcontainers SQL Server đã có dependency, chưa có Docker tại máy kiểm chứng.
 
@@ -77,6 +77,6 @@ Chuẩn bị backup và kiểm restore, lưu snapshot schema/checksum/row counts
 
 Bản gốc schema-sqlserver.sql và migration thủ công được giữ làm tài liệu lịch sử. Sau chuyển đổi, Flyway là đường cập nhật chính, có hướng dẫn trong docs/migrations.md. Reset demo chỉ dùng database demo tách biệt.
 
-## Nội dung xin duyệt
+## Phạm vi đã duyệt
 
 Duyệt cấu trúc V1–V14, baseline 1 trên DB hiện hữu đủ điều kiện, giữ toàn bộ dữ liệu/bảng ngoài mapping và hiệu chỉnh Unicode/precision theo hướng mở rộng. Sau duyệt sẽ triển khai trên container/bản sao, gửi kết quả trước mọi thao tác trên DB đang dùng.

@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -39,13 +43,16 @@ public class MedicalRecord {
     @Column(name = "examination_date", nullable = false)
     private LocalDate examinationDate;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Nationalized
+    @Column(nullable = false, length = Length.LONG32)
     private String findings;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String diagnosis;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String recommendations;
 
     @CreatedDate

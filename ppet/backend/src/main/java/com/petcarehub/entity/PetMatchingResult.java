@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -30,10 +34,12 @@ public class PetMatchingResult {
     @Column(name = "overall_score", nullable = false)
     private Integer overallScore;
 
-    @Column(name = "score_breakdown_json", columnDefinition = "TEXT")
+    @Nationalized
+    @Column(name = "score_breakdown_json", length = Length.LONG32)
     private String scoreBreakdownJson;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String explanation;
 
     @Column(name = "rank", nullable = false)

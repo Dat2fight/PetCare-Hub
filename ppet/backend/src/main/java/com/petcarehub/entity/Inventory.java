@@ -1,5 +1,7 @@
 package com.petcarehub.entity;
 
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -43,10 +45,11 @@ public class Inventory {
     @Column(name = "reorder_quantity")
     private Integer reorderQuantity;
 
+    @Nationalized
     @Column(length = 100)
     private String location;
 
     @LastModifiedDate
-    @Column(name = "updated_at")
+    @Column(nullable = false, name = "updated_at")
     private LocalDateTime updatedAt;
 }

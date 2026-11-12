@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -16,16 +20,18 @@ import java.math.BigDecimal;
 @Data
 public class Product extends BaseEntity {
 
+    @Nationalized
     @Column(nullable = false)
     private String name;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String description;
 
-    @Column(nullable = false, precision = 10, scale = 2)
+    @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 
-    @Column(name = "image_url")
+    @Column(length = 500, name = "image_url")
     private String imageUrl;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -38,6 +44,7 @@ public class Product extends BaseEntity {
     @Column(precision = 10, scale = 2)
     private BigDecimal weight;
 
+    @Nationalized
     @Column(length = 100)
     private String dimensions;
 

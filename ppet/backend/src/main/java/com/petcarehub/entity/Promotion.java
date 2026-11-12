@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -27,17 +31,18 @@ public class Promotion {
     @Column(nullable = false, unique = true, length = 50)
     private String code;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "discount_type", nullable = false, length = 50)
     private DiscountType discountType;
 
-    @Column(name = "discount_value", nullable = false, precision = 10, scale = 2)
+    @Column(name = "discount_value", nullable = false, precision = 18, scale = 2)
     private BigDecimal discountValue;
 
-    @Column(name = "min_order_amount", precision = 10, scale = 2)
+    @Column(name = "min_order_amount", precision = 18, scale = 2)
     private BigDecimal minOrderAmount;
 
     @Column(name = "max_uses")

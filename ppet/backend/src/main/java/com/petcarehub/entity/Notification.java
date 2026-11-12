@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -32,17 +36,20 @@ public class Notification {
     @Column(nullable = false, length = 50)
     private NotificationType type;
 
+    @Nationalized
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Nationalized
+    @Column(nullable = false, length = Length.LONG32)
     private String message;
 
     @Column(name = "is_read", nullable = false)
     @Builder.Default
     private Boolean read = false;
 
-    @Column(name = "data_json", columnDefinition = "TEXT")
+    @Nationalized
+    @Column(name = "data_json", length = Length.LONG32)
     private String dataJson;
 
     @CreatedDate

@@ -1,5 +1,9 @@
 package com.petcarehub.entity;
 
+import org.hibernate.Length;
+
+import org.hibernate.annotations.Nationalized;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
@@ -44,7 +48,8 @@ public class InventoryTransaction {
     @Column(name = "reference_id")
     private Long referenceId;
 
-    @Column(columnDefinition = "TEXT")
+    @Nationalized
+    @Column(length = Length.LONG32)
     private String notes;
 
     @ManyToOne(fetch = FetchType.LAZY)
