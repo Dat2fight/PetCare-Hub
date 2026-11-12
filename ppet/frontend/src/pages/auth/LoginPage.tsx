@@ -5,8 +5,6 @@ import apiClient from '../../api/client';
 import { Button } from '../../components/common/Button';
 import { Input } from '../../components/common/Input';
 import { mockImages } from '../../data/mockImages';
-import { FcGoogle } from 'react-icons/fc';
-import { FaFacebook } from 'react-icons/fa';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -91,33 +89,16 @@ export const LoginPage: React.FC = () => {
               required
             />
 
-            <div className="flex items-center justify-between mt-2">
-              <label className="flex items-center">
-                <input type="checkbox" className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-gray-300" />
-                <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
-              </label>
-              <span aria-disabled="true">Quên mật khẩu? (Sắp ra mắt)</span>
-            </div>
+            <label className="mt-2 flex items-center">
+              <input type="checkbox" className="w-4 h-4 rounded text-primary-600 focus:ring-primary-500 border-gray-300" />
+              <span className="ml-2 text-sm text-gray-600">Ghi nhớ đăng nhập</span>
+            </label>
 
             <Button type="submit" fullWidth isLoading={isLoading} className="mt-8">
               Đăng nhập
             </Button>
           </form>
 
-          <div className="mt-8 pt-6 border-t border-gray-100">
-            <p className="text-center text-sm text-gray-500 mb-4">Hoặc đăng nhập bằng</p>
-            <div className="grid grid-cols-2 gap-4">
-              <button disabled aria-disabled="true" title="Sắp ra mắt" className="flex items-center justify-center py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors">
-                <FcGoogle size={20} className="mr-2" />
-                <span className="text-sm font-medium text-gray-700">Google — Sắp ra mắt</span>
-              </button>
-              <button disabled aria-disabled="true" title="Sắp ra mắt" className="flex items-center justify-center py-2.5 px-4 bg-[#1877F2] text-white rounded-xl hover:bg-[#1877F2]/90 transition-colors">
-                <FaFacebook size={20} className="mr-2" />
-                <span className="text-sm font-medium">Facebook — Sắp ra mắt</span>
-              </button>
-            </div>
-          </div>
-          
           <p className="mt-8 text-center text-sm text-gray-500">
             Bạn chưa có tài khoản? <Link to="/register" className="font-semibold text-primary-600 hover:text-primary-500">Đăng ký ngay</Link>
           </p>
