@@ -47,7 +47,7 @@ class FlywayMigrationTest {
                 "--app.bootstrap.enabled=false", "--app.order-expiry.interval-ms=3600000")) {
             assertTrue(context.isActive());
             var flyway = context.getBean(Flyway.class);
-            assertEquals("15", flyway.info().current().getVersion().toString());
+            assertEquals("17", flyway.info().current().getVersion().toString());
             var emf = context.getBean(EntityManagerFactory.class);
             try (var em = emf.createEntityManager()) {
                 em.getTransaction().begin();
@@ -101,7 +101,7 @@ class FlywayMigrationTest {
             // Refuse nonempty databases until an operator explicitly onboards them.
             assertThrows(FlywayException.class, flyway::migrate);
             flyway.baseline();
-            assertEquals(14, flyway.migrate().migrationsExecuted);
+            assertEquals(16, flyway.migrate().migrationsExecuted);
             assertEquals(before, snapshot(statement));
             assertEquals(0, count(statement, "SELECT @@TRANCOUNT"));
             assertEquals(0, count(statement, "SELECT COUNT(*) FROM dbo.orders WHERE paid_at IS NOT NULL OR delivered_at IS NOT NULL"));
@@ -119,12 +119,27 @@ class FlywayMigrationTest {
         for (String[] entry : manifest()) {
             Files.write(directory.resolve(entry[1]), resource("db/migration/" + entry[1]));
         }
+        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql"))
+            Files.write(directory.resolve(added), resource("db/migration/" + added));
         String last = "V15__unicode_descriptions.sql";
         Files.write(directory.resolve(last), resource("db/migration/" + last));
         Files.writeString(directory.resolve(last), "\nSELECT 42;\n", java.nio.file.StandardOpenOption.APPEND);
         Flyway changed = Flyway.configure().dataSource(url, sql.username(), sql.password())
                 .defaultSchema("dbo").locations("filesystem:" + directory.toAbsolutePath()).load();
         assertThrows(FlywayException.class, changed::validate);
+    }
+
+    @Test void administrativeMigrationDefaultsAndAppendOnlyAudit() throws Exception {
+        String url=newDatabase(); flyway(url).migrate();
+        try(var connection=connect(url);var statement=connection.createStatement()) {
+            statement.execute("INSERT INTO dbo.users(username,email,password_hash,first_name,last_name) VALUES('admin_migration','migration@example.test','unused',N'Test',N'Admin')");
+            assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.users WHERE token_version=0 AND must_change_password=0 AND deleted_at IS NULL"));
+            statement.execute("INSERT INTO dbo.admin_audit_log(occurred_at,actor_user_id,actor_role,action,target_type,summary,details,correlation_id,result) VALUES(SYSDATETIME(),1,'ADMIN','TEST','USER',N'Test','{}','00000000-0000-0000-0000-000000000001','SUCCESS')");
+            assertThrows(SQLException.class,() -> statement.execute("UPDATE dbo.admin_audit_log SET action='CHANGED'"));
+            assertThrows(SQLException.class,() -> statement.execute("DELETE FROM dbo.admin_audit_log"));
+            assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.admin_audit_log WHERE action='TEST'"));
+            assertEquals(1,count(statement,"SELECT COUNT(*) FROM sys.columns WHERE object_id=OBJECT_ID('dbo.appointments') AND name='staff_id' AND is_nullable=1"));
+        }
     }
 
     @Test void failedCartUpgradePreservesDuplicatesAndCanBeRetriedAfterReconciliation() throws Exception {

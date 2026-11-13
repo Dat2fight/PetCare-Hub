@@ -12,6 +12,10 @@ import java.util.stream.Collectors;
 public class UserDetailsImpl implements UserDetails {
 
     private boolean enabled;
+    private long tokenVersion;
+    private boolean mustChangePassword;
+    public long getTokenVersion() { return tokenVersion; }
+    public boolean isMustChangePassword() { return mustChangePassword; }
     private Long id;
     private String username;
     private String email;
@@ -38,12 +42,15 @@ public class UserDetailsImpl implements UserDetails {
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName().name()))
                 .collect(Collectors.toList());
 
-        return new UserDetailsImpl(
+        var principal = new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
                 user.getPasswordHash(),
-                authorities, Boolean.TRUE.equals(user.getEnabled()));
+                authorities, Boolean.TRUE.equals(user.getEnabled()) && user.getDeletedAt() == null);
+        principal.tokenVersion = user.getTokenVersion();
+        principal.mustChangePassword = user.isMustChangePassword();
+        return principal;
     }
 
     public Long getId() {

@@ -41,7 +41,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 String username = tokenProvider.getUsernameFromJWT(jwt);
 
                 UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
-                if (!userDetails.isEnabled()) {
+                if (!userDetails.isEnabled() || !(userDetails instanceof UserDetailsImpl principal) || !tokenProvider.matchesVersion(jwt, principal)) {
                     SecurityContextHolder.clearContext();
                     securityErrors.unauthorized(request, response);
                     return;
@@ -50,6 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                String path = request.getRequestURI().substring(request.getContextPath().length());
+                if (principal.isMustChangePassword() && !java.util.Set.of("/api/v1/auth/me", "/api/v1/auth/password").contains(path)) {
+                    securityErrors.forbidden(request, response);
+                    return;
+                }
             }
         } catch (org.springframework.security.core.AuthenticationException | io.jsonwebtoken.JwtException ex) {
             SecurityContextHolder.clearContext();

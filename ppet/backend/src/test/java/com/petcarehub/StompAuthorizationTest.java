@@ -37,6 +37,7 @@ class StompAuthorizationTest {
     }
     StompHeaderAccessor connect() {
         when(tokens.validateToken(token)).thenReturn(true);
+        when(tokens.matchesVersion(org.mockito.ArgumentMatchers.eq(token),org.mockito.ArgumentMatchers.any())).thenReturn(true);
         when(tokens.getUsernameFromJWT(token)).thenReturn("customer");
         when(tokens.getExpirationFromJWT(token)).thenReturn(Date.from(Instant.now().plusSeconds(60)));
         when(users.loadUserByUsername("customer")).thenReturn(principal(true));

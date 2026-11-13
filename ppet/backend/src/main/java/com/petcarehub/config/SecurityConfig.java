@@ -33,6 +33,8 @@ public class SecurityConfig {
 
     @Autowired
     private com.petcarehub.security.SecurityErrorHandler securityErrors;
+    @Autowired private com.petcarehub.security.PermissionService permissions;
+    @Autowired private com.petcarehub.service.AdminAuditService audit;
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
@@ -69,7 +71,10 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
-                    auth.requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                    auth.requestMatchers("/api/v1/admin/me/permissions").access(permissions.access(com.petcarehub.security.Permission.PORTAL_ACCESS))
+                        .requestMatchers("/api/v1/admin/audit-logs").access(permissions.access(com.petcarehub.security.Permission.AUDIT_VIEW))
+                        .requestMatchers("/api/v1/admin/dashboard", "/api/v1/admin/revenue-report").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
+                        .requestMatchers("/api/v1/admin/**").access(permissions.access(com.petcarehub.security.Permission.USER_MANAGE))
                         .requestMatchers("/api/v1/products/manage").hasAnyRole("ADMIN", "SALES_STAFF", "WAREHOUSE_STAFF");
                     for (HttpMethod method : new HttpMethod[]{HttpMethod.POST, HttpMethod.PUT, HttpMethod.PATCH, HttpMethod.DELETE}) {
                         auth.requestMatchers(method, "/api/v1/products/**", "/api/v1/categories/**", "/api/v1/promotions/**", "/api/v1/services/**")
@@ -117,6 +122,7 @@ public class SecurityConfig {
 
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(new com.petcarehub.security.AdminRequestAuditFilter(audit), JwtAuthenticationFilter.class);
 
         return http.build();
     }

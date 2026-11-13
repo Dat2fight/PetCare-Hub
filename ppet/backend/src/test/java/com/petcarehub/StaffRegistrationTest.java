@@ -22,41 +22,47 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test")
+@SpringBootTest @AutoConfigureMockMvc @ActiveProfiles("test") @org.springframework.transaction.annotation.Transactional
 class StaffRegistrationTest {
     @Autowired MockMvc mvc;
-    @MockBean UserRepository users;
-    @MockBean RoleRepository roles;
+    @Autowired UserRepository users;
+    @Autowired RoleRepository roles;
 
     private String body(RoleType role) {
         return "{\"username\":\"new-account\",\"email\":\"account@example.test\",\"password\":\"" + UUID.randomUUID()
                 + "\",\"firstName\":\"Test\",\"lastName\":\"Account\",\"role\":\"" + role + "\"}";
     }
     private void stubRoles() {
-        when(roles.findByName(any())).thenAnswer(call -> Optional.of(Role.builder().name(call.getArgument(0)).build()));
-        when(users.save(any())).thenAnswer(call -> call.getArgument(0));
+        for(var type:RoleType.values()) if(roles.findByName(type).isEmpty()) roles.save(Role.builder().name(type).build());
+    }
+    private org.springframework.test.web.servlet.request.RequestPostProcessor admin() {
+        stubRoles();
+        var actor=users.save(User.builder().username("staff_test_admin").email("staff_test_admin@example.test")
+            .firstName("Test").lastName("Admin").passwordHash("unused").roles(java.util.Set.of(roles.findByName(RoleType.ADMIN).orElseThrow())).build());
+        return user(com.petcarehub.security.UserDetailsImpl.build(actor));
     }
     @ParameterizedTest @EnumSource(RoleType.class)
     void publicRegistrationAlwaysCustomer(RoleType injected) throws Exception {
         stubRoles();
         mvc.perform(post("/api/v1/auth/register").contentType("application/json").content(body(injected))).andExpect(status().isOk());
-        verify(users).save(argThat(u -> u.getRoles().size() == 1 && u.getRoles().iterator().next().getName() == RoleType.CUSTOMER));
+        org.junit.jupiter.api.Assertions.assertEquals(java.util.Set.of(RoleType.CUSTOMER), users.findByUsername("new-account").orElseThrow().getRoles().stream().map(Role::getName).collect(java.util.stream.Collectors.toSet()));
     }
     @ParameterizedTest @EnumSource(value=RoleType.class, names={"CUSTOMER", "SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN"})
     void onlyAdminCanProvisionStaff(RoleType caller) throws Exception {
         mvc.perform(post("/api/v1/admin/staff").with(user("caller").roles(caller.name()))
                 .contentType("application/json").content(body(RoleType.VETERINARIAN))).andExpect(status().isForbidden());
-        verify(users, never()).save(any());
+        org.junit.jupiter.api.Assertions.assertFalse(users.existsByUsername("new-account"));
     }
     @ParameterizedTest @EnumSource(value=RoleType.class, names={"SALES_STAFF", "WAREHOUSE_STAFF", "VETERINARIAN"})
     void adminCreatesEmployeeWithoutExposingPassword(RoleType role) throws Exception {
         stubRoles();
-        mvc.perform(post("/api/v1/admin/staff").with(user("admin").roles("ADMIN"))
+        mvc.perform(post("/api/v1/admin/staff").with(admin())
                 .contentType("application/json").content(body(role))).andExpect(status().isCreated())
-                .andExpect(jsonPath("$.roles[0]").value(role.name())).andExpect(jsonPath("$.passwordHash").doesNotExist());
+                .andExpect(jsonPath("$.user.roles[0]").value(role.name())).andExpect(jsonPath("$.user.passwordHash").doesNotExist())
+                .andExpect(jsonPath("$.temporaryPassword").isNotEmpty()).andExpect(jsonPath("$.user.mustChangePassword").value(true));
     }
     @Test void adminCannotCreateAdminThroughEmployeeEndpoint() throws Exception {
-        mvc.perform(post("/api/v1/admin/staff").with(user("admin").roles("ADMIN"))
+        mvc.perform(post("/api/v1/admin/staff").with(admin())
                 .contentType("application/json").content(body(RoleType.ADMIN))).andExpect(status().isBadRequest());
     }
 }

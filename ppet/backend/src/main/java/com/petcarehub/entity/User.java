@@ -16,7 +16,7 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
-@ToString(exclude = {"roles"})
+@ToString(exclude = {"roles", "passwordHash"})
 @Data
 public class User extends BaseEntity {
 
@@ -48,7 +48,19 @@ public class User extends BaseEntity {
     @Builder.Default
     private Boolean enabled = true;
 
+    @Column(name = "deleted_at")
+    private java.time.LocalDateTime deletedAt;
+
+    @Builder.Default
+    @Column(name = "token_version", nullable = false)
+    private long tokenVersion = 0;
+
+    @Builder.Default
+    @Column(name = "must_change_password", nullable = false)
+    private boolean mustChangePassword = false;
+
     @ManyToMany(fetch = FetchType.EAGER)
+    @org.hibernate.annotations.BatchSize(size=100)
     @JoinTable(
         name = "user_roles",
         joinColumns = @JoinColumn(name = "user_id"),

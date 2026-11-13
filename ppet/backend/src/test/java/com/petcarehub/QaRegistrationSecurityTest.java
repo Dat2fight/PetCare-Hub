@@ -56,7 +56,7 @@ class QaRegistrationSecurityTest {
         User admin=users.save(User.builder().username("qa_admin").email("qa_admin@example.test").passwordHash("unused")
                 .firstName("qa_A").lastName("qa_B").roles(new HashSet<>(Set.of(roles.findByName(RoleType.ADMIN).orElseThrow()))).build());
         mvc.perform(patch("/api/v1/admin/users/{id}/role",admin.getId()).with(user(UserDetailsImpl.build(admin)))
-                .param("role","CUSTOMER")).andExpect(status().isForbidden());
+                .contentType("application/json").content("{\"role\":\"CUSTOMER\",\"reason\":\"test\"}")).andExpect(status().isConflict());
         assertTrue(users.findById(admin.getId()).orElseThrow().getRoles().stream().anyMatch(r->r.getName()==RoleType.ADMIN));
     }
 }

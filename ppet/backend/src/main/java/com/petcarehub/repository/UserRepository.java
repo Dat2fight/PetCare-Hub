@@ -6,8 +6,8 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface UserRepository extends JpaRepository<User, Long> {
-    @org.springframework.data.jpa.repository.Query("select distinct u from User u join u.roles r where u.enabled = true and r.name = :role order by u.id")
+public interface UserRepository extends JpaRepository<User, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<User> {
+    @org.springframework.data.jpa.repository.Query("select distinct u from User u join u.roles r where u.enabled = true and u.deletedAt is null and r.name = :role order by u.id")
     java.util.List<User> findEligibleStaff(com.petcarehub.enums.RoleType role);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select u from User u where u.id = :id")
@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
     Boolean existsByEmail(String email);
     Boolean existsByUsername(String username);
+    @org.springframework.data.jpa.repository.Query("select count(u) from User u join u.roles r where u.enabled=true and u.deletedAt is null and r.name=com.petcarehub.enums.RoleType.ADMIN")
+    long countActiveAdmins();
 }

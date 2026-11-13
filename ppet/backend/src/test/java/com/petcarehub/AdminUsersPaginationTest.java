@@ -53,8 +53,8 @@ class AdminUsersPaginationTest {
                 .andExpect(jsonPath("$.content[0].id").value(ids.get(0))).andExpect(jsonPath("$.content[0].roles[0]").value("CUSTOMER"))
                 .andExpect(jsonPath("$.content[0].enabled").value(true)).andReturn();
         var fields=new java.util.HashSet<String>();json.readTree(result.getResponse().getContentAsString()).get("content").get(0).fieldNames().forEachRemaining(fields::add);
-        assertEquals(Set.of("id","username","email","firstName","lastName","enabled","roles"),fields);
-        verify(users).findAll(argThat((Pageable page)->page.getPageNumber()==0 && page.getPageSize()==20 && page.getSort().getOrderFor("id")!=null));
+        assertEquals(Set.of("id","username","email","firstName","lastName","enabled","roles","deletedAt","mustChangePassword"),fields);
+        verify(users).findAll(org.mockito.ArgumentMatchers.<org.springframework.data.jpa.domain.Specification<User>>any(),argThat((Pageable page)->page.getPageNumber()==0 && page.getPageSize()==20 && page.getSort().getOrderFor("id")!=null));
         verify(users,never()).findAll();
     }
 

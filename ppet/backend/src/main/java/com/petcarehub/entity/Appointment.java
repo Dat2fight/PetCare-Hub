@@ -35,7 +35,7 @@ public class Appointment extends BaseEntity {
     private ServiceEntity service;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "staff_id", nullable = false)
+    @JoinColumn(name = "staff_id")
     private User staff;
 
     @Column(name = "appointment_date", nullable = false)

@@ -25,7 +25,7 @@ public class StompAuthorizationInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider tokens;
     private final UserDetailsServiceImpl users;
     private final Map<String, SessionIdentity> sessions = new ConcurrentHashMap<>();
-    private record SessionIdentity(Long userId, String username, Instant expiresAt) {}
+    private record SessionIdentity(Long userId, String username, Instant expiresAt, long version) {}
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -42,11 +42,11 @@ public class StompAuthorizationInterceptor implements ChannelInterceptor {
             try {
                 if (!tokens.validateToken(jwt)) throw denied();
                 var principal = (UserDetailsImpl) users.loadUserByUsername(tokens.getUsernameFromJWT(jwt));
-                if (!principal.isEnabled()) throw denied();
+                if (!principal.isEnabled() || principal.isMustChangePassword() || !tokens.matchesVersion(jwt, principal)) throw denied();
                 Instant expiresAt = tokens.getExpirationFromJWT(jwt).toInstant();
                 if (!expiresAt.isAfter(clock.instant())) throw denied();
                 headers.setUser(new UsernamePasswordAuthenticationToken(principal.getId().toString(), null, principal.getAuthorities()));
-                sessions.put(sessionId, new SessionIdentity(principal.getId(), principal.getUsername(), expiresAt));
+                sessions.put(sessionId, new SessionIdentity(principal.getId(), principal.getUsername(), expiresAt, principal.getTokenVersion()));
                 return message;
             } catch (RuntimeException ex) {
                 throw denied();
@@ -78,7 +78,8 @@ public class StompAuthorizationInterceptor implements ChannelInterceptor {
         if (identity == null || !identity.expiresAt().isAfter(clock.instant())) return false;
         try {
             var current = (UserDetailsImpl) users.loadUserByUsername(identity.username());
-            return current.isEnabled() && current.getId().equals(identity.userId());
+            return current.isEnabled() && !current.isMustChangePassword() && current.getId().equals(identity.userId())
+                    && current.getTokenVersion() == identity.version();
         } catch (RuntimeException ex) { return false; }
     }
 

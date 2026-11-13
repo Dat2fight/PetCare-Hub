@@ -86,7 +86,7 @@ class JwtSecretConfigurationTest {
                     .build().parseSignedClaims(token);
             assertEquals(algorithm, signed.getHeader().getAlgorithm());
             assertEquals(60000, signed.getPayload().getExpiration().getTime() - signed.getPayload().getIssuedAt().getTime());
-            assertEquals(3, signed.getPayload().size()); // Preserve sub, iat, exp only.
+            assertEquals(4, signed.getPayload().size()); // Preserve sub, iat, exp only.
         });
     }
 

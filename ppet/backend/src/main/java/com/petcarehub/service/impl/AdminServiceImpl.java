@@ -36,7 +36,7 @@ public class AdminServiceImpl implements AdminService {
     private final java.time.Clock clock;
 
     @Override
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("@perm.has('REPORT_VIEW')")
     public DashboardSummaryDTO getDashboardSummary(java.time.LocalDate from, java.time.LocalDate to) {
         long totalUsers = userRepository.count();
         long totalOrders = orderRepository.count();
@@ -54,7 +54,7 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
+    @org.springframework.security.access.prepost.PreAuthorize("@perm.has('REPORT_VIEW')")
     public RevenueReportDTO getRevenueReport(java.time.LocalDate from, java.time.LocalDate to) {
         var period = period(from, to);
         var summary = orderRepository.summarizeRevenue(period.start(), period.end());
@@ -77,54 +77,4 @@ public class AdminServiceImpl implements AdminService {
         return new Period(start.atStartOfDay(), end.plusDays(1).atStartOfDay());
     }
 
-    @Override
-    @Transactional(readOnly = true)
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public Page<AdminUserDTO> getAllUsers(Pageable pageable) {
-        Sort sort = pageable.getSort().isSorted() ? pageable.getSort() : Sort.by("id");
-        for (Sort.Order order : sort) {
-            if (!java.util.Set.of("id", "username", "email", "firstName", "lastName", "enabled").contains(order.getProperty()))
-                throw new BadRequestException("Trường sắp xếp người dùng không hợp lệ");
-        }
-        if (sort.getOrderFor("id") == null) sort = sort.and(Sort.by("id"));
-        Pageable bounded = pageable.isUnpaged() ? PageRequest.of(0, 20, sort)
-                : PageRequest.of(pageable.getPageNumber(), Math.min(pageable.getPageSize(), 100), sort);
-        return userRepository.findAll(bounded).map(AdminUserDTO::from);
-    }
-
-    @Override
-    @Transactional
-    @org.springframework.security.access.prepost.PreAuthorize("hasRole('ADMIN')")
-    public User updateUserRole(Long userId, String role) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("User không tồn tại với id: " + userId));
-
-        if (role == null || role.isBlank()) {
-            throw new BadRequestException("Tên role không được để trống");
-        }
-
-        RoleType roleType;
-        try {
-            String roleName = role.trim().toUpperCase();
-            if (roleName.startsWith("ROLE_")) {
-                roleName = roleName.substring(5);
-            }
-            roleType = RoleType.valueOf(roleName);
-        } catch (IllegalArgumentException e) {
-            throw new BadRequestException("Role không hợp lệ: " + role);
-        }
-
-        // NEEDS DECISION: admin removal needs a dedicated, serialized governance flow.
-        // Until then, no generic role change may remove an existing administrator.
-        if (roleType != RoleType.ADMIN && user.getRoles().stream().anyMatch(r -> r.getName() == RoleType.ADMIN))
-            throw new org.springframework.security.access.AccessDeniedException("Không thể hạ quyền quản trị viên qua chức năng này");
-
-        Role roleEntity = roleRepository.findByName(roleType)
-                .orElseThrow(() -> new ResourceNotFoundException("Role không tồn tại: " + role));
-
-        user.getRoles().clear();
-        user.getRoles().add(roleEntity);
-        return userRepository.save(user);
-    }
 }
-

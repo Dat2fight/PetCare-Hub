@@ -14,6 +14,9 @@ import java.util.List;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select a from Appointment a where a.staff.id=:staffId and a.status in (com.petcarehub.enums.AppointmentStatus.SCHEDULED,com.petcarehub.enums.AppointmentStatus.CONFIRMED) and (a.appointmentDate>:date or (a.appointmentDate=:date and a.startTime>:time)) order by a.id")
+    List<Appointment> futureAssigned(Long staffId, LocalDate date, LocalTime time);
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @Query("select a from Appointment a where a.id = :id")
     java.util.Optional<Appointment> findLockedById(Long id);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)

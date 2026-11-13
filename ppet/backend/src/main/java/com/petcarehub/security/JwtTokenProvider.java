@@ -64,6 +64,7 @@ public class JwtTokenProvider {
 
         return Jwts.builder()
                 .subject(userPrincipal.getUsername())
+                .claim("tv", userPrincipal.getTokenVersion())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(getSigningKey())
@@ -78,6 +79,13 @@ public class JwtTokenProvider {
                 .getPayload();
 
         return claims.getSubject();
+    }
+
+    public boolean matchesVersion(String token, UserDetailsImpl principal) {
+        Number version = Jwts.parser().clock(() -> Date.from(clock.instant())).verifyWith(getSigningKey())
+                .build().parseSignedClaims(token).getPayload().get("tv", Number.class);
+        // Pre-migration tokens have no version; require a fresh login after deploying this feature.
+        return version != null && version.longValue() == principal.getTokenVersion();
     }
 
     public boolean validateToken(String authToken) {

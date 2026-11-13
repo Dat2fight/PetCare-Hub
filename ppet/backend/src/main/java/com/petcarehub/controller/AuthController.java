@@ -35,6 +35,15 @@ public class AuthController {
     @Autowired
     private JwtTokenProvider tokenProvider;
 
+    @Autowired private com.petcarehub.service.PasswordChangeService passwordChanges;
+
+    @PostMapping("/password")
+    @org.springframework.security.access.prepost.PreAuthorize("isAuthenticated()")
+    @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+    public void password(@jakarta.validation.Valid @RequestBody com.petcarehub.dto.admin.AdminRequests.Password request) {
+        passwordChanges.change(request);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@jakarta.validation.Valid @RequestBody LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
@@ -49,6 +58,7 @@ public class AuthController {
         
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
+        userDTO.setMustChangePassword(user.isMustChangePassword());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
         userDTO.setPhone(user.getPhone());
@@ -83,6 +93,7 @@ public class AuthController {
         
         UserDTO userDTO = new UserDTO();
         userDTO.setId(user.getId());
+        userDTO.setMustChangePassword(user.isMustChangePassword());
         userDTO.setUsername(user.getUsername());
         userDTO.setEmail(user.getEmail());
         userDTO.setPhone(user.getPhone());
