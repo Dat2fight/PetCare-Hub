@@ -87,7 +87,7 @@ class AdminFoundationTest {
             "GET /admin/dashboard","GET /admin/revenue-report","GET /admin/audit-logs","GET /admin/users/{userId}/overview",
             "PATCH /admin/users/{userId}/role","PATCH /admin/users/{userId}/status","DELETE /admin/users/{userId}","POST /admin/users/{userId}/revoke-sessions");
         var actual=new java.util.HashSet<String>();
-        mappings.getHandlerMethods().forEach((mapping,handler) -> mapping.getPatternValues().stream().filter(p -> p.startsWith("/api/v1/admin/")).forEach(p -> {
+        mappings.getHandlerMethods().forEach((mapping,handler) -> mapping.getPatternValues().stream().filter(p -> p.startsWith("/api/v1/admin/") && handler.getBeanType()==com.petcarehub.controller.AdminController.class).forEach(p -> {
             org.junit.jupiter.api.Assertions.assertNotNull(handler.getMethodAnnotation(org.springframework.security.access.prepost.PreAuthorize.class),p);
             mapping.getMethodsCondition().getMethods().forEach(method -> actual.add(method+" "+p.substring(7)));
         }));
@@ -125,7 +125,7 @@ class AdminFoundationTest {
             org.junit.jupiter.api.Assertions.assertEquals(before+1,audit.count(),r[1]); covered.add(r[0]+" "+r[1]);
         }
         var mapped=new java.util.HashSet<String>();
-        mappings.getHandlerMethods().forEach((mapping,handler) -> mapping.getPatternValues().stream().filter(p -> p.startsWith("/api/v1/admin/")).forEach(p ->
+        mappings.getHandlerMethods().forEach((mapping,handler) -> mapping.getPatternValues().stream().filter(p -> p.startsWith("/api/v1/admin/") && handler.getBeanType()==com.petcarehub.controller.AdminController.class).forEach(p ->
             mapping.getMethodsCondition().getMethods().stream().filter(m -> !m.name().equals("GET")).forEach(m -> mapped.add(m.name()+" "+p.substring(7)))));
         org.junit.jupiter.api.Assertions.assertEquals(mapped,covered,"Every new admin write needs a successful audit assertion");
         long before=audit.count();

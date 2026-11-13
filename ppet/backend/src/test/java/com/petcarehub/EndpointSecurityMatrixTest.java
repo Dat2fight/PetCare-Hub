@@ -37,6 +37,7 @@ class EndpointSecurityMatrixTest {
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
+        "POST /admin/orders/{id}/transition","POST /admin/orders/{id}/request-refund","POST /admin/orders/{id}/mark-refunded","POST /admin/orders/{id}/notes","POST /admin/inventory/movements","POST /admin/appointments/{id}/assign","POST /admin/appointments/{id}/status","POST /admin/reviews/{id}/moderate",
         "PATCH /admin/users/{userId}/status", "DELETE /admin/users/{userId}", "POST /admin/users/{userId}/revoke-sessions",
         "POST /products", "PUT /products/{id}", "DELETE /products/{id}",
         "POST /categories", "PUT /categories/{id}", "DELETE /categories/{id}",
@@ -51,6 +52,7 @@ class EndpointSecurityMatrixTest {
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
+        "GET /admin/orders","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/inventory","GET /admin/inventory/transactions","GET /admin/appointments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff","GET /admin/reviews","GET /admin/reviews/count",
         "GET /admin/me/permissions", "GET /admin/users/{userId}/overview", "GET /admin/audit-logs",
         "GET /care-packages/manage","GET /care-packages/subscriptions/me","GET /wishlist", "GET /wishlist/status", "GET /reviews/me", "GET /reviews/pending", "GET /reviews/eligibility", "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
         "GET /pets/my-pets", "GET /pets/my-pets/{id}", "GET /products/manage", "GET /services/manage",
@@ -90,6 +92,9 @@ class EndpointSecurityMatrixTest {
             if(endpoint.matches(".* /(medical-records|vaccinations|treatments)(/.*)?"))
                 allowed |= role==com.petcarehub.enums.RoleType.VETERINARIAN;
             if(endpoint.contains(" /inventory/")) allowed |= role==com.petcarehub.enums.RoleType.WAREHOUSE_STAFF;
+            if(endpoint.startsWith("POST /admin/orders/")||endpoint.startsWith("POST /admin/reviews/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
+            if(endpoint.startsWith("POST /admin/inventory/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF || role==com.petcarehub.enums.RoleType.WAREHOUSE_STAFF;
+            if(endpoint.equals("POST /admin/appointments/{id}/status")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF||role==com.petcarehub.enums.RoleType.VETERINARIAN;
             // Malformed JSON prevents test data mutations after an allowed filter boundary.
             // CatalogAuthorizationTest and flow tests exercise valid allowed requests as well.
             int status=perform(endpoint,role.name(),true);
@@ -101,6 +106,7 @@ class EndpointSecurityMatrixTest {
     }
     @Test void everyPrivateResourceIdHasANamedOwnershipRegression() throws Exception {
         Map<String,String> evidence=new HashMap<>();
+        register(evidence,"AdminOperationsTest#roleMatrixAndCompleteEndpointInventory","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff");
         register(evidence,"AdminFoundationTest#everyAdminEndpointHasExplicitRolePolicyAndMethodGuard", "GET /admin/users/{userId}/overview");
         register(evidence,"PrivatePetDataTest#privatePetEndpointRequiresOwnerOrClinicalRole", "GET /pets/my-pets/{id}");
         register(evidence,"PrivatePetDataTest#personalPetUpdatesCheckOwnershipAndIgnoreProtectedFields", "PUT /pets/my-pets/{id}");

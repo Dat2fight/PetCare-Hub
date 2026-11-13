@@ -71,7 +71,12 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
-                    auth.requestMatchers("/api/v1/admin/me/permissions").access(permissions.access(com.petcarehub.security.Permission.PORTAL_ACCESS))
+                    auth.requestMatchers("/api/v1/admin/orders", "/api/v1/admin/orders/**").access(permissions.access(com.petcarehub.security.Permission.ORDER_MANAGE))
+                        .requestMatchers("/api/v1/admin/inventory", "/api/v1/admin/inventory/**").access(permissions.access(com.petcarehub.security.Permission.INVENTORY_MANAGE))
+                        .requestMatchers("/api/v1/admin/reviews", "/api/v1/admin/reviews/**").access(permissions.access(com.petcarehub.security.Permission.REVIEW_MANAGE))
+                        .requestMatchers("/api/v1/admin/appointments/*/assign", "/api/v1/admin/appointments/*/eligible-staff").access(permissions.access(com.petcarehub.security.Permission.APPOINTMENT_MANAGE))
+                        .requestMatchers("/api/v1/admin/appointments", "/api/v1/admin/appointments/**").access(permissions.accessAny(com.petcarehub.security.Permission.APPOINTMENT_MANAGE,com.petcarehub.security.Permission.ASSIGNED_APPOINTMENT_MANAGE))
+                        .requestMatchers("/api/v1/admin/me/permissions").access(permissions.access(com.petcarehub.security.Permission.PORTAL_ACCESS))
                         .requestMatchers("/api/v1/admin/audit-logs").access(permissions.access(com.petcarehub.security.Permission.AUDIT_VIEW))
                         .requestMatchers("/api/v1/admin/dashboard", "/api/v1/admin/revenue-report").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
                         .requestMatchers("/api/v1/admin/**").access(permissions.access(com.petcarehub.security.Permission.USER_MANAGE))

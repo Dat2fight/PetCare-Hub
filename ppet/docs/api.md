@@ -207,3 +207,39 @@ All paths below have prefix `/api/v1/admin`. Anonymous: 401; unauthorized roles:
 Users: keyword, role, status=ACTIVE/LOCKED/DELETED/ALL, page/size (max 100), sort whitelist. Role writes now accept JSON {role,reason,currentPassword}; status {enabled,reason,currentPassword}; delete/revoke {reason,currentPassword}. Staff accepts username/email/firstName/lastName/phone/role; returns {user,temporaryPassword} once with Cache-Control:no-store. Client password is ignored. User DTO adds deletedAt/mustChangePassword. Overview independently pages ordersPage/appointmentsPage/petsPage, size max100. Audit filters actor/action/targetType/target/from/to.
 
 POST /api/v1/auth/password accepts {currentPassword,newPassword}; returns 204 and revokes tokens. Auth user DTO adds mustChangePassword. JWT requires tv claim. See admin-guide.md for permission grants, safeguards and audit. Legacy business URLs retain previous policies until their phase is migrated.
+
+## Admin operations — giai đoạn 2 (2026-11-13)
+
+Tiền tố `/api/v1/admin`. ADMIN được tất cả; anonymous 401, CUSTOMER 403. URL guard và method guard dùng cùng PermissionService. Staff phải hoàn thành đổi mật khẩu tạm.
+
+| Endpoint | SALES_STAFF | WAREHOUSE_STAFF | VETERINARIAN | Permission |
+|---|---|---|---|---|
+| GET /orders; GET /orders/{id}; GET /orders/{id}/print | Có | 403 | 403 | ORDER_MANAGE |
+| GET /orders/{id}/notes; GET /orders/{id}/payments | Có | 403 | 403 | ORDER_MANAGE |
+| POST /orders/{id}/transition; /request-refund; /mark-refunded; /notes | Có | 403 | 403 | ORDER_MANAGE |
+| GET /inventory; GET /inventory/transactions; POST /inventory/movements | Có | Có | 403 | INVENTORY_MANAGE |
+| GET /appointments; GET /appointments/{id}; POST /appointments/{id}/status | Chỉ được giao | 403 | Chỉ được giao | APPOINTMENT_MANAGE hoặc ASSIGNED_APPOINTMENT_MANAGE |
+| GET /appointments/{id}/eligible-staff; POST /appointments/{id}/assign | 403 | 403 | 403 | APPOINTMENT_MANAGE (ADMIN) |
+| GET /reviews; GET /reviews/count; POST /reviews/{id}/moderate | Có | 403 | 403 | REVIEW_MANAGE |
+
+Mọi danh sách trả Page (`content,totalElements,number,size,…`), mặc định 20, tối đa 100. `sort` ngoài whitelist trả 400; ID giảm dần là khóa phụ ổn định. Khoảng ngày đóng hai đầu theo giờ nghiệp vụ. Keyword tối đa 100 ký tự, LIKE escape %, _, [, !; giá trị client dùng bind parameters.
+
+| Danh sách | Bộ lọc | Sort cho phép |
+|---|---|---|
+| orders | status, payment, keyword (mã/tên khách), from, to, refunds=true | id, createdAt, total, status |
+| inventory | keyword (tên/SKU), low=true | id, quantity, name |
+| inventory/transactions | productId, type, actor, from, to | id, createdAt |
+| appointments | staff, serviceId, status, from, to, unassigned=true | id, date, status |
+| reviews | status=PENDING mặc định (hoặc APPROVED/REJECTED/HIDDEN/ALL), type=PRODUCT/PET/SERVICE, target | id, createdAt, rating |
+| notes, payments, eligible-staff | page, size | id |
+
+- `transition`: `{action:"confirm|process|ship|deliver|cancel",reason?}`. Cancel cần reason; dùng state machine hiện tại, sai trạng thái 409. Chỉ hủy PENDING/CONFIRMED/PROCESSING; hủy đơn hỗn hợp nhả toàn bộ pet, kho, lượt mã và điểm đã dùng.
+- `request-refund`: `{body:"lý do"}` (1–2000 ký tự), chỉ COMPLETED + DELIVERED/CANCELLED. Tạo yêu cầu đối soát toàn bộ đơn.
+- `mark-refunded`: `{reference:"biên nhận",reason:"ghi chú"}` (tối đa 100/500 ký tự), chỉ đã thu tiền và đã yêu cầu hoàn hoặc đã hủy. Retry cùng biên nhận không tạo giao dịch tiền trùng; khác biên nhận sau khi hoàn trả 409. Không nhận số tiền từ client, không hoàn một phần. Không gọi cổng, hoàn kho, chuyển chủ, thay đổi điểm đã kiếm hoặc hủy gói khi đánh dấu hoàn.
+- `notes`: `{body:"nội dung"}`. Không có ghi chú nội bộ trong DTO khách hoặc phiếu in. Order detail/print trả `{order,total,taxAmount,paidAt,refundRequestedAt,refundedAt,refundReference}`; `order` là DTO an toàn hiện có. `/payments` là sổ thu/hoàn tiền mặt, không phải dữ liệu cổng.
+- `movements`: `{productId,type:"STOCK_IN|STOCK_OUT|ADJUSTMENT",quantity,reason}`. Nhập/xuất >0; kiểm kê là số tồn mới >=0; lý do bắt buộc. Xuất vượt tồn 409. Actor lấy từ phiên đăng nhập; lịch sử có source, referenceType/referenceId, actorId.
+- `assign`: `{staffId,reason}`. Chỉ lịch tương lai SCHEDULED/CONFIRMED, nhân viên active/chưa xóa/đúng role dịch vụ. Khóa pet → nhân viên → lịch, kiểm trùng nhân viên và pet. Sai role/khóa 400, trùng 409.
+- `status`: `{status,reason?}`. Tái dùng state machine, sai 409, hủy cần lý do và tạo thông báo web. Nhân viên sai phạm vi ID hoặc lọc staff khác trả 404. Không thông báo email.
+- `moderate`: `{action:"APPROVED|REJECTED|HIDDEN",reason?}`. Reject cần reason. APPROVED cũng dùng hiện lại review đã ẩn. GET /reviews/count trả `{pending:n}`. API review/summary công khai chỉ tính approved.
+
+Các POST thành công trả 200; transition trả OrderDTO, POST còn lại body rỗng. Chi tiết audit và vận hành ở [admin-guide](admin-guide.md). URL nghiệp vụ cũ vẫn tồn tại với chính sách cũ; portal mới dùng toàn bộ URL admin kể trên để ghi audit.

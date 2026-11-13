@@ -37,4 +37,7 @@ public class PermissionService {
     public AuthorizationManager<RequestAuthorizationContext> access(Permission permission) {
         return (authentication, context) -> new AuthorizationDecision(permissions(authentication.get()).contains(permission));
     }
+    public AuthorizationManager<RequestAuthorizationContext> accessAny(Permission... values) {
+        return (authentication,context) -> {var grants=permissions(authentication.get());return new AuthorizationDecision(Arrays.stream(values).anyMatch(grants::contains));};
+    }
 }

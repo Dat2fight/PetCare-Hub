@@ -404,3 +404,7 @@ Flyway bật mặc định/dev; H2 test tắt Flyway. Không đổi API hay fron
 
 ## Admin portal — foundation
 Phase 1 adds `/admin/*` (under the Vite base path), backend permissions, account management, temporary staff passwords, JWT revocation and administrative audit. See [admin guide](docs/admin-guide.md) and [API contract](docs/api.md). Apply V16/V17 with the documented backup/migration procedure before deploying this backend. Operational modules follow in later phases. No new dependencies.
+
+## Admin portal — daily operations
+
+Phase 2 adds orders/COD and manual refund reconciliation, internal notes/print slips, stock movements/history, appointment assignment/week calendar and review moderation. Role guards and audit cover the new admin API. See [operator guide](docs/admin-guide.md), [API matrix](docs/api.md) and [phase 2 report](docs/admin-phase-2-report.md). Apply V18 with backup and test-copy verification before deploying this version; no production migration is performed by this change. Cash only; in-app notifications only; no new dependency or environment variable.

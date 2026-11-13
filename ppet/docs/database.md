@@ -534,3 +534,17 @@ Kiểm chứng bổ sung: Flyway/constraint tests đã chạy bằng database m�
 
 ## Admin foundation migrations
 V16__admin_accounts.sql: users.token_version BIGINT default0, must_change_password BIT default0; reuse deleted_at, add status index; appointments.staff_id nullable for reassignment. V17__admin_audit_log.sql: append-only audit table and indexes; SQL Server trigger rejects UPDATE/DELETE. actor_user_id is a historical scalar (no cascading FK); credentials and personal contact details excluded. Existing database is not mutated automatically by the agent. Apply via Flyway only after backup and test-copy validation. Old JWTs require login again. See admin-guide.md.
+
+## Admin operations — V18
+
+`V18__admin_operations.sql` bổ sung:
+
+- orders.refund_reference NVARCHAR(100), refunded_at/refund_requested_at DATETIME2 nullable; giữ PaymentStatus.REFUNDED hiện có.
+- order_notes: order_id, actor_id (FK), body NVARCHAR(2000), created_at; chỉ cho nội bộ, index theo order/id.
+- order_payment_events: order_id/actor_id (FK), event_type VARCHAR(40), amount DECIMAL(18,2), reference NVARCHAR(100), occurred_at; unique(order_id,event_type) cho CASH_RECEIVED và CASH_REFUNDED. Khóa đơn và unique index chặn retry ghi tiền trùng.
+- order_items.item_name_snapshot NVARCHAR(255), tên sản phẩm/thú cưng tại checkout mới. Đơn cũ giữ NULL và đọc tên catalog hiện có; không giả lập tên lịch sử. Gói chăm sóc dùng snapshot riêng đã có.
+- Index hàng đợi orders(status,payment_status,created_at,id), reviews(moderation_state,reviewable_type,id).
+
+Không backfill biên nhận, thời điểm thu hoặc sổ tiền cho đơn lịch sử. Giá/số lượng/địa chỉ vẫn lấy snapshot đã lưu của đơn. Doanh thu hiện tại chỉ tính COMPLETED và loại đơn hủy, nên REFUNDED tự bị loại. Đánh dấu hoàn chỉ là xác nhận trả tiền mặt, không tự chạy quy trình trả hàng/thu hồi quyền sở hữu/điểm/gói.
+
+Áp dụng bằng Flyway sau V17, sao lưu và thử bản sao trước; không chạy SQL legacy hoặc sửa checksum. Đã kiểm chứng V18 trên database test mới và nâng cấp legacy ở SQL Server cục bộ, Hibernate validate, Unicode ghi chú/biên nhận và unique giao dịch tiền. Database `petcarehub` thật chưa được cập nhật trong giai đoạn này.
