@@ -60,6 +60,11 @@ public class InventoryServiceImpl implements InventoryService {
         requirePositive(quantity);
         changeStock(productId, quantity, TransactionType.STOCK_OUT, "Xuất kho", getCurrentUser(), null);
     }
+    @Override @Transactional
+    public void reduceStockWithReason(Long productId,Integer quantity,String reason) {
+        if(reason==null||reason.isBlank())throw new BadRequestException("Cần nhập lý do xuất kho");
+        requirePositive(quantity);changeStock(productId,quantity,TransactionType.STOCK_OUT,reason,getCurrentUser(),null);
+    }
 
     @Override
     @Transactional

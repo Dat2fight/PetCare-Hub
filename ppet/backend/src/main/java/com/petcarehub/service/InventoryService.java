@@ -10,6 +10,7 @@ import com.petcarehub.dto.inventory.StockUpdateRequest;
 public interface InventoryService {
     boolean checkStock(Long productId, Integer requiredQuantity);
     void reduceStock(Long productId, Integer quantity);
+    void reduceStockWithReason(Long productId, Integer quantity, String reason);
     void reserveForOrder(Long productId, int quantity, long orderId);
     void restoreForOrder(Long productId, int quantity, long orderId);
     void adjustStock(Long productId, Integer quantity, String reason);
