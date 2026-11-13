@@ -69,7 +69,7 @@ class PhaseThreeOwnershipTest {
     @Autowired CarePackageRepository plans;
     @Autowired CarePackageSubscriptionRepository subscriptions;
     @Test void cashActivatesPackageOnceAndOnlyForOwner() throws Exception {
-        var owner=account(); var other=account();
+        var owner=account(); var other=account(); var staff=account();
         var pet=pets.save(Pet.builder().name("Miu").owner(owner).price(java.math.BigDecimal.ZERO)
                 .species(species.save(Species.builder().name("Package species").build())).build());
         var plan=plans.save(CarePackage.builder().name("Khám định kỳ").price(java.math.BigDecimal.TEN)
@@ -93,7 +93,7 @@ class PhaseThreeOwnershipTest {
                 .andExpect(status().isNotFound());
         mvc.perform(get(mine).with(customer(owner))).andExpect(jsonPath("$.length()").value(0));
         for(String action:java.util.List.of("confirm","process","ship","deliver","deliver"))
-            mvc.perform(post(orders+"/"+id+"/"+action).with(user("staff").roles("SALES_STAFF"))).andExpect(status().isOk());
+            mvc.perform(post(orders+"/"+id+"/"+action).with(user(new UserDetailsImpl(staff.getId(),staff.getUsername(),staff.getEmail(),"",java.util.List.of(new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_SALES_STAFF")))))).andExpect(status().isOk());
         mvc.perform(get(mine).with(customer(owner))).andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].name").value("Khám định kỳ")).andExpect(jsonPath("$[0].includesCheckup").value(true))
                 .andExpect(jsonPath("$[0].status").value("ACTIVE"));

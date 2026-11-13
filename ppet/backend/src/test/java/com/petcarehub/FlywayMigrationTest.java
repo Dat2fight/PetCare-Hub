@@ -47,7 +47,7 @@ class FlywayMigrationTest {
                 "--app.bootstrap.enabled=false", "--app.order-expiry.interval-ms=3600000")) {
             assertTrue(context.isActive());
             var flyway = context.getBean(Flyway.class);
-            assertEquals("17", flyway.info().current().getVersion().toString());
+            assertEquals("18", flyway.info().current().getVersion().toString());
             var emf = context.getBean(EntityManagerFactory.class);
             try (var em = emf.createEntityManager()) {
                 em.getTransaction().begin();
@@ -101,7 +101,7 @@ class FlywayMigrationTest {
             // Refuse nonempty databases until an operator explicitly onboards them.
             assertThrows(FlywayException.class, flyway::migrate);
             flyway.baseline();
-            assertEquals(16, flyway.migrate().migrationsExecuted);
+            assertEquals(17, flyway.migrate().migrationsExecuted);
             assertEquals(before, snapshot(statement));
             assertEquals(0, count(statement, "SELECT @@TRANCOUNT"));
             assertEquals(0, count(statement, "SELECT COUNT(*) FROM dbo.orders WHERE paid_at IS NOT NULL OR delivered_at IS NOT NULL"));
@@ -119,7 +119,7 @@ class FlywayMigrationTest {
         for (String[] entry : manifest()) {
             Files.write(directory.resolve(entry[1]), resource("db/migration/" + entry[1]));
         }
-        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql"))
+        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql", "V18__admin_operations.sql"))
             Files.write(directory.resolve(added), resource("db/migration/" + added));
         String last = "V15__unicode_descriptions.sql";
         Files.write(directory.resolve(last), resource("db/migration/" + last));
@@ -139,6 +139,22 @@ class FlywayMigrationTest {
             assertThrows(SQLException.class,() -> statement.execute("DELETE FROM dbo.admin_audit_log"));
             assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.admin_audit_log WHERE action='TEST'"));
             assertEquals(1,count(statement,"SELECT COUNT(*) FROM sys.columns WHERE object_id=OBJECT_ID('dbo.appointments') AND name='staff_id' AND is_nullable=1"));
+        }
+    }
+
+
+    @Test void operationsMigrationPreservesUnicodeAndRejectsDuplicatePayments() throws Exception {
+        String url=newDatabase();flyway(url).migrate();
+        try(var connection=connect(url);var statement=connection.createStatement()) {
+            statement.execute("INSERT INTO dbo.users(username,email,password_hash,first_name,last_name) VALUES('ops_migration','ops@example.test','unused',N'Test',N'Ops')");
+            statement.execute("INSERT INTO dbo.orders(customer_id,order_number) VALUES(1,'ops-migration')");
+            statement.execute("INSERT INTO dbo.order_notes(order_id,actor_id,body,created_at) VALUES(1,1,N'Hoàn tiền cho khách',SYSDATETIME())");
+            assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.order_notes WHERE body=N'Hoàn tiền cho khách'"));
+            String payment="INSERT INTO dbo.order_payment_events(order_id,event_type,amount,reference,actor_id,occurred_at) VALUES(1,'CASH_REFUNDED',123.45,N'Biên nhận',1,SYSDATETIME())";
+            statement.execute(payment);
+            assertThrows(SQLException.class,()->statement.execute(payment));
+            assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.order_payment_events WHERE amount=123.45 AND reference=N'Biên nhận'"));
+            assertEquals(0,flyway(url).migrate().migrationsExecuted);
         }
     }
 

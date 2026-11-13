@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 @ToString(exclude = {"order", "pet", "product"})
 @Data
 public class OrderItem {
+    @org.hibernate.annotations.Nationalized @Column(length=255) private String itemNameSnapshot;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

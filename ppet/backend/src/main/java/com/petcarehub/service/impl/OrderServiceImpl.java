@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 @Transactional
 public class OrderServiceImpl implements OrderService {
     private final PackageCheckout packages;
+    private final jakarta.persistence.EntityManager entityManager;
     private final OrderRepository orders;
     private final ProductRepository products;
     private final PetRepository pets;
@@ -110,7 +111,7 @@ public class OrderServiceImpl implements OrderService {
             if (pet.getOwner() != null || pet.getAvailabilityStatus() != AvailabilityStatus.AVAILABLE || pet.getReservedOrder() != null)
                 throw new IllegalStateException("Thú cưng này không còn khả dụng");
             if (pet.getPrice() == null || pet.getPrice().signum() <= 0) throw new IllegalStateException("Thú cưng chưa được niêm yết giá");
-            order.addItem(OrderItem.builder().itemType(OrderItemType.PET).pet(pet).quantity(1).unitPrice(pet.getPrice()).subtotal(pet.getPrice()).build());
+            order.addItem(OrderItem.builder().itemType(OrderItemType.PET).itemNameSnapshot(pet.getName()).pet(pet).quantity(1).unitPrice(pet.getPrice()).subtotal(pet.getPrice()).build());
             total = total.add(pet.getPrice()); reservedPets.add(pet);
         }
         BigDecimal petTotal = total;
@@ -120,7 +121,7 @@ public class OrderServiceImpl implements OrderService {
             Product product = products.findById(item.getProductId()).orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm"));
             if (!Boolean.TRUE.equals(product.getActive())) throw new ResourceNotFoundException("Sản phẩm không tồn tại hoặc đã ngừng bán");
             BigDecimal subtotal = product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity()));
-            order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
+            order.addItem(OrderItem.builder().itemType(OrderItemType.PRODUCT).itemNameSnapshot(product.getName()).product(product).quantity(item.getQuantity()).unitPrice(product.getPrice()).subtotal(subtotal).build());
             total = total.add(subtotal);
         }
         var summary = pricing.calculate(customerId, total, total.subtract(petTotal), request.getPromotionCode(), request.getPointsToUse(), true);
@@ -227,13 +228,14 @@ public class OrderServiceImpl implements OrderService {
             pricing.earn(o);
             o.setPaymentStatus(PaymentStatus.COMPLETED);
             o.setPaidAt(java.time.LocalDateTime.now(clock));
+            entityManager.persist(OrderPaymentEvent.builder().orderId(o.getId()).eventType("CASH_RECEIVED").amount(o.getTotalAmount()).actorId(ownership.userId()).occurredAt(java.time.LocalDateTime.now(clock)).build());
             packageLine.ifPresent(line -> packages.activate(o,line));
         }
         return dto(orders.save(o));
     }
     @Override public OrderDTO cancelOrder(Long id) {
         Long currentId = ownership.userId();
-        Order o = (ownership.hasRole("ADMIN") ? orders.findLockedById(id) : orders.findOwnedLockedById(id, currentId))
+        Order o = (ownership.hasRole("ADMIN") || ownership.hasRole("SALES_STAFF") ? orders.findLockedById(id) : orders.findOwnedLockedById(id, currentId))
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy đơn hàng"));
         return cancelLocked(o);
     }
@@ -294,8 +296,8 @@ public class OrderServiceImpl implements OrderService {
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {
             OrderItemDTO d = new OrderItemDTO();
-            if (item.getProduct() != null) { d.setProductId(item.getProduct().getId()); d.setProductName(item.getProduct().getName()); d.setImageUrl(item.getProduct().getImageUrl()); }
-            if (item.getPet() != null) { d.setPetId(item.getPet().getId()); d.setPetName(item.getPet().getName()); d.setImageUrl(item.getPet().getImageUrl()); }
+            if (item.getProduct() != null) { d.setProductId(item.getProduct().getId()); d.setProductName(item.getItemNameSnapshot()!=null?item.getItemNameSnapshot():item.getProduct().getName()); d.setImageUrl(item.getProduct().getImageUrl()); }
+            if (item.getPet() != null) { d.setPetId(item.getPet().getId()); d.setPetName(item.getItemNameSnapshot()!=null?item.getItemNameSnapshot():item.getPet().getName()); d.setImageUrl(item.getPet().getImageUrl()); }
             if (item.getCarePackage()!=null) {
                 d.setCarePackageId(item.getCarePackage().getId());
                 d.setBeneficiaryPetId(item.getBeneficiaryPet().getId());

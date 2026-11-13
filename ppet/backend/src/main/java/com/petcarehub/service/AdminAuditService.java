@@ -20,17 +20,23 @@ public class AdminAuditService {
     private final Clock clock;
     // Values are identifiers/booleans/enums only. Passwords, tokens and personal details never enter the log.
     private static final Set<String> KEYS=Set.of("enabledBefore","enabledAfter","roleBefore","roleAfter",
-        "deleted","sessionsRevoked","appointmentsUnassigned","mustChangePassword","status","method");
+        "deleted","sessionsRevoked","appointmentsUnassigned","mustChangePassword","status","method",
+        "statusBefore","statusAfter","quantity","staffId","reasonProvided","paymentStatus","replay");
 
     @Transactional(propagation=Propagation.MANDATORY)
-    public void record(String action, Long targetId, Map<String,?> details) { append(action,targetId,details,"SUCCESS"); }
+    public void record(String action, Long targetId, Map<String,?> details) { append(action,"USER",targetId,details,"SUCCESS"); }
+
+    @Transactional(propagation=Propagation.MANDATORY)
+    public void record(String action, String targetType, Long targetId, Map<String,?> details) {
+        append(action,targetType,targetId,details,"SUCCESS");
+    }
 
     @Transactional(propagation=Propagation.REQUIRES_NEW)
     public void failure(int status, String method) {
-        append("ADMIN_REQUEST_REJECTED", null, Map.of("status",status,"method",method),status==401 || status==403 ? "DENIED" : "FAILED");
+        append("ADMIN_REQUEST_REJECTED", "REQUEST", null, Map.of("status",status,"method",method),status==401 || status==403 ? "DENIED" : "FAILED");
     }
 
-    private void append(String action, Long targetId, Map<String,?> details, String result) {
+    private void append(String action, String targetType, Long targetId, Map<String,?> details, String result) {
         Map<String,Object> safe=new TreeMap<>();
         details.forEach((key,value) -> { if(KEYS.contains(key) && (value instanceof Boolean || value instanceof Number || value instanceof String)) safe.put(key,value); });
         String json;
@@ -42,7 +48,7 @@ public class AdminAuditService {
         String correlation=request==null ? UUID.randomUUID().toString() : (String)request.getAttribute("correlationId");
         logs.save(AdminAuditLog.builder().occurredAt(LocalDateTime.now(clock)).actorUserId(ownership.userId())
             .actorRole(auth.getAuthorities().stream().map(a -> a.getAuthority()).sorted().collect(java.util.stream.Collectors.joining(",")))
-            .action(action).targetType("USER").targetId(targetId).summary(action).details(json).result(result)
+            .action(action).targetType(targetType).targetId(targetId).summary(action).details(json).result(result)
             .ip(request==null ? null : request.getRemoteAddr()) // No trust in client-supplied forwarding headers.
             .correlationId(correlation==null ? UUID.randomUUID().toString() : correlation).build());
     }

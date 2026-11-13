@@ -41,3 +41,5 @@
     background: #94a3b8; 
   }
 }
+
+@media print { body:has(#admin-invoice) * { visibility: hidden; } #admin-invoice, #admin-invoice * { visibility: visible !important; } #admin-invoice { position: absolute; left: 0; top: 0; width: 100%; padding: 1rem; } }
