@@ -76,7 +76,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 "Validation Failed",
                 fieldErrors.toString(),
-                request.getDescription(false).replace("uri=", ""), java.util.UUID.randomUUID().toString(), fieldErrors
+                request.getDescription(false).replace("uri=", ""), ErrorResponse.currentCorrelationId(), fieldErrors
         );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }

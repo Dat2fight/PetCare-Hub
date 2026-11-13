@@ -13,6 +13,14 @@ public record ErrorResponse(
         java.util.Map<String,String> fieldErrors
 ) {
     public ErrorResponse(LocalDateTime timestamp, int status, String error, String message, String path) {
-        this(timestamp, status, error, message, path, java.util.UUID.randomUUID().toString(), null);
+        this(timestamp, status, error, message, path, currentCorrelationId(), null);
+    }
+    public static String currentCorrelationId() {
+        var attributes=org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        if(attributes instanceof org.springframework.web.context.request.ServletRequestAttributes servlet) {
+            Object id=servlet.getRequest().getAttribute("correlationId");
+            if(id instanceof String value) return value;
+        }
+        return java.util.UUID.randomUUID().toString();
     }
 }
