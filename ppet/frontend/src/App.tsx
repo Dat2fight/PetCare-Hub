@@ -1,5 +1,17 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { PermissionProvider } from './contexts/PermissionContext';
+import { useAuth } from './contexts/AuthContext';
+const AdminPortal = React.lazy(() => import('./pages/admin/AdminPortal'));
+const ChangePasswordPage = React.lazy(() => import('./pages/auth/ChangePasswordPage'));
+
+function PublicHeader() { return useLocation().pathname.startsWith('/admin') ? null : <Header />; }
+function PublicFooter() { return useLocation().pathname.startsWith('/admin') ? null : <Footer />; }
+function SessionGate({ children }: { children: React.ReactNode }) {
+  const { user } = useAuth(); const location = useLocation();
+  if (user?.mustChangePassword && location.pathname !== '/change-password') return <Navigate to="/change-password" replace />;
+  return children;
+}
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -47,10 +59,13 @@ function App() {
     <Router basename={import.meta.env.BASE_URL}>
       <ScrollToTop />
       <AuthProvider>
+        <PermissionProvider><SessionGate>
         <div className="flex flex-col min-h-screen">
-          <Header />
+          <PublicHeader />
           <main className="grow">
             <Routes>
+              <Route path="/admin/*" element={<ProtectedRoute><React.Suspense fallback={<p role="status" className="p-6">Đang tải cổng quản trị…</p>}><AdminPortal /></React.Suspense></ProtectedRoute>} />
+              <Route path="/change-password" element={<ProtectedRoute><React.Suspense fallback={<p>Đang tải…</p>}><ChangePasswordPage /></React.Suspense></ProtectedRoute>} />
               <Route path="/" element={<HomePage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
@@ -87,9 +102,10 @@ function App() {
               <Route path="*" element={<div className="p-8">404 — Không tìm thấy trang.</div>} />
             </Routes>
           </main>
-          <Footer />
+          <PublicFooter />
         </div>
         <Toaster position="top-right" />
+        </SessionGate></PermissionProvider>
       </AuthProvider>
     </Router>
   );

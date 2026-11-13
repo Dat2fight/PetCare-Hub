@@ -187,3 +187,23 @@ Khi chuyển đơn COD sang DELIVERED, backend ghi nhận thu tiền và kích h
 Không thêm endpoint, đổi DTO hoặc quyền truy cập. Backend bật Flyway trước Hibernate validate; database cũ chưa baseline sẽ bị chặn khởi động. Cần hoàn thành [onboarding database](migrations.md) trước khi triển khai backend. Chuỗi Unicode, tiền decimal(18,2), URL 500 ký tự và idempotency key được ánh xạ theo schema SQL Server; các giới hạn API hiện có vẫn áp dụng.
 
 Kiểm chứng C1 bổ sung dùng SQL Server cục bộ tách database test, không thay endpoint/DTO/quyền hay datasource runtime. Hướng dẫn tại [migration](migrations.md).
+
+
+## Admin foundation (2026-11-13)
+All paths below have prefix `/api/v1/admin`. Anonymous: 401; unauthorized roles: 403. URL and method guards use PermissionService.
+
+| Method/path | Permission | Role |
+|---|---|---|
+| GET /me/permissions | PORTAL_ACCESS | All four internal roles |
+| GET /dashboard, /revenue-report | REPORT_VIEW | ADMIN |
+| GET /users | USER_MANAGE | ADMIN |
+| POST /staff | USER_MANAGE | ADMIN |
+| PATCH /users/{userId}/role, /users/{userId}/status | USER_MANAGE | ADMIN |
+| DELETE /users/{userId} | USER_MANAGE | ADMIN |
+| POST /users/{userId}/revoke-sessions | USER_MANAGE | ADMIN |
+| GET /users/{userId}/overview | USER_MANAGE | ADMIN |
+| GET /audit-logs | AUDIT_VIEW | ADMIN |
+
+Users: keyword, role, status=ACTIVE/LOCKED/DELETED/ALL, page/size (max 100), sort whitelist. Role writes now accept JSON {role,reason,currentPassword}; status {enabled,reason,currentPassword}; delete/revoke {reason,currentPassword}. Staff accepts username/email/firstName/lastName/phone/role; returns {user,temporaryPassword} once with Cache-Control:no-store. Client password is ignored. User DTO adds deletedAt/mustChangePassword. Overview independently pages ordersPage/appointmentsPage/petsPage, size max100. Audit filters actor/action/targetType/target/from/to.
+
+POST /api/v1/auth/password accepts {currentPassword,newPassword}; returns 204 and revokes tokens. Auth user DTO adds mustChangePassword. JWT requires tv claim. See admin-guide.md for permission grants, safeguards and audit. Legacy business URLs retain previous policies until their phase is migrated.

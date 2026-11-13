@@ -25,6 +25,7 @@ export const LoginPage: React.FC = () => {
       const res = await apiClient.post('/auth/login', { username, password });
       const token = res.data.token || res.data.accessToken;
       await login(token, res.data.user);
+      if (res.data.user.mustChangePassword) { navigate('/change-password', { replace: true }); return; }
       let from = location.state?.from;
       try { from ??= JSON.parse(sessionStorage.getItem('loginReturnTo') || 'null'); } catch { /* Ignore obsolete session data. */ }
       sessionStorage.removeItem('loginReturnTo');
@@ -73,8 +74,8 @@ export const LoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <Input
-              label="Email hoặc số điện thoại"
-              placeholder="Nhập email hoặc số điện thoại"
+              label="Tên đăng nhập"
+              placeholder="Nhập tên đăng nhập"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required

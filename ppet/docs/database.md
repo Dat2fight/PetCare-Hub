@@ -530,3 +530,7 @@ Bộ test SQL Server đã đăng ký cả hai file tiền tố 004, cùng 005 đ
 V1–V14 đăng ký toàn bộ schema và migration thủ công, gồm cả hai file 004. V15 mở rộng hai description thành NVARCHAR(MAX). Mapping Unicode/giá/URL/khóa checkout và nullable được đồng bộ. Không sửa nguồn SQL cũ, xóa bảng dư hay backfill mốc thời gian. Xem [runbook](migrations.md), [kiểm kê](hardening/SCHEMA-INVENTORY.md) và [báo cáo](hardening/REPORT.md). Database thực chưa được áp migration trong giai đoạn này.
 
 Kiểm chứng bổ sung: Flyway/constraint tests đã chạy bằng database mới petcarehub_test_<UUID> trên SQL Server cục bộ 17.0.1000.7, không dùng petcarehub. Cơ chế tạo/dọn có guard được mô tả trong docs/migrations.md; Docker là tùy chọn cho CI.
+
+
+## Admin foundation migrations
+V16__admin_accounts.sql: users.token_version BIGINT default0, must_change_password BIT default0; reuse deleted_at, add status index; appointments.staff_id nullable for reassignment. V17__admin_audit_log.sql: append-only audit table and indexes; SQL Server trigger rejects UPDATE/DELETE. actor_user_id is a historical scalar (no cascading FK); credentials and personal contact details excluded. Existing database is not mutated automatically by the agent. Apply via Flyway only after backup and test-copy validation. Old JWTs require login again. See admin-guide.md.

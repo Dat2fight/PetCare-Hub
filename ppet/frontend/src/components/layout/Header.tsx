@@ -4,6 +4,7 @@ import { FiSearch, FiBell, FiShoppingCart, FiMenu, FiX } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 import apiClient from '../../api/client';
 import { useAuth } from '../../contexts/AuthContext';
+import { usePermissions } from '../../contexts/PermissionContext';
 
 const navigation = [['/', 'Trang chủ'], ['/pets', 'Thú cưng'], ['/products', 'Sản phẩm'], ['/services', 'Dịch vụ'], ['/care-packages','Gói chăm sóc'], ['/pet-matching', 'Tìm thú cưng phù hợp']];
 const accountLinks = [['/my-care-packages','Gói của tôi'],['/wishlist','Yêu thích'],['/my-reviews','Đánh giá của tôi'],['/profile', 'Hồ sơ cá nhân'], ['/my-pets', 'Thú cưng của tôi'], ['/my-appointments','Lịch hẹn của tôi'], ['/orders', 'Đơn hàng'], ['/loyalty', 'Điểm thưởng']];
@@ -11,11 +12,12 @@ const touch = 'inline-flex min-h-11 min-w-11 items-center justify-center rounded
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const { permissions } = usePermissions();
   const navigate = useNavigate(); const location = useLocation();
   const [unread, setUnread] = useState(0); const [open, setOpen] = useState(false); const [query, setQuery] = useState('');
   const toggle = useRef<HTMLButtonElement>(null); const panel = useRef<HTMLDivElement>(null); const account = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
-    setUnread(0); if (!user) return;
+    setUnread(0); if (!user || user.mustChangePassword) return;
     const controller = new AbortController();
     const load = () => apiClient.get('/notifications/unread-count', { signal: controller.signal }).then(({ data }) => {
       if (!controller.signal.aborted) setUnread(data.count);
@@ -35,6 +37,7 @@ export default function Header() {
   const signOut = () => { setOpen(false); logout(); navigate('/login'); };
   const search = (event: FormEvent) => { event.preventDefault(); setOpen(false); navigate(`/products?keyword=${encodeURIComponent(query.trim())}`); };
   const links = navigation.map(([to, label]) => <Link key={to} to={to} onClick={() => setOpen(false)} className={`${touch} px-2 text-sm font-medium`}>{label}</Link>);
+  if (permissions.includes('PORTAL_ACCESS')) links.push(<Link key="admin" to="/admin" onClick={() => setOpen(false)} className={`${touch} px-2 text-sm font-semibold`}>Quản trị</Link>);
   const personal = accountLinks.filter(([to]) => user?.roles.includes('CUSTOMER') || !['/my-care-packages','/my-reviews','/wishlist'].includes(to)).map(([to, label]) => <Link key={to} to={to} onClick={() => setOpen(false)} className="flex min-h-11 items-center rounded-lg px-3 hover:bg-primary-50">{label}</Link>);
   return <header className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-xs">
     <div className="mx-auto max-w-7xl px-3 sm:px-6 lg:px-8">

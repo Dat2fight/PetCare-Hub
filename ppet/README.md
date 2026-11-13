@@ -400,3 +400,7 @@ VITE_SITE_HOTLINE, VITE_SITE_ADDRESS, VITE_SITE_EMAIL, VITE_SITE_HOURS cấu hì
 ### Migration giai đoạn 3 (12/11/2026)
 
 Flyway bật mặc định/dev; H2 test tắt Flyway. Không đổi API hay frontend. Biến mới: FLYWAY_ENABLED, FLYWAY_BASELINE_ON_MIGRATE (false), FLYWAY_BASELINE_VERSION (1). Xem [runbook](docs/migrations.md), [kiểm kê](docs/hardening/SCHEMA-INVENTORY.md) và [báo cáo](docs/hardening/REPORT.md). Chưa áp dụng migration trên database thật. Các test SQL Server đã chạy trên database test riêng của SQL Server cài sẵn theo yêu cầu người dùng. Không cần Docker: từ ppet/backend chạy .\tools\test-sqlserver.ps1 (cần JDBC auth DLL hoặc credential test riêng). Các database test được tạo và dọn riêng; xem runbook để cấu hình.
+
+
+## Admin portal — foundation
+Phase 1 adds `/admin/*` (under the Vite base path), backend permissions, account management, temporary staff passwords, JWT revocation and administrative audit. See [admin guide](docs/admin-guide.md) and [API contract](docs/api.md). Apply V16/V17 with the documented backup/migration procedure before deploying this backend. Operational modules follow in later phases. No new dependencies.

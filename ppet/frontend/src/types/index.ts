@@ -20,6 +20,7 @@ export interface AuthResponse {
 }
 
 export interface User {
+  mustChangePassword?: boolean
   id: number
   username: string
   email: string
