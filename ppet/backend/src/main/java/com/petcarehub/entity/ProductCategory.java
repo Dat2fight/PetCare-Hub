@@ -20,6 +20,7 @@ import java.util.List;
 @ToString(exclude = {"parentCategory", "subCategories", "products"})
 @Data
 public class ProductCategory {
+    @Column(nullable=false) @Builder.Default private Integer displayOrder = 0;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

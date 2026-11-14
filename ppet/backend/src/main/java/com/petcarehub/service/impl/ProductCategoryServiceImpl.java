@@ -31,7 +31,7 @@ public class ProductCategoryServiceImpl implements ProductCategoryService {
     @Override
     @Transactional(readOnly = true)
     public List<ProductCategoryDTO> getAllCategories() {
-        return categoryRepository.findAll().stream()
+        return categoryRepository.findAll(org.springframework.data.domain.Sort.by("displayOrder", "id")).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }

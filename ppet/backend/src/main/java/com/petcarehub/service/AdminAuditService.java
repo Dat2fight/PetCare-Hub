@@ -21,7 +21,7 @@ public class AdminAuditService {
     // Values are identifiers/booleans/enums only. Passwords, tokens and personal details never enter the log.
     private static final Set<String> KEYS=Set.of("enabledBefore","enabledAfter","roleBefore","roleAfter",
         "deleted","sessionsRevoked","appointmentsUnassigned","mustChangePassword","status","method",
-        "statusBefore","statusAfter","quantity","staffId","reasonProvided","paymentStatus","replay");
+        "count","ids","statusBefore","statusAfter","quantity","staffId","reasonProvided","paymentStatus","replay");
 
     @Transactional(propagation=Propagation.MANDATORY)
     public void record(String action, Long targetId, Map<String,?> details) { append(action,"USER",targetId,details,"SUCCESS"); }

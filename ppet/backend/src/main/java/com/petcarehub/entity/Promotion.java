@@ -23,6 +23,7 @@ import java.time.LocalDateTime;
 @EntityListeners(AuditingEntityListener.class)
 @Data
 public class Promotion {
+    @Column(nullable=false) @Builder.Default private boolean restrictedAudience=false;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
