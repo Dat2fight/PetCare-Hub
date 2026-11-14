@@ -19,6 +19,7 @@ public class AdminAppointmentOperations {
     private final AppointmentRepository appointments;private final UserRepository users;private final PetRepository pets;
     private final AppointmentService service;private final AdminQuery query;private final AdminAuditService audit;
     private final Ownership ownership;private final PermissionService permissions;private final NotificationRepository notifications;
+    private final BusinessSchedule schedule;private final CatalogMutex mutex;
     private final Clock clock;private final jakarta.persistence.EntityManager em;
     private Appointment accessible(Long id){var a=appointments.findById(id).orElseThrow(this::missing);if(!permissions.has("APPOINTMENT_MANAGE")&&(a.getStaff()==null||!a.getStaff().getId().equals(ownership.userId())))throw missing();return a;}
     private ResourceNotFoundException missing(){return new ResourceNotFoundException("Không tìm thấy lịch hẹn");}
@@ -43,7 +44,7 @@ public class AdminAppointmentOperations {
         "o.enabled=true and o.deletedAt is null and r.name=:role",Map.of("role",a.getService().getServiceType().staffRole()),page,Map.of("id","o.id"));}
     @PreAuthorize("@perm.has('APPOINTMENT_MANAGE')")
     public void assign(Long id,OperationRequests.Assign request){
-        var snapshot=accessible(id);
+        mutex.read();var snapshot=accessible(id);
         // Same resource order as customer booking: pet, candidate staff, then appointment.
         pets.findByIdForUpdate(snapshot.getPet().getId()).orElseThrow(this::missing);
         var staff=users.findLockedById(request.staffId()).orElseThrow(()->new ResourceNotFoundException("Không tìm thấy nhân viên"));
@@ -51,6 +52,7 @@ public class AdminAppointmentOperations {
         if(!Set.of(AppointmentStatus.SCHEDULED,AppointmentStatus.CONFIRMED).contains(a.getStatus())||!LocalDateTime.of(a.getAppointmentDate(),a.getStartTime()).isAfter(LocalDateTime.now(clock)))throw new IllegalStateException("Chỉ phân công lại lịch sắp tới chưa bắt đầu");
         if(!Boolean.TRUE.equals(staff.getEnabled())||staff.getDeletedAt()!=null||staff.getRoles().stream().noneMatch(r->r.getName()==a.getService().getServiceType().staffRole()))throw new BadRequestException("Nhân viên không hoạt động hoặc không đúng vai trò dịch vụ");
         if(appointments.findConflictingAppointments(a.getAppointmentDate(),staff.getId(),a.getStartTime(),a.getEndTime()).stream().anyMatch(x->!x.getId().equals(id))||appointments.findPetConflicts(a.getAppointmentDate(),a.getPet().getId(),a.getStartTime(),a.getEndTime()).stream().anyMatch(x->!x.getId().equals(id)))throw new IllegalStateException("Nhân viên hoặc thú cưng có lịch trùng");
+        if(!schedule.available(staff.getId(),a.getAppointmentDate(),a.getStartTime(),a.getEndTime()))throw new IllegalStateException("Nhân viên ngoài ca hoặc ngày nghỉ");
         a.setStaff(staff);audit.record("APPOINTMENT_ASSIGNED","APPOINTMENT",id,Map.of("staffId",staff.getId(),"reasonProvided",true));
     }
     public void status(Long id,OperationRequests.Status request){

@@ -41,10 +41,13 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final com.petcarehub.security.Ownership ownership;
     private final java.time.Clock clock;
     private final com.petcarehub.repository.NotificationRepository notifications;
+    private final com.petcarehub.service.BusinessSchedule schedule;
+    private final com.petcarehub.service.CatalogMutex catalogMutex;
     
     @Override
     @Transactional
     public AppointmentDTO bookAppointment(AppointmentCreateRequest request) {
+        catalogMutex.read();
         Long currentUserId = ownership.userId();
         User customer = userRepository.findById(currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy tài khoản"));
@@ -58,7 +61,8 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (duration < 5 || duration > 480 || start == null || !start.isAfter(LocalDateTime.now(clock).plusMinutes(booking.getMinimumNoticeMinutes())))
             throw new BadRequestException("Thời gian đặt lịch hoặc thời lượng không hợp lệ");
         LocalDateTime end = start.plusMinutes(duration);
-        if (start.toLocalTime().isBefore(booking.getOpeningTime()) || !start.toLocalDate().equals(end.toLocalDate()) || end.toLocalTime().isAfter(booking.getClosingTime()))
+        var window=schedule.hours(start.toLocalDate());
+        if (window.closed() || start.toLocalTime().isBefore(window.start()) || !start.toLocalDate().equals(end.toLocalDate()) || end.toLocalTime().isAfter(window.end()))
             throw new BadRequestException("Lịch hẹn phải nằm trong giờ làm việc");
         LocalDate appointmentDate = start.toLocalDate();
         LocalTime startTime = start.toLocalTime();
@@ -76,7 +80,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         for (User candidate : candidates) {
             // Lock a stable resource row even when there are no existing appointments.
             User locked = userRepository.findLockedById(candidate.getId()).orElseThrow();
-            if (eligible(locked, serviceEntity) && appointmentRepository.findConflictingAppointments(appointmentDate, locked.getId(), startTime, endTime).isEmpty()) {
+            if (eligible(locked, serviceEntity) && schedule.available(locked.getId(),appointmentDate,startTime,endTime) && appointmentRepository.findConflictingAppointments(appointmentDate, locked.getId(), startTime, endTime).isEmpty()) {
                 staff = locked; break;
             }
         }
@@ -166,16 +170,18 @@ public class AppointmentServiceImpl implements AppointmentService {
         if (duration < 5 || duration > 480) return List.of();
         List<User> staff = userRepository.findEligibleStaff(service.getServiceType().staffRole());
         List<LocalDateTime> slots = new ArrayList<>();
-        LocalDateTime close = date.atTime(booking.getClosingTime());
+        var window=schedule.hours(date);
+        if(window.closed())return List.of();
+        LocalDateTime close = date.atTime(window.end());
         LocalDateTime now = LocalDateTime.now(clock).plusMinutes(booking.getMinimumNoticeMinutes());
         List<Appointment> occupied = petId == null ? List.of() : appointmentRepository.findPetConflicts(date, petId,
-                booking.getOpeningTime(), booking.getClosingTime());
-        for (LocalDateTime start = date.atTime(booking.getOpeningTime()); !start.plusMinutes(duration).isAfter(close); start = start.plusMinutes(duration)) {
+                window.start(), window.end());
+        for (LocalDateTime start = date.atTime(window.start()); !start.plusMinutes(duration).isAfter(close); start = start.plusMinutes(duration)) {
             if (!start.isAfter(now)) continue;
             LocalTime from = start.toLocalTime(), until = start.plusMinutes(duration).toLocalTime();
             if (occupied.stream().anyMatch(a -> a.getStartTime().isBefore(until) && a.getEndTime().isAfter(from))) continue;
             for (User candidate : staff) {
-                if (eligible(candidate, service) && appointmentRepository.findConflictingAppointments(date, candidate.getId(), start.toLocalTime(), start.plusMinutes(duration).toLocalTime()).isEmpty()) {
+                if (eligible(candidate, service) && schedule.available(candidate.getId(),date,from,until) && appointmentRepository.findConflictingAppointments(date, candidate.getId(), start.toLocalTime(), start.plusMinutes(duration).toLocalTime()).isEmpty()) {
                     slots.add(start); break;
                 }
             }

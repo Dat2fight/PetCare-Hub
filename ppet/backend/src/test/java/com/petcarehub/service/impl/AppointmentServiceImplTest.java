@@ -16,8 +16,13 @@ class AppointmentServiceImplTest {
     final UserRepository users = mock(UserRepository.class);
     final EntityManager em = mock(EntityManager.class);
     final PetRepository pets = mock(PetRepository.class);
-    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets), java.time.Clock.systemDefaultZone(), mock(NotificationRepository.class));
+    final AppointmentServiceImpl service = new AppointmentServiceImpl(appointments, pets, users, em, new BookingProperties(), new com.petcarehub.security.Ownership(pets), java.time.Clock.systemDefaultZone(), mock(NotificationRepository.class), schedule(new BookingProperties()), mock(com.petcarehub.service.CatalogMutex.class));
 
+    static com.petcarehub.service.BusinessSchedule schedule(BookingProperties settings) {
+        var s=mock(com.petcarehub.service.BusinessSchedule.class);
+        when(s.hours(any())).thenAnswer(i->new com.petcarehub.service.BusinessSchedule.Window(settings.getOpeningTime(),settings.getClosingTime(),false));
+        when(s.available(any(),any(),any(),any())).thenReturn(true);return s;
+    }
     @Test void invalidDurationsTerminateAndAvailabilityUsesRealConflicts() {
         ServiceEntity treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).build();
         when(em.find(ServiceEntity.class, 1L)).thenReturn(treatment);
@@ -63,7 +68,7 @@ class AppointmentServiceImplTest {
         settings.setOpeningTime(LocalTime.MIDNIGHT);
         settings.setClosingTime(LocalTime.of(2, 0));
         var booking = new AppointmentServiceImpl(appointments, pets, users, em, settings,
-                new com.petcarehub.security.Ownership(pets), clock, mock(NotificationRepository.class));
+                new com.petcarehub.security.Ownership(pets), clock, mock(NotificationRepository.class), schedule(settings), mock(com.petcarehub.service.CatalogMutex.class));
         var treatment = ServiceEntity.builder().active(true).serviceType(ServiceType.VETERINARY).durationMinutes(30).build();
         when(em.find(ServiceEntity.class, 1L)).thenReturn(treatment);
         var staff = User.builder().enabled(true).roles(Set.of(Role.builder().name(RoleType.VETERINARIAN).build())).build();
