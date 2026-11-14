@@ -37,6 +37,7 @@ class EndpointSecurityMatrixTest {
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
+        "POST /admin/catalog/{resource}","PUT /admin/catalog/{resource}/{id}","DELETE /admin/catalog/{resource}/{id}","POST /admin/catalog/products/bulk-preview","POST /admin/catalog/products/bulk-apply","POST /admin/catalog/products/csv-preview","POST /admin/catalog/products/csv-apply","POST /admin/catalog/pets/{id}/release-reservation","POST /admin/schedules/{kind}","PUT /admin/schedules/{kind}/{id}","DELETE /admin/schedules/{kind}/{id}","POST /admin/schedule-cancel","PUT /admin/loyalty-rules","POST /admin/loyalty/{userId}/adjust","POST /admin/subscriptions/{id}","POST /admin/campaigns",
         "POST /admin/orders/{id}/transition","POST /admin/orders/{id}/request-refund","POST /admin/orders/{id}/mark-refunded","POST /admin/orders/{id}/notes","POST /admin/inventory/movements","POST /admin/appointments/{id}/assign","POST /admin/appointments/{id}/status","POST /admin/reviews/{id}/moderate",
         "PATCH /admin/users/{userId}/status", "DELETE /admin/users/{userId}", "POST /admin/users/{userId}/revoke-sessions",
         "POST /products", "PUT /products/{id}", "DELETE /products/{id}",
@@ -52,6 +53,7 @@ class EndpointSecurityMatrixTest {
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
+        "GET /admin/catalog/products/low-stock","GET /admin/catalog/{resource}","GET /admin/catalog/{resource}/{id}","GET /admin/pet-support/{id}","GET /admin/schedules/{kind}","GET /admin/schedule-affected","GET /admin/staff-performance","GET /admin/loyalty-rules","GET /admin/promotion-usages/{id}","GET /admin/subscriptions","GET /admin/campaign-audience",
         "GET /admin/orders","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/inventory","GET /admin/inventory/transactions","GET /admin/appointments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff","GET /admin/reviews","GET /admin/reviews/count",
         "GET /admin/me/permissions", "GET /admin/users/{userId}/overview", "GET /admin/audit-logs",
         "GET /care-packages/manage","GET /care-packages/subscriptions/me","GET /wishlist", "GET /wishlist/status", "GET /reviews/me", "GET /reviews/pending", "GET /reviews/eligibility", "GET /auth/me", "GET /cart", "GET /orders", "GET /orders/{id}",
@@ -95,6 +97,7 @@ class EndpointSecurityMatrixTest {
             if(endpoint.startsWith("POST /admin/orders/")||endpoint.startsWith("POST /admin/reviews/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
             if(endpoint.startsWith("POST /admin/inventory/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF || role==com.petcarehub.enums.RoleType.WAREHOUSE_STAFF;
             if(endpoint.equals("POST /admin/appointments/{id}/status")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF||role==com.petcarehub.enums.RoleType.VETERINARIAN;
+            if(endpoint.startsWith("POST /admin/catalog/")||endpoint.startsWith("PUT /admin/catalog/")||endpoint.startsWith("DELETE /admin/catalog/")||endpoint.equals("POST /admin/campaigns")||endpoint.startsWith("POST /admin/subscriptions/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
             // Malformed JSON prevents test data mutations after an allowed filter boundary.
             // CatalogAuthorizationTest and flow tests exercise valid allowed requests as well.
             int status=perform(endpoint,role.name(),true);
@@ -106,6 +109,7 @@ class EndpointSecurityMatrixTest {
     }
     @Test void everyPrivateResourceIdHasANamedOwnershipRegression() throws Exception {
         Map<String,String> evidence=new HashMap<>();
+        register(evidence,"AdminCatalogTest#roleMatrixAndCompleteEndpointInventory","GET /admin/catalog/{resource}","GET /admin/catalog/{resource}/{id}","GET /admin/pet-support/{id}","GET /admin/schedules/{kind}","GET /admin/promotion-usages/{id}");
         register(evidence,"AdminOperationsTest#roleMatrixAndCompleteEndpointInventory","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff");
         register(evidence,"AdminFoundationTest#everyAdminEndpointHasExplicitRolePolicyAndMethodGuard", "GET /admin/users/{userId}/overview");
         register(evidence,"PrivatePetDataTest#privatePetEndpointRequiresOwnerOrClinicalRole", "GET /pets/my-pets/{id}");
@@ -142,7 +146,7 @@ class EndpointSecurityMatrixTest {
     }
     private int perform(String endpoint, String role, boolean malformed) throws Exception {
         String[] parts=endpoint.split(" ",2);
-        String path="/api/v1"+parts[1].replaceAll("\\{[^}]+}","987654321");
+        String path="/api/v1"+parts[1].replace("{resource}","products").replace("{kind}","hours").replaceAll("\\{[^}]+}","987654321");
         var req=request(HttpMethod.valueOf(parts[0]),path).contentType("application/json").content(malformed ? "{" : "{}")
                 .param("points","1").param("description","qa_test").param("role","CUSTOMER")
                 .param("productId","987654321").param("quantity","1").param("reason","qa_test")

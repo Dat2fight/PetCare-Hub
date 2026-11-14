@@ -408,3 +408,7 @@ Phase 1 adds `/admin/*` (under the Vite base path), backend permissions, account
 ## Admin portal — daily operations
 
 Phase 2 adds orders/COD and manual refund reconciliation, internal notes/print slips, stock movements/history, appointment assignment/week calendar and review moderation. Role guards and audit cover the new admin API. See [operator guide](docs/admin-guide.md), [API matrix](docs/api.md) and [phase 2 report](docs/admin-phase-2-report.md). Apply V18 with backup and test-copy verification before deploying this version; no production migration is performed by this change. Cash only; in-app notifications only; no new dependency or environment variable.
+
+## Admin Portal — giai đoạn 3
+
+Nhánh `feature/admin-3-catalog` thêm quản trị catalog/thú cưng, bulk/CSV, lịch làm việc DB, loyalty và chiến dịch ưu đãi trên web. Cần migration **V19** trước khi chạy bản này; chưa áp lên database thật. Các nhóm tính năng, kiểm thử, quyền và giới hạn gói cũ: [báo cáo giai đoạn 3](docs/admin-phase-3-report.md). Cách dùng: [admin guide](docs/admin-guide.md). Biến thể/nhận nuôi và quota gói: [thiết kế cần quyết định](docs/admin-phase-3-design-decisions.md).

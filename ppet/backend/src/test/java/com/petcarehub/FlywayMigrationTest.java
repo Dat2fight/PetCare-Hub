@@ -47,7 +47,7 @@ class FlywayMigrationTest {
                 "--app.bootstrap.enabled=false", "--app.order-expiry.interval-ms=3600000")) {
             assertTrue(context.isActive());
             var flyway = context.getBean(Flyway.class);
-            assertEquals("18", flyway.info().current().getVersion().toString());
+            assertEquals("19", flyway.info().current().getVersion().toString());
             var emf = context.getBean(EntityManagerFactory.class);
             try (var em = emf.createEntityManager()) {
                 em.getTransaction().begin();
@@ -101,7 +101,7 @@ class FlywayMigrationTest {
             // Refuse nonempty databases until an operator explicitly onboards them.
             assertThrows(FlywayException.class, flyway::migrate);
             flyway.baseline();
-            assertEquals(17, flyway.migrate().migrationsExecuted);
+            assertEquals(18, flyway.migrate().migrationsExecuted);
             assertEquals(before, snapshot(statement));
             assertEquals(0, count(statement, "SELECT @@TRANCOUNT"));
             assertEquals(0, count(statement, "SELECT COUNT(*) FROM dbo.orders WHERE paid_at IS NOT NULL OR delivered_at IS NOT NULL"));
@@ -119,7 +119,7 @@ class FlywayMigrationTest {
         for (String[] entry : manifest()) {
             Files.write(directory.resolve(entry[1]), resource("db/migration/" + entry[1]));
         }
-        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql", "V18__admin_operations.sql"))
+        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql", "V18__admin_operations.sql", "V19__admin_catalog.sql"))
             Files.write(directory.resolve(added), resource("db/migration/" + added));
         String last = "V15__unicode_descriptions.sql";
         Files.write(directory.resolve(last), resource("db/migration/" + last));

@@ -548,3 +548,26 @@ V16__admin_accounts.sql: users.token_version BIGINT default0, must_change_passwo
 Không backfill biên nhận, thời điểm thu hoặc sổ tiền cho đơn lịch sử. Giá/số lượng/địa chỉ vẫn lấy snapshot đã lưu của đơn. Doanh thu hiện tại chỉ tính COMPLETED và loại đơn hủy, nên REFUNDED tự bị loại. Đánh dấu hoàn chỉ là xác nhận trả tiền mặt, không tự chạy quy trình trả hàng/thu hồi quyền sở hữu/điểm/gói.
 
 Áp dụng bằng Flyway sau V17, sao lưu và thử bản sao trước; không chạy SQL legacy hoặc sửa checksum. Đã kiểm chứng V18 trên database test mới và nâng cấp legacy ở SQL Server cục bộ, Hibernate validate, Unicode ghi chú/biên nhận và unique giao dịch tiền. Database `petcarehub` thật chưa được cập nhật trong giai đoạn này.
+
+## Admin catalog V19 (2026-11-15)
+
+`V19__admin_catalog.sql` thêm:
+
+- `admin_catalog_state`: singleton khóa chung cho cây danh mục, batch, campaign, lịch và đặt lịch mới; bookings lấy read lock, chỉnh lịch write lock.
+- `product_categories.display_order` default 0; public categories sort display_order,id. Inventory.reorder_point đã có từ trước được dùng làm ngưỡng từng sản phẩm.
+- `orders.reward_earn_every` nullable snapshot DECIMAL(18,2). Đơn cũ NULL dùng chính sách lịch sử 10000; không backfill theo chính sách mới.
+- `loyalty_rules`: singleton id=1, earn_every=10000, point_value=100, silver=1000/gold=5000/platinum=10000; CHECK tỷ lệ dương/ngưỡng tăng dần. CK_loyalty_source_type thêm MANUAL_ADJUSTMENT.
+- `business_hours`, `holidays`, `staff_shifts`, `staff_time_off`: weekday/work_date/staff_id/start_time/end_time/closed/reason; FK staff, index lookup, unique thứ mở cửa và ngày lễ. Thiếu cấu hình dùng BookingProperties; có roster thì ngày không có ca không nhận lịch.
+- `promotions.restricted_audience` default false, normalized_code computed UPPER(code) persisted + unique index. Nếu dữ liệu cũ có trùng code không phân biệt hoa thường, migration dừng để rà soát thủ công.
+- `promotion_audience`: FK promo/customer, unique cặp. `promotion_campaigns`: UUID request_key unique, actor/promo, created_at, recipient_count, fingerprint; index actor/time phục vụ giới hạn tần suất.
+
+Không xóa dữ liệu, không sửa migration trước, không seed catalog thật. V19 đã được kiểm tra trên SQL Server test riêng (schema mới, nâng cấp legacy, Hibernate validate). Khi triển khai thật: sao lưu/kiểm khôi phục, chạy thử bản sao, dừng phiên bản cũ, Flyway migrate với ddl-auto=validate; không tự chạy reset hoặc sửa checksum. Database chính chưa được áp V19 trong công việc này.
+
+Truy vấn chỉ đọc trước migration, **chưa tự chạy trên database chính**:
+
+```sql
+SELECT UPPER(code) AS normalized_code, COUNT(*) AS copies
+FROM promotions GROUP BY UPPER(code) HAVING COUNT(*)>1;
+```
+
+Biến thể/nhận nuôi/quota gói chưa thêm bảng: xem [thiết kế cần quyết định](admin-phase-3-design-decisions.md).

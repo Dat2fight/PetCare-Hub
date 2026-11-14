@@ -34,6 +34,7 @@ public class SecurityConfig {
     @Autowired
     private com.petcarehub.security.SecurityErrorHandler securityErrors;
     @Autowired private com.petcarehub.security.PermissionService permissions;
+    @Autowired private com.petcarehub.security.CatalogPolicy catalogPolicy;
     @Autowired private com.petcarehub.service.AdminAuditService audit;
 
     @Bean
@@ -71,7 +72,14 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
-                    auth.requestMatchers("/api/v1/admin/orders", "/api/v1/admin/orders/**").access(permissions.access(com.petcarehub.security.Permission.ORDER_MANAGE))
+                    auth.requestMatchers("/api/v1/admin/catalog/**").access(catalogPolicy.access())
+                        .requestMatchers("/api/v1/admin/pet-support/**").access(permissions.accessAny(com.petcarehub.security.Permission.USER_MANAGE,com.petcarehub.security.Permission.ASSIGNED_MEDICAL_MANAGE))
+                        .requestMatchers("/api/v1/admin/schedules/**","/api/v1/admin/schedule-affected","/api/v1/admin/schedule-cancel").access(permissions.access(com.petcarehub.security.Permission.APPOINTMENT_MANAGE))
+                        .requestMatchers("/api/v1/admin/staff-performance").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
+                        .requestMatchers("/api/v1/admin/loyalty-rules","/api/v1/admin/loyalty/**").access(permissions.access(com.petcarehub.security.Permission.SYSTEM_MANAGE))
+                        .requestMatchers("/api/v1/admin/promotion-usages/**","/api/v1/admin/campaign-audience","/api/v1/admin/campaigns").access(permissions.access(com.petcarehub.security.Permission.PROMOTION_MANAGE))
+                        .requestMatchers("/api/v1/admin/subscriptions","/api/v1/admin/subscriptions/**").access(permissions.access(com.petcarehub.security.Permission.PACKAGE_MANAGE))
+                        .requestMatchers("/api/v1/admin/orders", "/api/v1/admin/orders/**").access(permissions.access(com.petcarehub.security.Permission.ORDER_MANAGE))
                         .requestMatchers("/api/v1/admin/inventory", "/api/v1/admin/inventory/**").access(permissions.access(com.petcarehub.security.Permission.INVENTORY_MANAGE))
                         .requestMatchers("/api/v1/admin/reviews", "/api/v1/admin/reviews/**").access(permissions.access(com.petcarehub.security.Permission.REVIEW_MANAGE))
                         .requestMatchers("/api/v1/admin/appointments/*/assign", "/api/v1/admin/appointments/*/eligible-staff").access(permissions.access(com.petcarehub.security.Permission.APPOINTMENT_MANAGE))

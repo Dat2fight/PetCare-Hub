@@ -243,3 +243,51 @@ Mọi danh sách trả Page (`content,totalElements,number,size,…`), mặc đ�
 - `moderate`: `{action:"APPROVED|REJECTED|HIDDEN",reason?}`. Reject cần reason. APPROVED cũng dùng hiện lại review đã ẩn. GET /reviews/count trả `{pending:n}`. API review/summary công khai chỉ tính approved.
 
 Các POST thành công trả 200; transition trả OrderDTO, POST còn lại body rỗng. Chi tiết audit và vận hành ở [admin-guide](admin-guide.md). URL nghiệp vụ cũ vẫn tồn tại với chính sách cũ; portal mới dùng toàn bộ URL admin kể trên để ghi audit.
+
+## Admin catalog — giai đoạn 3 (2026-11-15)
+
+Tiền tố `/api/v1/admin`. JSON thuần; lỗi 400/403/404/409 có correlationId như giai đoạn 1. Danh sách trả Page `{content,number,size,totalElements}`, tối đa 100 dòng, sort theo whitelist; SQL bind mọi giá trị. Anonymous 401, CUSTOMER 403. Ma trận đầy đủ ở [báo cáo giai đoạn 3](admin-phase-3-report.md).
+
+### Danh mục dùng chung
+
+`GET /catalog/{resource}`, `GET /catalog/{resource}/{id}`, `POST /catalog/{resource}`, `PUT /catalog/{resource}/{id}`, `DELETE /catalog/{resource}/{id}`. Resource: products/categories/pets/species/breeds/services/promotions/packages. POST/PUT là form đầy đủ, không bind entity; field ngoài whitelist bị 400. DELETE body `{reason}` bắt buộc; có tham chiếu thì 409, dùng active=false khi phù hợp. Filter `keyword` (tên, riêng promotions tìm code), `active` cho loại có active. Sort id/name, price nếu có; categories thêm displayOrder; promotions dùng code.
+
+| Resource | Các trường form |
+|---|---|
+| products | name, description, price>=0, sku, categoryId, imageUrl, active, reorderPoint nullable (mặc định 10); không có quantity |
+| categories | name, description, parentId nullable, displayOrder>=0; chống vòng cha-con |
+| pets | name, description, price>0, speciesId, breedId nullable, birthDate không tương lai, imageUrl, healthStatus, availabilityStatus AVAILABLE/UNAVAILABLE |
+| species | name, description |
+| breeds | name, description, speciesId |
+| services | name, description, price>=0, durationMinutes 5..480, serviceType VETERINARY/GROOMING, active |
+| promotions | code, description, discountType PERCENTAGE/FIXED_AMOUNT, discountValue, minOrderAmount, maxUses nullable, maxUsesPerCustomer, startDate, endDate, active |
+| packages | name, description, price>0, durationMonths 1..120, includesGrooming/includesCheckup/includesVaccination, active |
+
+Ảnh optional HTTPS thuộc APP_CATALOG_IMAGE_HOSTS, tối đa 500 ký tự; không download qua backend. Thời gian mã theo giờ cửa hàng, ISO local datetime; from<to, % từ 1..100. Mã uppercase, duy nhất không phân biệt hoa thường, áp dụng tiền **sản phẩm**. Mã đã dùng chỉ gia hạn/tắt, không bật lại hoặc sửa giá trị/phạm vi. Pet có chủ/từng gắn đơn bị chặn chỉnh sửa/xóa trực tiếp; danh mục bán chỉ owner IS NULL.
+
+### Kho thấp, bulk và CSV
+
+- `GET /catalog/products/low-stock`: `{count,quantity}` tổng hợp SQL các sản phẩm active có quantity<=COALESCE(reorderPoint,10).
+- `POST /catalog/products/bulk-preview`, `/bulk-apply`: `{ids:[...],action:ACTIVE|PRICE_AMOUNT|PRICE_PERCENT,active,value,previewToken?}`. 1..100 ID duy nhất; % trong -100..100; preview trả rows before/after và previewToken. Apply bắt buộc token khớp dữ liệu hiện tại; một transaction, một audit có IDs. Không sửa tồn kho.
+- `POST /catalog/products/csv-preview`, `/csv-apply`: `{csv,previewToken?}`. UTF-8 tối đa 200000 byte, 1..200 dòng dữ liệu. Header `sku,name,price,categoryId,imageUrl,description`; hỗ trợ quoted comma/newline/double quote và BOM. Báo lỗi từng dòng; chặn ô công thức; SKU hiện có cập nhật, SKU mới tạo inventory=0. SKU không phân biệt hoa thường; giữ active/ngưỡng của SKU cũ. Apply kiểm lại token/toàn bộ dữ liệu, lỗi thì không nhập dòng nào.
+
+### Thú cưng và lịch
+
+- `POST /catalog/pets/{id}/release-reservation` `{reason}`: khóa đơn rồi pet, gọi luồng hủy hiện có cho **toàn bộ đơn hỗn hợp**, hoàn tài nguyên, ghi order note, thông báo web và một audit.
+- `GET /pet-support/{id}`: chỉ đọc, mỗi lần xem audit; ADMIN hoặc bác sĩ có lịch với pet; ngoài phạm vi 404.
+- `GET/POST /schedules/{kind}`, `PUT/DELETE /schedules/{kind}/{id}`; kind hours/holidays/shifts/time-off. GET filter staff, from/to (ngày nghỉ), sort id/weekday/workDate. POST/PUT `{weekday?,workDate?,staffId?,startTime?,endTime?,closed?,reason}`. Weekday 1=Monday..7=Sunday; hours/shifts lặp tuần; holidays/time-off ngày cụ thể; holidays nghỉ cả ngày, time-off có khoảng giờ. DELETE `{reason}`. Không sửa ngày quá khứ.
+- `GET /schedule-affected?date=YYYY-MM-DD&staff=` liệt kê lịch còn hoạt động của ngày/nhân viên để admin lựa chọn; không tự hủy khi lưu cấu hình. Với nghỉ một phần ngày, admin đối chiếu giờ và chọn đúng lịch.
+- `POST /schedule-cancel` `{date,ids,reason}`: 1..100 lịch cùng ngày, kiểm state machine, hủy nguyên transaction và thông báo từng khách.
+- `GET /staff-performance?from=&to=`: kỳ tối đa 366 ngày; SQL group by nhân viên; total/completed/cancelled/noShow, phân trang. UI tính tỷ lệ từ số đếm, không tải toàn bộ lịch.
+
+### Loyalty, đăng ký gói và chiến dịch
+
+- `GET/PUT /loyalty-rules`: `{earnEvery,pointValue,silver,gold,platinum}`; tỷ lệ dương, ngưỡng tăng dần. DTO khách `/loyalty/account` thêm earnEvery/pointValue, thresholds cũng từ cùng bảng. Đơn mới snapshot earnEvery; đổi cấu hình không đổi điểm tích của đơn đã tạo.
+- `POST /loyalty/{userId}/adjust` `{points,reason}`: points khác 0, -1000000..1000000, không âm số dư; khóa User chung với checkout/loyalty. Ledger ADJUST/MANUAL_ADJUSTMENT đúng dấu; không tăng lifetime/rank do điều chỉnh.
+- `GET /promotion-usages/{id}`: các đơn dùng mã, phân trang.
+- `GET /subscriptions?packageId=`: danh sách khách/pet/ngày/trạng thái; dùng packageName snapshot khi có. ACTIVE đã qua endDate hiển thị EXPIRED; hạn mức chưa có dữ liệu không suy thành unlimited.
+- `POST /subscriptions/{id}` `{action:cancel|extend,endDate?,reason}`: không gia hạn gói đã hủy, ngày mới phải dài hơn hạn cũ, không quá khứ hoặc quá 10 năm.
+- `GET /campaign-audience?group=BIRTHDAY|INACTIVE&days=90`: count,limit=500,overLimit,audienceToken. BIRTHDAY theo tháng sinh pet có chủ; INACTIVE là khách có tài khoản cũ hơn days và không tạo đơn trong khoảng đó.
+- `POST /campaigns` `{group,days,requestKey:UUID,audienceToken,promotion:{...},message}`: kiểm lại danh sách, tối đa 500 khách, 1 lần/10 phút/người gửi; tạo code riêng + membership audience + thông báo web cùng transaction. Retry cùng key/người/nội dung trả kết quả cũ, không gửi lại; khác nội dung hoặc quá tần suất 409. Checkout kiểm membership cả quote và đặt đơn. Không gửi email/SMS.
+
+API nghiệp vụ cũ giữ tương thích và guard cũ. Portal dùng các endpoint admin trên để ghi audit. Không coi URL legacy là đường thay thế có cùng validation/audit mới.

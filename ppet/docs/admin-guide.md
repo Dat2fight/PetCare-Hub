@@ -1,6 +1,6 @@
-# Cổng quản trị — giai đoạn 1 và 2
+# Cổng quản trị — giai đoạn 1–3
 
-Giai đoạn 2: `feature/admin-2-operations`, nền `e42caab` (giai đoạn 1). Không push/merge/rebase.
+Giai đoạn 3: `feature/admin-3-catalog`, nền `8e34108` (giai đoạn 2). Không push/merge/rebase.
 
 ## Vận hành
 
@@ -17,7 +17,7 @@ Giai đoạn 2: `feature/admin-2-operations`, nền `e42caab` (giai đoạn 1). 
 
 Nguồn duy nhất của portal: `PermissionService`. ADMIN có tất cả quyền; SALES_STAFF có quyền vận hành/catalog/kho/khuyến mãi/review/nội dung/gói và lịch được giao; WAREHOUSE_STAFF có kho/đọc catalog; VETERINARIAN có lịch và y tế được giao. CUSTOMER không vào portal.
 
-Giai đoạn 1 có tổng quan cơ bản, người dùng, hồ sơ, nhật ký; giai đoạn 2 thêm đơn hàng, kho, lịch hẹn, đánh giá. Catalog/khuyến mãi/CMS/y tế nâng cao theo kế hoạch giai đoạn sau. API nghiệp vụ cũ giữ chính sách cũ cho tới khi được đưa vào từng giai đoạn.
+Giai đoạn 1 có tổng quan cơ bản, người dùng, hồ sơ, nhật ký; giai đoạn 2 thêm đơn hàng, kho, lịch hẹn, đánh giá. Giai đoạn 3 thêm catalog/khuyến mãi/lịch làm việc; CMS/y tế nâng cao theo kế hoạch sau. API nghiệp vụ cũ giữ chính sách cũ cho tới khi được đưa vào từng giai đoạn.
 
 ## Audit và bảo mật
 
@@ -69,3 +69,15 @@ SUCCESS cùng transaction: ORDER_CONFIRM, ORDER_PROCESS, ORDER_SHIP, ORDER_DELIV
 Lý do bắt buộc: hủy đơn/lịch, nhập/xuất/kiểm kê, phân công, yêu cầu/xác nhận hoàn, từ chối review. Không bổ sung nhập lại mật khẩu cho thao tác vận hành trong giai đoạn 2; các điều kiện quản trị tài khoản của giai đoạn 1 giữ nguyên.
 
 Trước triển khai: sao lưu và kiểm tra nâng cấp V18 trên bản sao, sau đó áp Flyway và triển khai backend/frontend cùng phiên bản; rà quyền nhân viên và thử giao dịch tiền mặt. Không dùng migration ngược để xóa sổ tiền/audit. Không thêm biến môi trường hoặc dependency.
+
+## Danh mục — giai đoạn 3
+
+1. **Sản phẩm/danh mục:** chọn Tạo mới hoặc tên dòng để sửa; form không sửa số tồn. Có thể chọn danh mục bằng bảng tìm kiếm/phân trang. Xóa cần lý do; đã tham chiếu thì tắt hoạt động. Danh mục cha không được tạo vòng; thứ tự hiển thị áp dụng danh sách công khai.
+2. **Bulk/CSV:** chọn ID hoặc tải file, bấm Kiểm tra/xem trước, đọc báo cáo rồi xác nhận áp dụng. Khi dữ liệu đổi phải preview lại. CSV giữ tồn kho, không nhập riêng các dòng đúng nếu file có dòng sai. Ngưỡng tồn trống dùng 10.
+3. **Thú cưng/loài/giống:** giống phải thuộc loài, ngày sinh không tương lai. Pet của khách chỉ ở Hỗ trợ thú cưng, đọc có audit. Pet giữ chỗ: xem đơn và hạn giữ, nút hủy sẽ hủy cả đơn sản phẩm+pet, không tách đơn. Pet từng thuộc đơn không được sửa giá hoặc xóa trực tiếp.
+4. **Dịch vụ/lịch:** tắt dịch vụ chặn đặt mới, giữ lịch cũ. Chỉ ADMIN cấu hình Lịch làm việc. Ca lặp theo thứ; nghỉ theo ngày. Xem tuần theo ngày bắt đầu, lọc ID nhân viên, phân trang; bảng và lịch hiển thị cùng trang hiện tại. Khi đóng cửa, dùng phần lịch bị ảnh hưởng, chọn rõ các lịch cần hủy và nhập lý do; không hủy ngầm.
+5. **Khuyến mãi/điểm:** mã dùng cho sản phẩm, đã dùng chỉ gia hạn/tắt. Quy tắc điểm chỉ ADMIN; thay đổi tỷ lệ tích không đổi snapshot đơn trước đó. Điều chỉnh điểm thay số dư, không thay lifetime. UI khách đọc ngưỡng/tỷ lệ cùng nguồn backend.
+6. **Gói chăm sóc:** CRUD gói; danh sách đăng ký dùng tên snapshot nếu có; hủy/gia hạn có lý do. Chưa có dữ liệu hạn mức/lượt dùng của gói cũ: không suy thành vô hạn, cần chốt theo thiết kế trước khi triển khai phần này.
+7. **Chiến dịch:** chọn nhóm, xem số người nhận, nhập mã/thời hạn/thông báo rồi xác nhận. Tối đa 500 khách, một chiến dịch mỗi 10 phút/người gửi. Mã chỉ dùng được cho danh sách đã chốt. Thông báo lưu trên web; không email/SMS.
+
+Ảnh: URL HTTPS thuộc danh sách cấu hình `APP_CATALOG_IMAGE_HOSTS`. Migration V19 chưa áp database thật. [Báo cáo và ma trận quyền](admin-phase-3-report.md), [các quyết định còn lại](admin-phase-3-design-decisions.md).
