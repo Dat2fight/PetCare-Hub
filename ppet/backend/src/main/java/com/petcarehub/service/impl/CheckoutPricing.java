@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CheckoutPricing {
-    private static final BigDecimal POINT_VALUE = BigDecimal.valueOf(100);
+    private final com.petcarehub.service.LoyaltyPolicy loyaltyPolicy;
+    private final jakarta.persistence.EntityManager em;
     private final PromotionRepository promotions;
     private final PromotionUsageRepository usages;
     private final LoyaltyAccountRepository accounts;
@@ -28,6 +29,7 @@ public class CheckoutPricing {
     @Value("${app.checkout.promotion-per-customer:1}") private int perCustomer;
 
     OrderQuote calculate(Long userId, BigDecimal subtotal, BigDecimal products, String code, int points, boolean reserve) {
+        BigDecimal pointValue=loyaltyPolicy.current().getPointValue();
         Promotion promo = null;
         BigDecimal discount = BigDecimal.ZERO;
         if (code != null && !code.isBlank()) {
@@ -39,6 +41,7 @@ public class CheckoutPricing {
                 throw new BadRequestException("Mã giảm giá ngoài thời hạn sử dụng");
             if (products.signum() == 0 || promo.getMinOrderAmount() != null && products.compareTo(promo.getMinOrderAmount()) < 0)
                 throw new BadRequestException("Tiền sản phẩm chưa đủ để áp mã");
+            if(promo.isRestrictedAudience()&&em.createQuery("select count(a) from PromotionAudience a where a.promotionId=:promotion and a.userId=:user",Long.class).setParameter("promotion",promo.getId()).setParameter("user",userId).getSingleResult()==0)throw new BadRequestException("Mã không dành cho tài khoản này");
             int limit = promo.getMaxUsesPerCustomer() == null ? perCustomer : promo.getMaxUsesPerCustomer();
             if (promo.getMaxUses() != null && promo.getCurrentUses() >= promo.getMaxUses()
                     || usages.countByPromotionIdAndCustomerId(promo.getId(), userId) >= limit)
@@ -48,15 +51,16 @@ public class CheckoutPricing {
             discount = discount.min(products).setScale(0, RoundingMode.HALF_UP);
         }
         int balance = accounts.findByCustomerId(userId).map(LoyaltyAccount::getAvailablePoints).orElse(0);
-        int max = products.subtract(discount).max(BigDecimal.ZERO).divide(POINT_VALUE.multiply(BigDecimal.valueOf(2)), 0, RoundingMode.DOWN)
+        int max = products.subtract(discount).max(BigDecimal.ZERO).divide(pointValue.multiply(BigDecimal.valueOf(2)), 0, RoundingMode.DOWN)
                 .min(BigDecimal.valueOf(balance)).intValueExact();
         if (points < 0 || points > max) throw new BadRequestException("Số điểm vượt số dư hoặc giới hạn 50% tiền sản phẩm");
-        BigDecimal redeemed = POINT_VALUE.multiply(BigDecimal.valueOf(points));
+        BigDecimal redeemed = pointValue.multiply(BigDecimal.valueOf(points));
         BigDecimal ship = products.signum() > 0 && subtotal.compareTo(freeShippingFrom) < 0 ? shippingFee : BigDecimal.ZERO;
         return new OrderQuote(subtotal, discount, points, redeemed, ship, subtotal.subtract(discount).subtract(redeemed).add(ship), balance, max);
     }
 
     void reserve(Order order) {
+        order.setRewardEarnEvery(loyaltyPolicy.current().getEarnEvery());
         if (order.getPromotionCode() != null) {
             var promo = promotions.lockByCode(order.getPromotionCode()).orElseThrow();
             promo.setCurrentUses(Math.addExact(promo.getCurrentUses(), 1));
@@ -80,7 +84,7 @@ public class CheckoutPricing {
         var eligible = order.getItems().stream().filter(i -> i.getProduct() != null)
                 .map(OrderItem::getSubtotal).reduce(BigDecimal.ZERO, BigDecimal::add);
         int points = eligible.subtract(order.getDiscountAmount()).subtract(order.getPointsDiscount())
-                .divideToIntegralValue(BigDecimal.valueOf(10000)).intValueExact();
+                .divideToIntegralValue((order.getRewardEarnEvery()==null?BigDecimal.valueOf(10000):order.getRewardEarnEvery())).intValueExact();
         if (points > 0) post(order, points, LoyaltyTransactionType.EARN);
     }
 
@@ -92,7 +96,7 @@ public class CheckoutPricing {
         account.setAvailablePoints(Math.addExact(account.getAvailablePoints(), delta));
         if (type == LoyaltyTransactionType.EARN) {
             account.setTotalPoints(Math.addExact(account.getTotalPoints(), points));
-            LoyaltyServiceImpl.updateMembershipLevel(account);
+            loyaltyPolicy.classify(account);
         }
         ledger.save(LoyaltyTransaction.builder().loyaltyAccount(account).transactionType(type)
                 .points(points).sourceType(LoyaltySourceType.PURCHASE).sourceId(order.getId())

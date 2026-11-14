@@ -12,7 +12,7 @@ class LoyaltyPromotionTest {
     @Test void tierUsesLifetimePointsAndRejectsNegativeSpend() {
         var accounts=mock(LoyaltyAccountRepository.class); var transactions=mock(LoyaltyTransactionRepository.class);
         var users=mock(UserRepository.class);
-        var service=new LoyaltyServiceImpl(accounts,transactions,users);
+        var service=new LoyaltyServiceImpl(accounts,transactions,users,new com.petcarehub.service.LoyaltyPolicy(mock(jakarta.persistence.EntityManager.class)));
         User user=new User();user.setId(1L);
         when(users.findLockedById(1L)).thenReturn(Optional.of(user));
         var account=LoyaltyAccount.builder().customer(user).availablePoints(900).totalPoints(900).build();

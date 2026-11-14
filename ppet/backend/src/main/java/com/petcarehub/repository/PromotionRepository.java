@@ -8,10 +8,11 @@ import java.util.Optional;
 @Repository
 public interface PromotionRepository extends JpaRepository<Promotion, Long> {
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
-    @org.springframework.data.jpa.repository.Query("from Promotion p where p.code = :code")
+    @org.springframework.data.jpa.repository.Query("from Promotion p where upper(p.code) = upper(:code)")
     Optional<Promotion> lockByCode(String code);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("from Promotion p where p.id = :id")
     Optional<Promotion> lockById(Long id);
+    @org.springframework.data.jpa.repository.Query("from Promotion p where upper(p.code)=upper(:code)")
     Optional<Promotion> findByCode(String code);
 }

@@ -84,6 +84,7 @@ public class Order extends BaseEntity {
     // Local business time in Asia/Ho_Chi_Minh; legacy unknown dates remain null.
     @Column(name = "paid_at")
     private java.time.LocalDateTime paidAt;
+    @Column(precision=18,scale=2) private BigDecimal rewardEarnEvery;
     private java.time.LocalDateTime confirmedAt;
     private java.time.LocalDateTime processingAt;
     private java.time.LocalDateTime shippedAt;

@@ -8,6 +8,8 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoyaltyAccountDTO {
+    private java.math.BigDecimal earnEvery;
+    private java.math.BigDecimal pointValue;
     private Long id;
     private Long userId;
     private Integer currentPoints;

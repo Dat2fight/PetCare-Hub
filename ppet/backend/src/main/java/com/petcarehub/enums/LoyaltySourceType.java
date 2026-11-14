@@ -5,5 +5,6 @@ public enum LoyaltySourceType {
     SERVICE_BOOKING,
     REVIEW,
     CARE_PACKAGE,
+    MANUAL_ADJUSTMENT,
     REDEMPTION
 }

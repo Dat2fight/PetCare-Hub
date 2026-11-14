@@ -2,7 +2,7 @@ import { formatBusinessTime } from '../../utils/businessDate';
 import { useEffect, useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import apiClient from '../../api/client';
-interface Account { id: number; currentPoints: number; tier: string; nextTier: string | null; pointsToNextTier: number; thresholds: Record<string, number> }
+interface Account { earnEvery: number; pointValue: number; id: number; currentPoints: number; tier: string; nextTier: string | null; pointsToNextTier: number; thresholds: Record<string, number> }
 interface Transaction { id: number; points: number; description: string; transactionDate: string }
 export const LoyaltyPage = () => {
   const { user } = useAuth(); const [account, setAccount] = useState<Account | null>(null); const [history, setHistory] = useState<Transaction[]>([]);
@@ -18,7 +18,7 @@ export const LoyaltyPage = () => {
     {loading ? <p>Đang tải…</p> : error ? <p role="alert">Không tải được điểm thưởng. <button onClick={() => setRetry(retry+1)}>Thử lại</button></p> : account && <>
       <p className="text-2xl">{account.currentPoints} điểm · {account.tier}</p><p>{account.nextTier ? `Còn ${account.pointsToNextTier} điểm để lên ${account.nextTier}` : 'Đã đạt hạng cao nhất'}</p>
       <p>{Object.entries(account.thresholds).map(([tier, points]) => `${tier}: ${points}`).join(' · ')}</p>
-      <h2 className="text-xl mt-6">Lịch sử điểm</h2>{!history.length ? <p>Chưa có giao dịch điểm.</p> : history.map(tx => <p key={tx.id}>{tx.description} · {tx.points} điểm · {formatBusinessTime(tx.transactionDate)}</p>)}
+      <p>Mỗi {account.earnEvery?.toLocaleString('vi-VN')} đ sản phẩm đủ điều kiện tích 1 điểm; 1 điểm đổi {account.pointValue?.toLocaleString('vi-VN')} đ.</p><h2 className="text-xl mt-6">Lịch sử điểm</h2>{!history.length ? <p>Chưa có giao dịch điểm.</p> : history.map(tx => <p key={tx.id}>{tx.description} · {tx.points} điểm · {formatBusinessTime(tx.transactionDate)}</p>)}
       <nav className="flex gap-6 mt-6"><button disabled={!page} onClick={() => setPage(page-1)}>Trang trước</button><button disabled={history.length < 20} onClick={() => setPage(page+1)}>Trang sau</button></nav>
     </>}
   </div>;

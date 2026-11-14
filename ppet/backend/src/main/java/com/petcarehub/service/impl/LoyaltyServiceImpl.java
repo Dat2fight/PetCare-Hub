@@ -34,8 +34,10 @@ public class LoyaltyServiceImpl implements LoyaltyService {
     private final LoyaltyAccountRepository accountRepository;
     private final LoyaltyTransactionRepository transactionRepository;
     private final UserRepository userRepository;
+    private final com.petcarehub.service.LoyaltyPolicy policy;
 
-    public LoyaltyServiceImpl(LoyaltyAccountRepository accountRepository, LoyaltyTransactionRepository transactionRepository, UserRepository userRepository) {
+    public LoyaltyServiceImpl(LoyaltyAccountRepository accountRepository, LoyaltyTransactionRepository transactionRepository, UserRepository userRepository, com.petcarehub.service.LoyaltyPolicy policy) {
+        this.policy=policy;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
@@ -74,7 +76,7 @@ public class LoyaltyServiceImpl implements LoyaltyService {
         account.setAvailablePoints(account.getAvailablePoints() + points);
         account.setTotalPoints(account.getTotalPoints() + points);
         
-        updateMembershipLevel(account);
+        policy.classify(account);
         account = accountRepository.save(account);
         
         LoyaltyTransaction tx = new LoyaltyTransaction();
@@ -125,31 +127,19 @@ public class LoyaltyServiceImpl implements LoyaltyService {
         }).collect(Collectors.toList());
     }
     
-    private static final java.util.Map<String, Integer> THRESHOLDS = java.util.Map.of("BRONZE", 0, "SILVER", 1000, "GOLD", 5000, "PLATINUM", 10000);
-
-    static void updateMembershipLevel(LoyaltyAccount account) {
-        int lifetime = account.getTotalPoints() == null ? 0 : account.getTotalPoints();
-        if (lifetime >= THRESHOLDS.get("PLATINUM")) {
-            account.setMembershipLevel(MembershipLevel.PLATINUM);
-        } else if (lifetime >= THRESHOLDS.get("GOLD")) {
-            account.setMembershipLevel(MembershipLevel.GOLD);
-        } else if (lifetime >= THRESHOLDS.get("SILVER")) {
-            account.setMembershipLevel(MembershipLevel.SILVER);
-        } else {
-            account.setMembershipLevel(MembershipLevel.BRONZE);
-        }
-    }
-    
     private LoyaltyAccountDTO mapToDTO(LoyaltyAccount account) {
+        policy.classify(account);
+        var thresholds=policy.thresholds();
         LoyaltyAccountDTO dto = new LoyaltyAccountDTO();
+        dto.setEarnEvery(policy.current().getEarnEvery());dto.setPointValue(policy.current().getPointValue());
         dto.setId(account.getId());
         dto.setUserId(account.getCustomer().getId());
         dto.setCurrentPoints(account.getAvailablePoints());
         dto.setLifetimePoints(account.getTotalPoints());
         dto.setMembershipLevel(account.getMembershipLevel() != null ? account.getMembershipLevel().name() : "BRONZE");
-        dto.setThresholds(THRESHOLDS);
+        dto.setThresholds(thresholds);
         dto.setTier(dto.getMembershipLevel());
-        var next = THRESHOLDS.entrySet().stream().filter(e -> e.getValue() > account.getTotalPoints()).min(java.util.Map.Entry.comparingByValue());
+        var next = thresholds.entrySet().stream().filter(e -> e.getValue() > account.getTotalPoints()).min(java.util.Map.Entry.comparingByValue());
         dto.setNextTier(next.map(java.util.Map.Entry::getKey).orElse(null));
         dto.setPointsToNextTier(next.map(e -> e.getValue() - account.getTotalPoints()).orElse(0));
         return dto;
