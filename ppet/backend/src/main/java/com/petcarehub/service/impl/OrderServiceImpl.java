@@ -30,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final java.time.Clock clock;
     private final com.petcarehub.config.OrderExpiryConfig.Settings expiry;
     private final NotificationRepository notifications;
+    private final SettingsService settings;
 
     @Override
     @Transactional(readOnly = true)
@@ -136,6 +137,7 @@ public class OrderServiceImpl implements OrderService {
         order.setPointsUsed(summary.pointsApplied());
         order.setPointsDiscount(summary.pointsDiscount());
         order.setShippingFee(summary.shippingFee());
+        order.setReturnWindowDays(settings.integer("returnDays"));
         order.setTotalAmount(summary.total());
         if (request.getPromotionCode() != null && !request.getPromotionCode().isBlank())
             order.setPromotionCode(request.getPromotionCode().trim());
@@ -152,7 +154,7 @@ public class OrderServiceImpl implements OrderService {
             }
             carts.saveAndFlush(cart);
         });
-        if (!reservedPets.isEmpty()) order.setExpiresAt(java.time.LocalDateTime.now(clock).plusHours(expiry.holdHours()));
+        if (!reservedPets.isEmpty()) order.setExpiresAt(java.time.LocalDateTime.now(clock).plusHours(settings.integer("holdHours")));
         Order saved = orders.saveAndFlush(order);
         for (OrderItem item : saved.getItems()) {
             if (item.getProduct() != null) inventory.reserveForOrder(item.getProduct().getId(), item.getQuantity(), saved.getId());
@@ -291,11 +293,13 @@ public class OrderServiceImpl implements OrderService {
         dto.setProcessingAt(o.getProcessingAt());
         dto.setShippedAt(o.getShippedAt());
         dto.setDeliveredAt(o.getDeliveredAt());
+        dto.setReturnedAmount(o.getReturnedAmount());
+        dto.setReturnUntil(o.getDeliveredAt()==null?null:o.getDeliveredAt().plusDays(o.getReturnWindowDays()==null?7:o.getReturnWindowDays()));
         dto.setCancelledAt(o.getCancelledAt());
         dto.setShippingAddress(o.getShipping() == null ? o.getShippingAddress() : o.getShipping().formatted()); dto.setPaymentMethod(o.getPaymentMethod());
         dto.setPaymentStatus(o.getPaymentStatus().name()); dto.setCreatedAt(o.getCreatedAt());
         dto.setItems(o.getItems().stream().map(item -> {
-            OrderItemDTO d = new OrderItemDTO();
+            OrderItemDTO d = new OrderItemDTO(); d.setItemId(item.getId());
             if (item.getProduct() != null) { d.setProductId(item.getProduct().getId()); d.setProductName(item.getItemNameSnapshot()!=null?item.getItemNameSnapshot():item.getProduct().getName()); d.setImageUrl(item.getProduct().getImageUrl()); }
             if (item.getPet() != null) { d.setPetId(item.getPet().getId()); d.setPetName(item.getItemNameSnapshot()!=null?item.getItemNameSnapshot():item.getPet().getName()); d.setImageUrl(item.getPet().getImageUrl()); }
             if (item.getCarePackage()!=null) {

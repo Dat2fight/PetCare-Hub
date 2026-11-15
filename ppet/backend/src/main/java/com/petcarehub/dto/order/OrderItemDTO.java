@@ -4,6 +4,8 @@ import lombok.Data;
 
 @Data
 public class OrderItemDTO {
+    @com.fasterxml.jackson.annotation.JsonProperty(access=com.fasterxml.jackson.annotation.JsonProperty.Access.READ_ONLY)
+    private Long itemId;
     private Long productId;
     private Long petId;
     private Long carePackageId;

@@ -28,6 +28,8 @@ public class OrderDTO {
     private java.time.LocalDateTime processingAt;
     private java.time.LocalDateTime shippedAt;
     private java.time.LocalDateTime deliveredAt;
+    private java.math.BigDecimal returnedAmount;
+    private java.time.LocalDateTime returnUntil;
     private java.time.LocalDateTime cancelledAt;
 
     private String notes;

@@ -60,12 +60,14 @@ public class AdminOrderOperations {
     }
     public void requestRefund(Long id,OperationRequests.Note request) {
         var order=locked(id);
+        requireNoReturns(id);
         if(order.getPaymentStatus()!=PaymentStatus.COMPLETED || !(order.getStatus()==OrderStatus.DELIVERED||order.getStatus()==OrderStatus.CANCELLED))throw new IllegalStateException("Chỉ lập yêu cầu hoàn cho đơn đã thu tiền và đã giao hoặc đã hủy");
         if(order.getRefundRequestedAt()==null){order.setRefundRequestedAt(LocalDateTime.now(clock));note(order,request.body());}
         audit.record("ORDER_REFUND_REQUESTED","ORDER",id,Map.of("reasonProvided",true));
     }
     public void refund(Long id,OperationRequests.Refund request) {
         var order=locked(id);String reference=request.reference().strip();
+        requireNoReturns(id);
         boolean replay=order.getPaymentStatus()==PaymentStatus.REFUNDED;
         if(replay&&!reference.equals(order.getRefundReference()))throw new IllegalStateException("Đơn đã được hoàn với biên nhận khác");
         if(!replay){
@@ -74,6 +76,9 @@ public class AdminOrderOperations {
             event(order,"CASH_REFUNDED",reference);note(order,request.reason());
         }
         audit.record("ORDER_REFUNDED","ORDER",id,Map.of("replay",replay,"paymentStatus","REFUNDED","reasonProvided",true));
+    }
+    private void requireNoReturns(Long id){
+        if(em.createQuery("select count(r) from ReturnRequest r where r.orderId=:id and r.status<>'REJECTED'",Long.class).setParameter("id",id).getSingleResult()>0)throw new IllegalStateException("Đơn đang có quy trình trả hàng; xử lý tại Trả hàng để tránh hoàn trùng");
     }
     private void event(Order order,String type,String reference){
         if(em.createQuery("select count(e) from OrderPaymentEvent e where e.orderId=:id and e.eventType=:type",Long.class).setParameter("id",order.getId()).setParameter("type",type).getSingleResult()==0)

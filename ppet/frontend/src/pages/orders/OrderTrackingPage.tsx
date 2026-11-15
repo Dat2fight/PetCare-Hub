@@ -1,3 +1,4 @@
+import { RequestReturn } from './Returns';
 import { formatBusinessTime } from '../../utils/businessDate';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
@@ -37,7 +38,7 @@ export const OrderTrackingPage = ({ confirmation = false }: { confirmation?: boo
       <p>Ngày đặt: {formatBusinessTime(order.createdAt, true)}</p>{order.shippingAddress && <p>Giao đến: {order.shippingAddress}</p>}
       {order.items.some(i=>i.carePackageId) && order.paymentStatus==='COMPLETED' && <Link className="underline" to="/my-care-packages">Xem gói đã kích hoạt</Link>}
       <p>{order.paymentMethod} · {order.paymentStatus==='COMPLETED' ? 'Đã thanh toán' : order.paymentStatus==='PENDING' ? 'Chưa thanh toán' : order.paymentStatus}</p>
-      <OrderItems items={order.items}/>{order.notes && <p>Ghi chú: {order.notes}</p>}
+      <OrderItems items={order.items}/><RequestReturn order={order}/>{order.notes && <p>Ghi chú: {order.notes}</p>}
       {order.shipping?.note && <p>Ghi chú giao hàng: {order.shipping.note}</p>}
       {order.subtotal != null && <p>Tiền hàng: {order.subtotal.toLocaleString('vi-VN')} ₫</p>}
       {!!order.discountAmount && <p>Giảm theo mã: {order.discountAmount.toLocaleString('vi-VN')} ₫</p>}

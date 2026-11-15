@@ -89,6 +89,8 @@ public class Order extends BaseEntity {
     private java.time.LocalDateTime processingAt;
     private java.time.LocalDateTime shippedAt;
     private java.time.LocalDateTime deliveredAt;
+    private Integer returnWindowDays;
+    @Builder.Default @Column(nullable=false,precision=18,scale=2) private BigDecimal returnedAmount=BigDecimal.ZERO;
     private java.time.LocalDateTime cancelledAt;
     @Nationalized @Column(length=100) private String refundReference;
     private java.time.LocalDateTime refundedAt;

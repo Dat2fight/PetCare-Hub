@@ -13,7 +13,7 @@ public class AdminInsightsService {
     private final EntityManager em;
     private final OrderRepository orders;
     private final Clock clock;
-    public static final String REVENUE_DEFINITION="Chỉ đơn thanh toán COMPLETED, loại đơn hủy/hoàn; tiền mặt COD phải DELIVERED. Ghi nhận theo paidAt, gồm tổng tiền thực thu của cả sản phẩm và thú cưng.";
+    public static final String REVENUE_DEFINITION="Chỉ đơn thanh toán COMPLETED, loại đơn hủy/hoàn toàn bộ; tiền mặt COD phải DELIVERED. Ghi nhận theo paidAt, gồm sản phẩm và thú cưng, trừ tiền trả sản phẩm đã xác nhận hoàn. Khoản hoàn điều chỉnh kỳ thu tiền gốc.";
     public ReportPeriod period(String name,LocalDate from,LocalDate to){
         return ReportPeriod.of(name,from,to,clock);
     }
@@ -51,7 +51,7 @@ public class AdminInsightsService {
     public List<Map<String,Object>> revenue(String granularity,ReportPeriod p){
         if(!Set.of("day","month").contains(granularity))throw CatalogInput.bad("Chọn day hoặc month");
         String grouping="year(o.paidAt),month(o.paidAt)"+(granularity.equals("day")?",day(o.paidAt)":"");
-        var q=em.createQuery("select "+grouping+",coalesce(sum(o.totalAmount),0),count(o) from Order o where"+OrderRepository.REVENUE_FILTER+" group by "+grouping,Object[].class).setParameter("from",p.start()).setParameter("to",p.end());
+        var q=em.createQuery("select "+grouping+",coalesce(sum(o.totalAmount-coalesce(o.returnedAmount,0)),0),count(o) from Order o where"+OrderRepository.REVENUE_FILTER+" group by "+grouping,Object[].class).setParameter("from",p.start()).setParameter("to",p.end());
         Map<LocalDate,Object[]> byDate=new HashMap<>();
         boolean day=granularity.equals("day");
         for(var r:q.getResultList())byDate.put(LocalDate.of(((Number)r[0]).intValue(),((Number)r[1]).intValue(),day?((Number)r[2]).intValue():1),r);
