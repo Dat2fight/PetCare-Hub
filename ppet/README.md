@@ -418,3 +418,9 @@ Nhánh `feature/admin-3-catalog` thêm quản trị catalog/thú cưng, bulk/CSV
 Nhánh `feature/admin-4-insights` bổ sung dashboard doanh thu/so sánh kỳ, biểu đồ SVG và bảng số liệu, cảnh báo vận hành, xuất CSV, thông báo web theo lô và nhắc lịch tự động, trạng thái hệ thống/job. Các màn mới chỉ dành cho ADMIN; không thêm thư viện, email hay cổng thanh toán. Cần **V20__admin_insights.sql** theo [runbook migration](docs/migrations.md), sao lưu và chạy thử bản sao trước khi triển khai. Chưa áp dụng lên database thật, chưa push/merge.
 
 Xem [báo cáo và kiểm chứng giai đoạn 4](docs/admin-phase-4-report.md), [API](docs/api.md#admin-insights--giai-đoạn-4-2026-11-15) và [hướng dẫn vận hành](docs/admin-guide.md#dashboard-thông-báo-và-hệ-thống--giai-đoạn-4). Các biến `APP_NOTIFICATIONS_*`, `APP_REMINDERS_*` có mặc định trong `backend/.env.example`; profile test tắt các job mới. Maven tạo build-info để trang hệ thống hiển thị phiên bản ứng dụng.
+
+## Admin Portal — giai đoạn 5
+
+`feature/admin-5-content-settings` bổ sung CMS có nháp/xuất bản/20 phiên bản, trang chính sách/bài viết/FAQ công khai, nội dung trang chủ và liên hệ, cấu hình phí/thời hạn, xuất CSV bất đồng bộ tải một lần, và trả sản phẩm theo từng bước có xác nhận. Tiền mặt và thông báo web; không thêm dependency. Cần **V21__admin_content_settings_returns.sql** sau V20 theo [runbook migration](docs/migrations.md); chưa áp trên database chính.
+
+Xem [báo cáo giai đoạn 5](docs/admin-phase-5-report.md), [hướng dẫn vận hành](docs/admin-guide.md#nội-dung-cấu-hình-xuất-dữ-liệu-và-trả-hàng--giai-đoạn-5) và [sao lưu/khôi phục](docs/backup-restore-runbook.md). Sao lưu DB do người vận hành thực hiện ngoài ứng dụng. Trước mở bán, cửa hàng phải duyệt/xuất bản nội dung chính sách của mình. Nháp không thay đổi nội dung đang công khai; cấu hình mới không tính lại tiền hay thời hạn đã chốt của đơn cũ.

@@ -16,6 +16,8 @@ spring:
       enabled: false
 
 app:
+  exports:
+    enabled: false
   notifications:
     enabled: false
   reminders:

@@ -1,4 +1,6 @@
 import React, { useEffect } from 'react';
+import { ContentPage, ContentList, policyNames } from './pages/content/PublicContent';
+import { MyReturns } from './pages/orders/Returns';
 import { BrowserRouter as Router, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { PermissionProvider } from './contexts/PermissionContext';
 import { useAuth } from './contexts/AuthContext';
@@ -64,6 +66,8 @@ function App() {
           <PublicHeader />
           <main className="grow">
             <Routes>
+              {Object.keys(policyNames).map(page=><Route key={page} path={"/"+page} element={<ContentPage page={page}/>}/>)}
+              <Route path="/articles" element={<ContentList/>}/><Route path="/articles/:slug" element={<ContentPage/>}/><Route path="/faq" element={<ContentList kind="FAQ"/>}/><Route path="/returns" element={<ProtectedRoute roles={['CUSTOMER']}><MyReturns/></ProtectedRoute>}/>
               <Route path="/admin/*" element={<ProtectedRoute><React.Suspense fallback={<p role="status" className="p-6">Đang tải cổng quản trị…</p>}><AdminPortal /></React.Suspense></ProtectedRoute>} />
               <Route path="/change-password" element={<ProtectedRoute><React.Suspense fallback={<p>Đang tải…</p>}><ChangePasswordPage /></React.Suspense></ProtectedRoute>} />
               <Route path="/" element={<HomePage />} />

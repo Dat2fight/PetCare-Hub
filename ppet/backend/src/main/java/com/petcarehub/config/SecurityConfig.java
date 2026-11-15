@@ -72,7 +72,12 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
-                    auth.requestMatchers("/api/v1/admin/dashboard/**","/api/v1/admin/reports/**").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
+                    auth.requestMatchers("/api/v1/admin/content","/api/v1/admin/content/**").access(permissions.access(com.petcarehub.security.Permission.CONTENT_MANAGE))
+                        .requestMatchers("/api/v1/admin/settings","/api/v1/admin/data-exports","/api/v1/admin/data-exports/**").access(permissions.access(com.petcarehub.security.Permission.SYSTEM_MANAGE))
+                        .requestMatchers("/api/v1/admin/returns","/api/v1/admin/returns/**").access(permissions.access(com.petcarehub.security.Permission.ORDER_MANAGE))
+                        .requestMatchers("/api/v1/returns").hasRole("CUSTOMER")
+                        .requestMatchers(HttpMethod.GET,"/api/v1/content","/api/v1/content/**").permitAll()
+                        .requestMatchers("/api/v1/admin/dashboard/**","/api/v1/admin/reports/**").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
                         .requestMatchers("/api/v1/admin/notifications/**","/api/v1/admin/system/**").access(permissions.access(com.petcarehub.security.Permission.SYSTEM_MANAGE))
                         .requestMatchers("/api/v1/admin/catalog/**").access(catalogPolicy.access())
                         .requestMatchers("/api/v1/admin/pet-support/**").access(permissions.accessAny(com.petcarehub.security.Permission.USER_MANAGE,com.petcarehub.security.Permission.ASSIGNED_MEDICAL_MANAGE))

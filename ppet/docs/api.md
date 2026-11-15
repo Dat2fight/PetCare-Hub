@@ -1,5 +1,7 @@
 # PetCare Hub — API và ma trận quyền hiện hành
 
+Giai đoạn 5 (2026-11-15): [hợp đồng CMS/settings/async export/returns](admin-phase-5-api.md), [ma trận quyền và báo cáo](admin-phase-5-report.md). Phần bổ sung này cập nhật doanh thu sau hoàn sản phẩm và OrderDTO; các phần lịch sử bên dưới giữ ngữ cảnh từng giai đoạn.
+
 Đối chiếu code trên `fix/qa-critical-001-007`, base `44027f8`, ngày 27/10/2026. Các endpoint bên dưới dùng tiền tố `/api/v1`. Role thật: `CUSTOMER`, `SALES_STAFF`, `WAREHOUSE_STAFF`, `VETERINARIAN`, `ADMIN`. “Đã đăng nhập” bao gồm mọi role thật nhưng thao tác cá nhân luôn bị giới hạn theo principal.
 
 - 401: thiếu đăng nhập; 403: sai vai trò hoặc userId URL khác principal; 404: tài nguyên riêng không thuộc người gọi; 400: input sai; 409: trạng thái/tồn kho/xung đột dữ liệu.

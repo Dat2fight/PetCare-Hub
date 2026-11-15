@@ -23,6 +23,7 @@ class EndpointSecurityMatrixTest {
     @Autowired RequestMappingHandlerMapping mappings;
     // Only public authentication and storefront reads; /manage is deliberately excluded.
     static final Set<String> PUBLIC = Set.of(
+        "GET /content","GET /content/{slug}","GET /content/featured",
         "POST /auth/login", "POST /auth/register", "GET /pets", "GET /pets/{id}",
         "GET /products", "GET /products/{id}", "GET /categories", "GET /categories/{id}",
         "GET /home/products", "GET /home/reviews", "GET /services", "GET /services/{id}", "GET /species", "GET /species/{speciesId}/breeds",
@@ -30,6 +31,7 @@ class EndpointSecurityMatrixTest {
         "GET /care-packages","GET /care-packages/{id}", "GET /reviews/summary", "GET /reviews", "GET /reviews/{id}");
     // Customer operations must obtain identity from the principal and enforce resource ownership.
     static final Set<String> CUSTOMER_WRITES = Set.of(
+        "POST /returns",
         "POST /auth/password",
         "POST /cart/items", "PUT /cart/items/{itemId}", "DELETE /cart/items/{itemId}", "DELETE /cart",
         "POST /orders/quote", "POST /orders", "POST /orders/{id}/cancel", "POST /appointments", "POST /appointments/{id}/cancel", "PUT /appointments/{id}/status",
@@ -37,6 +39,7 @@ class EndpointSecurityMatrixTest {
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
+        "POST /admin/content","PUT /admin/content/{id}","DELETE /admin/content/{id}","POST /admin/content/{id}/publish","POST /admin/content/{id}/unpublish","POST /admin/content/{id}/restore","PUT /admin/settings","POST /admin/data-exports","POST /admin/data-exports/{id}/download","POST /admin/returns/{id}/transition",
         "POST /admin/notifications/send","POST /admin/notifications/templates","PUT /admin/notifications/templates/{id}","DELETE /admin/notifications/templates/{id}",
         "POST /admin/catalog/{resource}","PUT /admin/catalog/{resource}/{id}","DELETE /admin/catalog/{resource}/{id}","POST /admin/catalog/products/bulk-preview","POST /admin/catalog/products/bulk-apply","POST /admin/catalog/products/csv-preview","POST /admin/catalog/products/csv-apply","POST /admin/catalog/pets/{id}/release-reservation","POST /admin/schedules/{kind}","PUT /admin/schedules/{kind}/{id}","DELETE /admin/schedules/{kind}/{id}","POST /admin/schedule-cancel","PUT /admin/loyalty-rules","POST /admin/loyalty/{userId}/adjust","POST /admin/subscriptions/{id}","POST /admin/campaigns",
         "POST /admin/orders/{id}/transition","POST /admin/orders/{id}/request-refund","POST /admin/orders/{id}/mark-refunded","POST /admin/orders/{id}/notes","POST /admin/inventory/movements","POST /admin/appointments/{id}/assign","POST /admin/appointments/{id}/status","POST /admin/reviews/{id}/moderate",
@@ -54,6 +57,7 @@ class EndpointSecurityMatrixTest {
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
+        "GET /admin/content","GET /admin/content/{id}","GET /admin/content/{id}/revisions","GET /admin/settings","GET /admin/data-exports","GET /admin/returns","GET /returns",
         "GET /admin/dashboard/summary","GET /admin/dashboard/alerts","GET /admin/reports/revenue","GET /admin/reports/rankings","GET /admin/reports/export","GET /admin/system/status","GET /admin/notifications/audience-preview","GET /admin/notifications/history","GET /admin/notifications/templates",
         "GET /admin/catalog/products/low-stock","GET /admin/catalog/{resource}","GET /admin/catalog/{resource}/{id}","GET /admin/pet-support/{id}","GET /admin/schedules/{kind}","GET /admin/schedule-affected","GET /admin/staff-performance","GET /admin/loyalty-rules","GET /admin/promotion-usages/{id}","GET /admin/subscriptions","GET /admin/campaign-audience",
         "GET /admin/orders","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/inventory","GET /admin/inventory/transactions","GET /admin/appointments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff","GET /admin/reviews","GET /admin/reviews/count",
@@ -100,6 +104,7 @@ class EndpointSecurityMatrixTest {
             if(endpoint.startsWith("POST /admin/inventory/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF || role==com.petcarehub.enums.RoleType.WAREHOUSE_STAFF;
             if(endpoint.equals("POST /admin/appointments/{id}/status")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF||role==com.petcarehub.enums.RoleType.VETERINARIAN;
             if(endpoint.startsWith("POST /admin/catalog/")||endpoint.startsWith("PUT /admin/catalog/")||endpoint.startsWith("DELETE /admin/catalog/")||endpoint.equals("POST /admin/campaigns")||endpoint.startsWith("POST /admin/subscriptions/")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
+            if(endpoint.matches(".* /admin/(content|returns)(/.*)?")) allowed |= role==com.petcarehub.enums.RoleType.SALES_STAFF;
             // Malformed JSON prevents test data mutations after an allowed filter boundary.
             // CatalogAuthorizationTest and flow tests exercise valid allowed requests as well.
             int status=perform(endpoint,role.name(),true);
@@ -111,6 +116,7 @@ class EndpointSecurityMatrixTest {
     }
     @Test void everyPrivateResourceIdHasANamedOwnershipRegression() throws Exception {
         Map<String,String> evidence=new HashMap<>();
+        register(evidence,"AdminContentSettingsTest#roleMatrixAndPrivateContentScope","GET /admin/content/{id}","GET /admin/content/{id}/revisions");
         register(evidence,"AdminCatalogTest#roleMatrixAndCompleteEndpointInventory","GET /admin/catalog/{resource}","GET /admin/catalog/{resource}/{id}","GET /admin/pet-support/{id}","GET /admin/schedules/{kind}","GET /admin/promotion-usages/{id}");
         register(evidence,"AdminOperationsTest#roleMatrixAndCompleteEndpointInventory","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff");
         register(evidence,"AdminFoundationTest#everyAdminEndpointHasExplicitRolePolicyAndMethodGuard", "GET /admin/users/{userId}/overview");

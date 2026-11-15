@@ -1,5 +1,23 @@
 # PetCare Hub Database Schema Documentation
 
+## Admin content/settings/returns V21 (2026-11-15)
+
+Migration mới `V21__admin_content_settings_returns.sql`, áp sau V20 bằng Flyway; không sửa migration cũ hoặc SQL seed/legacy. Chưa áp vào database chính. [Sao lưu/khôi phục và thử bản sao](backup-restore-runbook.md) trước triển khai backend mới với `ddl-auto=validate` và frontend tương thích.
+
+| Bảng/cột | Ràng buộc và mục đích |
+|---|---|
+| system_settings | setting_key PK; setting_value DECIMAL(18,2), whitelist/biên được kiểm tại service |
+| site_content | slug unique; title/body/published_snapshot NVARCHAR; draft tách snapshot; actor FK; index kind/published_at/id |
+| content_revisions | FK content/user; snapshot NVARCHAR; index content_id/id DESC; service giữ 20 bản gần nhất |
+| return_requests | FK order/item/customer/handled_by; CHECK quantity>0 và enum trạng thái; UNIQUE(customer_id,request_key); index item/status, order/status, status/id |
+| data_export_jobs | FK actor; UNIQUE(actor_id,request_key); criteria/payload NVARCHAR; index status/id, expires_at/status, actor_id/created_at |
+| orders.return_window_days | INT NULL; snapshot đơn mới; legacy NULL dùng 7 ngày, không bịa delivered_at |
+| orders.returned_amount | DECIMAL(18,2) NOT NULL DEFAULT 0; tiền trả sản phẩm đã xác nhận hoàn, không sửa total_amount gốc |
+
+Khóa Order bảo vệ yêu cầu trả/số lượng/nhận kho/hoàn từng phần và tương tác với hoàn toàn bộ đơn. OrderPaymentEvent hiện có dùng event_type `RETURN_REFUND_{id}` chống lặp. Nhận hàng chỉ cộng kho sau thao tác nhân viên; tiền mặt chỉ được ghi nhận, không chuyển tiền tự động. Revenue sum trừ returned_amount tại kỳ paid_at gốc, xếp hạng sản phẩm vẫn bán gộp trước trả.
+
+Payload xuất xóa ngay khi tiêu thụ hoặc khi worker dọn job hết hạn 24h; metadata/lý do/idempotency chưa có retention tự xóa. Job DATA_EXPORT dùng job_runs hiện có. Không bảng secret hoặc nút backup/restore. Flyway/Hibernate validate đã được kiểm trên SQL Server test riêng qua `tools/test-sqlserver.ps1`; các bài nghiệp vụ chạy H2. Các câu SQL đối soát chỉ đọc ở [admin guide](admin-guide.md#kiểm-tra-dữ-liệu-trước-vận-hành-chỉ-đọc-tự-chạy-khi-cần), chưa chạy trên DB chính.
+
 ## 1. Database Overview
 
 The application uses **Microsoft SQL Server**. The tables below describe the logical model; authoritative DDL is versioned in backend/src/main/resources/db/migration. Follow [the Flyway runbook](migrations.md) for new databases and existing-data onboarding. Older manual migration instructions below are historical mappings, not deployment commands.
