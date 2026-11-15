@@ -38,6 +38,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private final UserRepository userRepository;
     private final EntityManager entityManager;
     private final com.petcarehub.config.BookingProperties booking;
+    private final com.petcarehub.service.SettingsService settings;
     private final com.petcarehub.security.Ownership ownership;
     private final java.time.Clock clock;
     private final com.petcarehub.repository.NotificationRepository notifications;
@@ -256,7 +257,7 @@ public class AppointmentServiceImpl implements AppointmentService {
         dto.setTimezone(clock.getZone().getId());
         dto.setStartsAt(dto.getAppointmentTime().atZone(clock.getZone()).toInstant());
         if (appointment.getEndTime() != null) dto.setEndsAt(appointment.getAppointmentDate().atTime(appointment.getEndTime()).atZone(clock.getZone()).toInstant());
-        dto.setCancelUntil(dto.getAppointmentTime().minusHours(booking.getCancellationNoticeHours()));
+        dto.setCancelUntil(dto.getAppointmentTime().minusHours(settings.integer("cancellationHours")));
         dto.setCancellable((appointment.getStatus() == AppointmentStatus.SCHEDULED || appointment.getStatus() == AppointmentStatus.CONFIRMED)
                 && !LocalDateTime.now(clock).isAfter(dto.getCancelUntil()));
         return dto;

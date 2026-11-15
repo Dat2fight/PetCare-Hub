@@ -9,13 +9,14 @@ import java.util.*;
 @Service @RequiredArgsConstructor @Transactional(readOnly=true)
 public class LoyaltyPolicy  {
     private final EntityManager em;
+    private final SettingsService settings;
     public LoyaltyRules current() {
         var r=em.find(LoyaltyRules.class,1);
         return r==null?new LoyaltyRules():r;
     }
     public Map<String,Integer> thresholds() {
         var r=current();
-        return Map.of("BRONZE",0,"SILVER",r.getSilver(),"GOLD",r.getGold(),"PLATINUM",r.getPlatinum());
+        return settings.thresholds();
     }
     public void classify(LoyaltyAccount a) {
         var r=current();

@@ -24,6 +24,7 @@ public class CheckoutPricing {
     private final LoyaltyTransactionRepository ledger;
     private final UserRepository users;
     private final Clock clock;
+    private final com.petcarehub.service.SettingsService settings;
     @Value("${app.checkout.shipping-fee:30000}") private BigDecimal shippingFee;
     @Value("${app.checkout.free-shipping-from:500000}") private BigDecimal freeShippingFrom;
     @Value("${app.checkout.promotion-per-customer:1}") private int perCustomer;
@@ -55,7 +56,7 @@ public class CheckoutPricing {
                 .min(BigDecimal.valueOf(balance)).intValueExact();
         if (points < 0 || points > max) throw new BadRequestException("Số điểm vượt số dư hoặc giới hạn 50% tiền sản phẩm");
         BigDecimal redeemed = pointValue.multiply(BigDecimal.valueOf(points));
-        BigDecimal ship = products.signum() > 0 && subtotal.compareTo(freeShippingFrom) < 0 ? shippingFee : BigDecimal.ZERO;
+        BigDecimal ship = products.signum() > 0 && subtotal.compareTo(settings.current().get("freeShippingFrom")) < 0 ? settings.current().get("shippingFee") : BigDecimal.ZERO;
         return new OrderQuote(subtotal, discount, points, redeemed, ship, subtotal.subtract(discount).subtract(redeemed).add(ship), balance, max);
     }
 

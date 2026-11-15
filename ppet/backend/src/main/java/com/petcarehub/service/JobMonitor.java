@@ -8,7 +8,7 @@ import java.time.*;
 import java.util.*;
 @Service @RequiredArgsConstructor
 public class JobMonitor {
-    public static final List<String> NAMES=List.of("ORDER_EXPIRY","NOTIFICATION_DISPATCH","CUSTOMER_REMINDERS");
+    public static final List<String> NAMES=List.of("ORDER_EXPIRY","NOTIFICATION_DISPATCH","CUSTOMER_REMINDERS","DATA_EXPORT");
     private final EntityManager em;
     private final Clock clock;
     @Transactional(propagation=Propagation.REQUIRES_NEW) public Long start(String name){

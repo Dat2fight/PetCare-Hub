@@ -19,7 +19,7 @@ public class AdminAuditService {
     private final Ownership ownership;
     private final Clock clock;
     // Values are identifiers/booleans/enums only. Passwords, tokens and personal details never enter the log.
-    private static final Set<String> KEYS=Set.of("enabledBefore","enabledAfter","roleBefore","roleAfter",
+    private static final Set<String> KEYS=Set.of("changes","enabledBefore","enabledAfter","roleBefore","roleAfter",
         "deleted","sessionsRevoked","appointmentsUnassigned","mustChangePassword","status","method",
         "exportKind","from","to","keywordProvided","audienceGroup","count","ids","statusBefore","statusAfter","quantity","staffId","reasonProvided","paymentStatus","replay");
 
