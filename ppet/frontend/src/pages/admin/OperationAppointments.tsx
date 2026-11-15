@@ -119,7 +119,7 @@ function AssignDialog({
   onDone: () => void;
 }) {
   const r = useQueue(`/admin/appointments/${id}/eligible-staff`);
-  return <ActionDialog key={r.data?.number ?? 0} title="Phân công nhân viên" url={`/admin/appointments/${id}/assign`} fields={[{
+  return <ActionDialog key={r.data?.number ?? 0} title="Phân công nhân viên" url={`/admin/appointments/${id}/assign`} fields={[{key:'actionable',label:'Phạm vi cần xử lý',options:{'':'Tất cả',true:'Lịch sắp tới còn hoạt động'}},{
     key: 'staffId',
     label: 'Nhân viên (trang hiện tại)',
     type: 'number',

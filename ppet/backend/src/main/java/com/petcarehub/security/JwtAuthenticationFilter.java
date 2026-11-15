@@ -27,6 +27,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     private SecurityErrorHandler securityErrors;
 
+    // Streaming CSV finishes through an ASYNC dispatch. Restore the JWT principal there too;
+    // stateless security does not retain the initial request's thread-local authentication.
+    @Override
+    protected boolean shouldNotFilterAsyncDispatch() { return false; }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         try {

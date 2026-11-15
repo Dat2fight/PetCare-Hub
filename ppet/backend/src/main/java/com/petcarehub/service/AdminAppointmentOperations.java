@@ -24,7 +24,7 @@ public class AdminAppointmentOperations {
     private Appointment accessible(Long id){var a=appointments.findById(id).orElseThrow(this::missing);if(!permissions.has("APPOINTMENT_MANAGE")&&(a.getStaff()==null||!a.getStaff().getId().equals(ownership.userId())))throw missing();return a;}
     private ResourceNotFoundException missing(){return new ResourceNotFoundException("Không tìm thấy lịch hẹn");}
     @Transactional(readOnly=true)
-    public Page<Map<String,Object>> list(Long staff,Long serviceId,AppointmentStatus status,LocalDate from,LocalDate to,boolean unassigned,Pageable page){
+    public Page<Map<String,Object>> list(Long staff,Long serviceId,AppointmentStatus status,LocalDate from,LocalDate to,boolean unassigned,boolean actionable,Pageable page){
         AdminQuery.dates(from,to);Map<String,Object> params=new HashMap<>();String where="1=1";
         if(!permissions.has("APPOINTMENT_MANAGE")){if(staff!=null&&!staff.equals(ownership.userId()))throw missing();staff=ownership.userId();}
         if(staff!=null){where+=" and s.id=:staff";params.put("staff",staff);}
@@ -32,6 +32,7 @@ public class AdminAppointmentOperations {
         if(status!=null){where+=" and o.status=:status";params.put("status",status);}
         if(from!=null){where+=" and o.appointmentDate>=:from";params.put("from",from);}
         if(to!=null){where+=" and o.appointmentDate<=:to";params.put("to",to);}
+        if(actionable){where+=" and o.appointmentDate>=:today and o.status in (com.petcarehub.enums.AppointmentStatus.SCHEDULED,com.petcarehub.enums.AppointmentStatus.CONFIRMED)";params.put("today",LocalDate.now(clock));}
         if(unassigned)where+=" and o.staff is null";
         return rows(where,params,page);
     }

@@ -17,6 +17,7 @@ import java.util.*;
 
 @Service @RequiredArgsConstructor @Transactional @PreAuthorize("@perm.has('ORDER_MANAGE')")
 public class AdminOrderOperations {
+    public static final String REFUND_QUEUE="o.paymentStatus=com.petcarehub.enums.PaymentStatus.COMPLETED and (o.refundRequestedAt is not null or o.status=com.petcarehub.enums.OrderStatus.CANCELLED)";
     private final OrderRepository orders;
     private final OrderService service;
     private final AdminQuery query;
@@ -25,14 +26,15 @@ public class AdminOrderOperations {
     private final Clock clock;
     private final EntityManager em;
     @Transactional(readOnly=true)
-    public Page<Map<String,Object>> list(OrderStatus status,PaymentStatus payment,String keyword,LocalDate from,LocalDate to,boolean refunds,Pageable page) {
+    public Page<Map<String,Object>> list(OrderStatus status,PaymentStatus payment,String keyword,LocalDate from,LocalDate to,boolean refunds,boolean expiring,Pageable page) {
         AdminQuery.dates(from,to);String where="1=1";Map<String,Object> params=new HashMap<>();
+        if(expiring){where+=" and o.status=com.petcarehub.enums.OrderStatus.PENDING and o.paymentStatus=com.petcarehub.enums.PaymentStatus.PENDING and o.expiresAt>=:now and o.expiresAt<=:soon";params.put("now",LocalDateTime.now(clock));params.put("soon",LocalDateTime.now(clock).plusHours(2));}
         if(status!=null){where+=" and o.status=:status";params.put("status",status);}
         if(payment!=null){where+=" and o.paymentStatus=:payment";params.put("payment",payment);}
         if(keyword!=null&&!keyword.isBlank()){where+=" and (lower(o.orderNumber) like :keyword escape '!' or lower(concat(concat(c.lastName,' '),c.firstName)) like :keyword escape '!')";params.put("keyword",AdminQuery.pattern(keyword));}
         if(from!=null){where+=" and o.createdAt>=:from";params.put("from",from.atStartOfDay());}
         if(to!=null){where+=" and o.createdAt<:to";params.put("to",to.plusDays(1).atStartOfDay());}
-        if(refunds)where+=" and o.paymentStatus=com.petcarehub.enums.PaymentStatus.COMPLETED and (o.refundRequestedAt is not null or o.status=com.petcarehub.enums.OrderStatus.CANCELLED)";
+        if(refunds)where+=" and ("+REFUND_QUEUE+")";
         return query.page("Order o join o.customer c","o.id,o.orderNumber,concat(concat(c.lastName,' '),c.firstName),o.status,o.paymentStatus,o.totalAmount,o.createdAt,o.refundRequestedAt",
             "id,orderNumber,customer,status,paymentStatus,total,createdAt,refundRequestedAt",where,params,page,Map.of("id","o.id","createdAt","o.createdAt","total","o.totalAmount","status","o.status"));
     }

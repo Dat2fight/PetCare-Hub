@@ -18,7 +18,7 @@ public class AdminInventoryOperations {
     public Page<Map<String,Object>> list(String keyword,boolean low,Pageable page){
         String where="o.product is not null";Map<String,Object> params=new HashMap<>();
         if(keyword!=null&&!keyword.isBlank()){where+=" and (lower(p.name) like :keyword escape '!' or lower(p.sku) like :keyword escape '!')";params.put("keyword",AdminQuery.pattern(keyword));}
-        if(low)where+=" and o.quantity<=coalesce(o.reorderPoint,10)";
+        if(low)where+=" and p.active=true and o.quantity<=coalesce(o.reorderPoint,10)";
         return query.page("Inventory o join o.product p","o.id,p.id,p.name,p.sku,o.quantity,o.reorderPoint,o.updatedAt","id,productId,name,sku,quantity,reorderPoint,updatedAt",where,params,page,Map.of("id","o.id","quantity","o.quantity","name","p.name"));
     }
     public void move(OperationRequests.Stock request){

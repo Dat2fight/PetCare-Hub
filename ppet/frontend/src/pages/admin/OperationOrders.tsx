@@ -6,7 +6,7 @@ import { Button } from '../../components/common/Button';
 import { Row, useQueue, Filters, options, labels, ActionDialog, Field, timeText } from './OperationsUI';
 export function OrdersQueue() {
   const r = useQueue('/admin/orders');
-  return <><PageHeader title="Đơn hàng" description="Quản lý đơn, thu tiền mặt và hoàn tiền thủ công." /><Filters apply={r.filter} fields={[{
+  return <><PageHeader title="Đơn hàng" description="Quản lý đơn, thu tiền mặt và hoàn tiền thủ công." /><Filters apply={r.filter} fields={[{key:'expiring',label:'Hạn giữ chỗ',options:{'':'Tất cả',true:'Sắp hết hạn trong 2 giờ'}},{
       key: 'keyword',
       label: 'Mã đơn hoặc tên khách'
     }, {

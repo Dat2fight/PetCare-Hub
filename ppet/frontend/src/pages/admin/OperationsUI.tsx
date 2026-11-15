@@ -1,3 +1,4 @@
+import {useLocation} from 'react-router-dom';
 import { formatBusinessTime } from '../../utils/businessDate';
 import { useState, FormEvent, ReactNode } from 'react';
 import api from '../../api/client';
@@ -42,7 +43,8 @@ export type Field = {
 };
 export function useQueue(path: string, initial = '') {
   const [page, setPage] = useState(0);
-  const [filter, setFilter] = useState(initial);
+  const location=useLocation();
+  const [filter, setFilter] = useState(initial || location.search.slice(1));
   const [sort, setSort] = useState('id,desc');
   const r = useAdminResource<Page<Row>>(`${path}?page=${page}&size=20&sort=${sort}&${filter}`);
   return {
@@ -67,7 +69,8 @@ export function Filters({
   fields: Field[];
   apply: (query: string) => void;
 }) {
-  const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(fields.map(f => [f.key, f.value || ''])));
+  const params=new URLSearchParams(useLocation().search);
+  const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(fields.map(f => [f.key, params.get(f.key) || f.value || ''])));
   return <FilterBar onSubmit={e => {
     e.preventDefault();
     apply(new URLSearchParams(Object.fromEntries(Object.entries(values).filter(([, v]) => v !== ''))).toString());
