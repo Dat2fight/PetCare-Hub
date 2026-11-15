@@ -2,6 +2,8 @@ import { HeartButton, useWishlistStatus } from '../components/customer/Wishlist'
 import { useResource } from '../hooks/useResource';
 import { PublicPetDTO } from '../services/petManagementService';
 import React from 'react';
+import { PublishedContent } from './content/PublicContent';
+import { SafeContent } from '../components/common/SafeContent';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/common/Button';
 import type { Product, ProductCategory } from '../services/productService';
@@ -11,10 +13,14 @@ import { FiHeart } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 
 export const HomePage: React.FC = () => {
-  const featured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc');
+  const contentHome=useResource<PublishedContent>('/content/home');
+  const curated=useResource<{pets?:PublicPetDTO[];products?:Product[]}>('/content/featured');
+  const defaultFeatured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc');
+  const featured={...defaultFeatured,...(curated.data?.pets ? {data:{content:curated.data.pets},error:undefined} : {})};
   const hearts=useWishlistStatus('PET',featured.data?.content.map(p=>p.id) ?? []);
   const services = useResource<Service[]>('/services');
-  const products = useResource<{items: Product[]; bestSelling: boolean}>('/home/products');
+  const defaultProducts = useResource<{items: Product[]; bestSelling: boolean}>('/home/products');
+  const products={...defaultProducts,...(curated.data?.products ? {data:{items:curated.data.products,bestSelling:false},error:undefined} : {})};
   const reviews = useResource<{id: number; displayName: string; rating: number; comment: string}[]>('/home/reviews');
   const categories = useResource<ProductCategory[]>('/categories');
   return (
@@ -28,7 +34,7 @@ export const HomePage: React.FC = () => {
             <span className="inline-block py-1.5 px-4 rounded-full bg-primary-100 text-primary-700 font-bold text-sm mb-6 shadow-xs">
               Chào mừng đến với PetCare Hub!
             </span>
-            <h1 className="text-5xl lg:text-[64px] font-extrabold text-gray-900 leading-[1.1] mb-6 tracking-tight">
+            {contentHome.data ? <><h1 className="text-4xl font-bold mb-5 break-words">{contentHome.data.content.title}</h1><div className="mb-8"><SafeContent text={contentHome.data.content.body}/></div></> : <>            <h1 className="text-5xl lg:text-[64px] font-extrabold text-gray-900 leading-[1.1] mb-6 tracking-tight">
               Tìm người bạn <br/> bốn chân <br/>
               <span className="text-primary-600 flex items-center gap-3">
                 phù hợp với bạn
@@ -38,6 +44,7 @@ export const HomePage: React.FC = () => {
             <p className="text-lg text-gray-600 mb-10 max-w-lg leading-relaxed">
               Không chỉ là nơi mua bán thú cưng, chúng tôi còn mang đến đầy đủ sản phẩm, dịch vụ chăm sóc và giải pháp sức khỏe để thú cưng luôn khỏe mạnh và hạnh phúc.
             </p>
+</>}
             <div className="flex flex-wrap gap-4">
               <Link to="/pets">
                 <Button size="lg" className="px-8 rounded-full shadow-lg shadow-primary-500/30">Tìm thú cưng ngay</Button>

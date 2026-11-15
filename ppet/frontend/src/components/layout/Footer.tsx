@@ -1,10 +1,14 @@
 import { siteConfig } from '../../config/siteConfig';
 import React from 'react';
+import { useResource } from '../../hooks/useResource';
+import { PublishedContent, policyNames } from '../../pages/content/PublicContent';
+import { SafeContent } from '../common/SafeContent';
 import { Link } from 'react-router-dom';
 import { MdPets } from 'react-icons/md';
 
 
 const Footer: React.FC = () => {
+  const contact=useResource<PublishedContent>('/content/contact');
   return (
     <footer className="bg-white pt-16 pb-8 border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -41,11 +45,11 @@ const Footer: React.FC = () => {
 
           <section>
             <h3 className="font-bold mb-6">Liên hệ</h3>
-            <dl className="text-sm space-y-2">
+            {contact.data ? <SafeContent text={contact.data.content.body}/> : <dl className="text-sm space-y-2">
               {Object.entries({ 'Điện thoại': siteConfig.hotline, 'Địa chỉ': siteConfig.address,
                 'Email': siteConfig.email, 'Giờ mở cửa': siteConfig.hours }).map(([label, value]) =>
                 <div key={label}><dt className="font-semibold">{label}</dt><dd>{value}</dd></div>)}
-            </dl>
+            </dl>}
           </section>
 
         </div>
@@ -55,10 +59,7 @@ const Footer: React.FC = () => {
           <p className="text-gray-400 text-sm text-center md:text-left">
             © 2025 PetCare Hub. Tất cả quyền được bảo lưu.
           </p>
-          <div className="flex space-x-6">
-            <span aria-disabled="true" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Điều khoản sử dụng — Sắp cập nhật</span>
-            <span aria-disabled="true" className="text-gray-400 hover:text-gray-600 text-sm transition-colors">Chính sách bảo mật — Sắp cập nhật</span>
-          </div>
+          <div className="flex flex-wrap gap-4 text-sm">{Object.entries(policyNames).map(([slug,label])=><Link className="underline" key={slug} to={"/"+slug}>{label}</Link>)}<Link className="underline" to="/articles">Bài viết</Link><Link className="underline" to="/faq">FAQ</Link></div>
         </div>
       </div>
     </footer>
