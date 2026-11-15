@@ -37,6 +37,7 @@ class EndpointSecurityMatrixTest {
         "PUT /notifications/{id}/read", "PUT /notifications/read-all",
         "POST /pet-matching/submit", "POST /pet-matching/submit/{userId}");
     static final Set<String> STAFF_WRITES = Set.of(
+        "POST /admin/notifications/send","POST /admin/notifications/templates","PUT /admin/notifications/templates/{id}","DELETE /admin/notifications/templates/{id}",
         "POST /admin/catalog/{resource}","PUT /admin/catalog/{resource}/{id}","DELETE /admin/catalog/{resource}/{id}","POST /admin/catalog/products/bulk-preview","POST /admin/catalog/products/bulk-apply","POST /admin/catalog/products/csv-preview","POST /admin/catalog/products/csv-apply","POST /admin/catalog/pets/{id}/release-reservation","POST /admin/schedules/{kind}","PUT /admin/schedules/{kind}/{id}","DELETE /admin/schedules/{kind}/{id}","POST /admin/schedule-cancel","PUT /admin/loyalty-rules","POST /admin/loyalty/{userId}/adjust","POST /admin/subscriptions/{id}","POST /admin/campaigns",
         "POST /admin/orders/{id}/transition","POST /admin/orders/{id}/request-refund","POST /admin/orders/{id}/mark-refunded","POST /admin/orders/{id}/notes","POST /admin/inventory/movements","POST /admin/appointments/{id}/assign","POST /admin/appointments/{id}/status","POST /admin/reviews/{id}/moderate",
         "PATCH /admin/users/{userId}/status", "DELETE /admin/users/{userId}", "POST /admin/users/{userId}/revoke-sessions",
@@ -53,6 +54,7 @@ class EndpointSecurityMatrixTest {
         "POST /orders/{id}/confirm", "POST /orders/{id}/process", "POST /orders/{id}/ship", "POST /orders/{id}/deliver",
         "POST /loyalty/account/{userId}/add", "POST /loyalty/account/spend", "POST /loyalty/account/{userId}/spend");
     static final Set<String> PRIVATE_READS = Set.of(
+        "GET /admin/dashboard/summary","GET /admin/dashboard/alerts","GET /admin/reports/revenue","GET /admin/reports/rankings","GET /admin/reports/export","GET /admin/system/status","GET /admin/notifications/audience-preview","GET /admin/notifications/history","GET /admin/notifications/templates",
         "GET /admin/catalog/products/low-stock","GET /admin/catalog/{resource}","GET /admin/catalog/{resource}/{id}","GET /admin/pet-support/{id}","GET /admin/schedules/{kind}","GET /admin/schedule-affected","GET /admin/staff-performance","GET /admin/loyalty-rules","GET /admin/promotion-usages/{id}","GET /admin/subscriptions","GET /admin/campaign-audience",
         "GET /admin/orders","GET /admin/orders/{id}","GET /admin/orders/{id}/print","GET /admin/orders/{id}/notes","GET /admin/orders/{id}/payments","GET /admin/inventory","GET /admin/inventory/transactions","GET /admin/appointments","GET /admin/appointments/{id}","GET /admin/appointments/{id}/eligible-staff","GET /admin/reviews","GET /admin/reviews/count",
         "GET /admin/me/permissions", "GET /admin/users/{userId}/overview", "GET /admin/audit-logs",

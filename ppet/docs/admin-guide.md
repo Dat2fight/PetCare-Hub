@@ -1,6 +1,20 @@
-# Cổng quản trị — giai đoạn 1–3
+# Cổng quản trị — giai đoạn 1–4
 
-Giai đoạn 3: `feature/admin-3-catalog`, nền `8e34108` (giai đoạn 2). Không push/merge/rebase.
+Giai đoạn 4: `feature/admin-4-insights`, nền `7768d41` (giai đoạn 3). Không push/merge/rebase.
+
+## Dashboard, thông báo và hệ thống — giai đoạn 4
+
+Các màn sau chỉ ADMIN thấy và gọi được; quyền nhân viên giai đoạn 1–3 giữ nguyên.
+
+1. **Tổng quan**: chọn hôm nay/tuần/tháng hoặc hai ngày rồi bấm Xem báo cáo. Doanh thu theo ngày thu tiền, chỉ đơn đã thanh toán, bỏ hủy/hoàn; tiền mặt cần xác nhận giao và thu tiền. Chỉ số so với kỳ liền trước cùng số ngày; lịch hẹn hôm nay so riêng hôm qua. Không có doanh thu kỳ trước thì hiển thị “Chưa có nền so sánh”. Dùng “Xem bảng số liệu” nếu không muốn đọc biểu đồ. Top sản phẩm không gồm thú cưng; dịch vụ tính lịch chưa hủy. Cảnh báo mở hàng đợi đã đặt sẵn bộ lọc.
+2. **Xuất CSV**: chọn doanh thu, tồn kho hiện tại hoặc khách hàng. Lọc tên cho kho/khách; tối đa 5000 dòng. Xác nhận trước khi tải, Excel đọc UTF-8 có dấu. Khách chỉ gồm ID/họ tên/trạng thái/ngày tạo. Nếu vượt trần, thu hẹp từ khóa. Audit CSV_EXPORT_PREPARED nghĩa là đã chuẩn bị file, không bảo đảm trình duyệt tải xong; tải lỗi có thể thử lại. Mỗi lần chuẩn bị file có audit riêng.
+3. **Gửi thông báo**: chọn một tài khoản hoặc nhóm role/hạng/không mua N ngày, nhập văn bản hoặc chọn mẫu GENERAL, xem trước số người, rồi xác nhận xếp hàng. Trần 500 người, một đợt/phút/người gửi; “ít nhất 501” là vượt trần, cần nhóm nhỏ hơn. Nếu danh sách đổi sau preview, xem trước lại. Xác nhận thành công chỉ là đã nhận yêu cầu; mở Lịch sử để theo dõi. Lỗi mạng: giữ nguyên form và thử lại dùng cùng requestKey, không tạo thông báo trùng. Sau khi máy chủ xác nhận thành công, lần gửi mới dùng key mới và vẫn chịu giới hạn một phút.
+4. **Mẫu thông báo**: tạo/sửa có xác nhận; xóa mẫu tùy chỉnh cần lý do. Dùng biến đúng mục đích trong hướng dẫn trên màn hình. Không dán HTML. Ba mẫu hệ thống không xóa/đổi mã/mục đích; có thể sửa nội dung hoặc bỏ “Đang bật”. Mẫu nhắc APPOINTMENT_REMINDER/VACCINATION_REMINDER được job dùng tự động; mẫu chung dùng cho gửi thủ công. Nội dung đợt đã xếp hàng giữ nguyên khi mẫu thay đổi.
+5. **Lịch sử thông báo**: bấm Làm mới. QUEUED là đang chờ/gửi, COMPLETED là đã xử lý hết; số “bỏ qua” là tài khoản khóa/xóa trước lúc gửi. “Đã gửi” nghĩa là lưu vào thông báo web của khách, không xác nhận đã đọc. Worker xử lý tối đa 100 người/tick, mặc định 5 giây. Sau 5 lần lỗi, FAILED dừng tự thử; xem mã lỗi và đối chiếu số đã gửi trước khi xử lý. Không gửi lại toàn bộ batch đã giao một phần vì có thể trùng người đã nhận; chưa có nút tiếp tục batch FAILED trong UI.
+6. **Nhắc tự động**: mặc định mỗi giờ, tối đa 100 lịch hẹn và 100 lần nhắc tiêm/tick. Lịch còn hoạt động trong 24 giờ; ngày tiêm tiếp theo hôm nay đến 7 ngày tới. Cùng lịch/ngày/giờ chỉ nhắc một lần; đổi ngày/giờ tạo mốc nhắc mới. Tắt mẫu tương ứng hoặc APP_REMINDERS_ENABLED để dừng. Không nhắc bù ngày đã qua; backlog lớn cần tăng tần suất sau khi đánh giá tải.
+7. **Hệ thống**: làm mới thủ công để xem DB, phiên bản ứng dụng/migration, đơn sắp hết hạn và lần gần nhất của ORDER_EXPIRY, NOTIFICATION_DISPATCH, CUSTOMER_REMINDERS. NEVER_RUN nghĩa là chưa có lịch sử (có thể job tắt/chưa đến giờ), RUNNING chưa ghi kết thúc; nếu kéo dài, kiểm tra tiến trình trước khi kết luận. Job FAILED chỉ hiện mã lỗi an toàn. Thanh toán tiền mặt nên không có webhook/cổng thanh toán để đối soát; số FAILED là trạng thái đơn tạo trong 7 ngày, không phải log cổng thanh toán.
+
+Triển khai V20 theo [database](database.md#admin-insights-v20-2026-11-15) và [runbook](migrations.md). Kiểm nội dung nhắc, múi giờ và cấu hình backend `.env.example` trước khi bật job trên môi trường thật. Có thể tạm đặt APP_NOTIFICATIONS_ENABLED=false/APP_REMINDERS_ENABLED=false; các hàng đợi/receipt vẫn giữ trong DB khi tắt. Không đưa secret vào giao diện hoặc VITE_*.
 
 ## Vận hành
 

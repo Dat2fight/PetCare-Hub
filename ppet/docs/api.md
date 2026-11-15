@@ -291,3 +291,46 @@ Tiền tố `/api/v1/admin`. JSON thuần; lỗi 400/403/404/409 có correlation
 - `POST /campaigns` `{group,days,requestKey:UUID,audienceToken,promotion:{...},message}`: kiểm lại danh sách, tối đa 500 khách, 1 lần/10 phút/người gửi; tạo code riêng + membership audience + thông báo web cùng transaction. Retry cùng key/người/nội dung trả kết quả cũ, không gửi lại; khác nội dung hoặc quá tần suất 409. Checkout kiểm membership cả quote và đặt đơn. Không gửi email/SMS.
 
 API nghiệp vụ cũ giữ tương thích và guard cũ. Portal dùng các endpoint admin trên để ghi audit. Không coi URL legacy là đường thay thế có cùng validation/audit mới.
+
+## Admin insights — giai đoạn 4 (2026-11-15)
+
+Tiền tố `/api/v1/admin`. Thêm 13 mappings (9 GET, 4 ghi), đều **ADMIN-only** theo Q2 bảo thủ. SALES_STAFF, WAREHOUSE_STAFF, VETERINARIAN, CUSTOMER nhận 403; anonymous nhận 401. Matcher URL và `@PreAuthorize` tại controller/service cùng kiểm quyền. Không đổi `PermissionService` hoặc quyền API giai đoạn trước.
+
+| Method / endpoint | Permission | ADMIN | SALES / KHO / BÁC SĨ / CUSTOMER |
+|---|---|---|---|
+| GET /dashboard/summary | REPORT_VIEW | Có | 403 |
+| GET /dashboard/alerts | REPORT_VIEW | Có | 403 |
+| GET /reports/revenue | REPORT_VIEW | Có | 403 |
+| GET /reports/rankings | REPORT_VIEW | Có | 403 |
+| GET /reports/export | REPORT_VIEW | Có, có audit | 403 |
+| GET /notifications/audience-preview | SYSTEM_MANAGE | Có | 403 |
+| POST /notifications/send | SYSTEM_MANAGE | Có, 202 | 403 |
+| GET /notifications/history | SYSTEM_MANAGE | Có | 403 |
+| GET /notifications/templates | SYSTEM_MANAGE | Có | 403 |
+| POST /notifications/templates | SYSTEM_MANAGE | Có | 403 |
+| PUT /notifications/templates/{id} | SYSTEM_MANAGE | Có | 403 |
+| DELETE /notifications/templates/{id} | SYSTEM_MANAGE | Có | 403 |
+| GET /system/status | SYSTEM_MANAGE | Có | 403 |
+
+### Dashboard và CSV
+
+- Summary: `period=today|week|month|custom` (mặc định month); custom cần `from`, `to` dạng ISO date. Tuần từ thứ Hai, tháng từ ngày 1 đến hôm nay. Kỳ tối đa 366 ngày, `[from 00:00, to+1 00:00)`, theo Clock/múi giờ kinh doanh. `previousFrom/previousTo` là kỳ liền trước có cùng số ngày. `metrics` gồm revenue/orders/pending/customers/appointmentsToday, mỗi chỉ số có current/previous/change/percent. Nếu previous=0 và current≠0, percent=null; cả hai=0 thì percent=0. Lịch hẹn hôm nay luôn so với hôm qua, không theo kỳ chọn.
+- Revenue: `granularity=day|month&from=&to=`. Trả `[{date,revenue,orders}]`, điền mốc trống bằng 0. Đơn COMPLETED về thanh toán, không CANCELLED, COD phải DELIVERED; dùng paidAt và tổng tiền thực thu, cùng `OrderRepository.REVENUE_FILTER` với đối soát cũ. REFUNDED bị loại. Tháng đầu/cuối chỉ tính phần nằm trong kỳ.
+- Rankings: `from=&to=`; top 10 products `{id,name,quantity,gross}` từ item sản phẩm của đơn đủ điều kiện, không pet; gross là tổng item trước phân bổ giảm giá/phí. Top 10 services `{id,name,count}` theo ngày hẹn, loại lịch hủy. `totalOrders,cancelled,expired,cancellationPercent,expiryPercent` theo ngày tạo đơn; hết hạn nằm trong đơn hủy.
+- Alerts: `[{key,label,count,href}]` cho tồn thấp (sản phẩm active), hoàn tiền, review PENDING, lịch còn hoạt động chưa phân công từ hôm nay, đơn PENDING/payment PENDING hết hạn trong 2 giờ. Link truyền bộ lọc tới hàng đợi hiện hữu. GET /orders thêm `expiring=true`; GET /appointments thêm `actionable=true` để loại lịch đã hủy/hoàn tất/quá ngày. Quyền các hàng đợi không đổi.
+- Export: `kind=revenue|inventory|customers&from=&to=&keyword=`. Revenue dùng kỳ đã chọn (tối đa 366 dòng); inventory/customers lọc tên, trần 5000 dòng, vượt trả 400 yêu cầu thu hẹp. Khách chỉ ID/tên/họ/enabled/createdAt, loại tài khoản đã xóa. Inventory là tồn hiện tại, gồm cả sản phẩm tắt. Không có mật khẩu/token/email/điện thoại/địa chỉ. UTF-8 BOM, quote/escape CSV và tiền tố `'` cho ô công thức, filename `petcare-{kind}-{ngày}.csv`, no-store. Truy vấn có giới hạn, chụp kết quả trước khi stream từng dòng để không giữ transaction DB trong lúc client tải. JWT được kiểm cả ASYNC redispatch. Audit `CSV_EXPORT_PREPARED` ghi ai/loại/kỳ/số dòng/có lọc tên hay không; không lưu từ khóa có thể chứa tên cá nhân. Audit xác nhận chuẩn bị file, không khẳng định client đã nhận đủ file.
+
+### Thông báo
+
+- Preview: `group=SINGLE&userId=...`, `group=ROLE&role=...`, `group=TIER&tier=BRONZE|SILVER|GOLD|PLATINUM`, hoặc `group=INACTIVE&days=90` (1..3650). Chỉ tài khoản enabled, chưa xóa. TIER lấy ngưỡng hiện tại và lifetime totalPoints, chỉ CUSTOMER; INACTIVE là CUSTOMER có tài khoản cũ hơn N ngày và không tạo đơn trong N ngày. Trả `{count,limit:500,overLimit,audienceToken}`; count bị chặn ở 501 (nghĩa là **ít nhất 501** nếu overLimit), không tải hết người dùng.
+- Send: `{group,userId?,role?,tier?,days?,templateId?,title?,message?,requestKey:UUID,audienceToken}`. Chọn template GENERAL đang bật hoặc title (200)/message (1500) văn bản thuần. Kiểm lại danh sách từ preview, 1..500 người, một đợt/phút/admin; stale preview/quá tần suất → 409. Cùng key, actor và payload trả đợt cũ; khác nội dung → 409. Trả 202 `{id,status,total}` nghĩa là đã ghi hàng đợi, chưa xác nhận giao xong.
+- Worker khóa batch, gửi tối đa 100 người/tick; Notification và trạng thái SENT cùng transaction. Tài khoản bị khóa/xóa trước khi xử lý → SKIPPED. Retry không gửi lại SENT. Lỗi rollback phần đang xử lý, tăng attempts; sau 5 lỗi batch FAILED và dừng. Nội dung đã snapshot không đổi khi sửa/xóa mẫu. `COMPLETED` nghĩa là sent+skipped=total; SENT nghĩa là đã lưu thông báo trên web, không phải khách đã đọc. Không email/SMS.
+- History: Page `{id,actorId,status,total,sent,skipped,attempts,createdAt,finishedAt,errorCode}`; templates: Page `{id,code,purpose,title,body,active}`. Trần size=100, mặc định queue UI 20; sort id, riêng templates thêm code, kiểm whitelist phía server.
+- POST/PUT templates: `{code,purpose:GENERAL|APPOINTMENT|VACCINATION,title,body,active}`. Code `[A-Z0-9_]{2,60}`, chuẩn hóa uppercase, unique. title≤200/body≤1500. Biến GENERAL `{firstName}`; APPOINTMENT thêm `{petName}`, `{appointmentTime}`; VACCINATION thêm `{petName}`, `{dueDate}`. Từ chối HTML, biến lạ/ngoặc lỗi, không chạy expression. Render escape giá trị và kiểm độ dài cuối cùng. DELETE cần `{reason}`. Ba mã hệ thống GENERAL/APPOINTMENT_REMINDER/VACCINATION_REMINDER không xóa/đổi mã/mục đích, có thể sửa nội dung hoặc tắt.
+- Nhắc tự động dùng hai mẫu reserved: lịch SCHEDULED/CONFIRMED trong 24 giờ; vaccine nextDueDate từ hôm nay đến +7 ngày. Tối đa 100 mỗi loại/tick, Clock kinh doanh, receipt unique theo loại/nguồn/ngày/giờ chống trùng; đổi ngày/giờ hẹn cho phép nhắc lần mới. Tắt template hoặc job để ngừng. Không nhắc bù lịch đã qua.
+
+### Hệ thống và audit
+
+`GET /system/status` trả checkedAt, database CONNECTED/UNAVAILABLE (SELECT 1), version từ build-info (fallback development), migration (version/DISABLED/NONE/UNAVAILABLE), paymentGateway=NOT_CONFIGURED_CASH_ONLY, failedPaymentsLast7Days, expiringOrders, jobs. Khi DB không kết nối, không query số liệu; migration UNKNOWN, jobs rỗng. Mỗi job có name/status/startedAt/finishedAt/processed/errorCode; NEVER_RUN nếu chưa có bản ghi, RUNNING nếu chưa kết thúc. Đây không phải health endpoint công khai hoặc giám sát độc lập khi toàn bộ ứng dụng/DB hỏng.
+
+Mỗi POST/PUT/DELETE mới thành công ghi một SUCCESS trong transaction: NOTIFICATION_QUEUED (replay cũng một audit), NOTIFICATION_TEMPLATE_SAVED, NOTIFICATION_TEMPLATE_DELETED; export GET có CSV_EXPORT_PREPARED. Không audit mỗi người nhận của worker; job dùng job_runs. Lỗi chỉ mã cố định JOB_EXECUTION_FAILED/DELIVERY_RETRY_REQUIRED/DELIVERY_FAILED, không trả exception/config/stack trace. Quy trình xác nhận UI áp dụng cho gửi/lưu/xóa/export; riêng xóa mẫu yêu cầu lý do, không thêm yêu cầu nhập lại mật khẩu.

@@ -72,7 +72,9 @@ public class SecurityConfig {
                     .accessDeniedHandler((request, response, exception) -> securityErrors.forbidden(request, response)))
                 .authorizeHttpRequests(auth -> {
                     // Reject forbidden writes before JSON binding/validation; controller guards remain in place.
-                    auth.requestMatchers("/api/v1/admin/catalog/**").access(catalogPolicy.access())
+                    auth.requestMatchers("/api/v1/admin/dashboard/**","/api/v1/admin/reports/**").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))
+                        .requestMatchers("/api/v1/admin/notifications/**","/api/v1/admin/system/**").access(permissions.access(com.petcarehub.security.Permission.SYSTEM_MANAGE))
+                        .requestMatchers("/api/v1/admin/catalog/**").access(catalogPolicy.access())
                         .requestMatchers("/api/v1/admin/pet-support/**").access(permissions.accessAny(com.petcarehub.security.Permission.USER_MANAGE,com.petcarehub.security.Permission.ASSIGNED_MEDICAL_MANAGE))
                         .requestMatchers("/api/v1/admin/schedules/**","/api/v1/admin/schedule-affected","/api/v1/admin/schedule-cancel").access(permissions.access(com.petcarehub.security.Permission.APPOINTMENT_MANAGE))
                         .requestMatchers("/api/v1/admin/staff-performance").access(permissions.access(com.petcarehub.security.Permission.REPORT_VIEW))

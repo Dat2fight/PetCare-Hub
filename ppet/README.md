@@ -412,3 +412,9 @@ Phase 2 adds orders/COD and manual refund reconciliation, internal notes/print s
 ## Admin Portal — giai đoạn 3
 
 Nhánh `feature/admin-3-catalog` thêm quản trị catalog/thú cưng, bulk/CSV, lịch làm việc DB, loyalty và chiến dịch ưu đãi trên web. Cần migration **V19** trước khi chạy bản này; chưa áp lên database thật. Các nhóm tính năng, kiểm thử, quyền và giới hạn gói cũ: [báo cáo giai đoạn 3](docs/admin-phase-3-report.md). Cách dùng: [admin guide](docs/admin-guide.md). Biến thể/nhận nuôi và quota gói: [thiết kế cần quyết định](docs/admin-phase-3-design-decisions.md).
+
+## Admin Portal — giai đoạn 4
+
+Nhánh `feature/admin-4-insights` bổ sung dashboard doanh thu/so sánh kỳ, biểu đồ SVG và bảng số liệu, cảnh báo vận hành, xuất CSV, thông báo web theo lô và nhắc lịch tự động, trạng thái hệ thống/job. Các màn mới chỉ dành cho ADMIN; không thêm thư viện, email hay cổng thanh toán. Cần **V20__admin_insights.sql** theo [runbook migration](docs/migrations.md), sao lưu và chạy thử bản sao trước khi triển khai. Chưa áp dụng lên database thật, chưa push/merge.
+
+Xem [báo cáo và kiểm chứng giai đoạn 4](docs/admin-phase-4-report.md), [API](docs/api.md#admin-insights--giai-đoạn-4-2026-11-15) và [hướng dẫn vận hành](docs/admin-guide.md#dashboard-thông-báo-và-hệ-thống--giai-đoạn-4). Các biến `APP_NOTIFICATIONS_*`, `APP_REMINDERS_*` có mặc định trong `backend/.env.example`; profile test tắt các job mới. Maven tạo build-info để trang hệ thống hiển thị phiên bản ứng dụng.

@@ -571,3 +571,21 @@ FROM promotions GROUP BY UPPER(code) HAVING COUNT(*)>1;
 ```
 
 Biến thể/nhận nuôi/quota gói chưa thêm bảng: xem [thiết kế cần quyết định](admin-phase-3-design-decisions.md).
+
+## Admin insights V20 (2026-11-15)
+
+`V20__admin_insights.sql` thêm năm bảng, không đổi/xóa dữ liệu nghiệp vụ cũ:
+
+| Bảng | Mục đích / ràng buộc |
+|---|---|
+| notification_templates | Code unique; title/body NVARCHAR; purpose, active; ba mẫu hệ thống tiếng Việt |
+| notification_batches | request_key UUID unique, actor FK users, fingerprint, status/counters/timestamps/safe error; index status/id, actor/created_at |
+| notification_deliveries | Snapshot title/body, batch/user FK; unique (batch_id,user_id), index batch/status/id |
+| reminder_receipts | Unique (kind,source_id,source_date,source_time) cùng transaction với thông báo, tránh nhắc lại |
+| job_runs | Tên job, bắt đầu/kết thúc, số xử lý, trạng thái, mã lỗi; index (name,id DESC) |
+
+Thêm index vaccinations(next_due_date,id), orders(paid_at,payment_status,status) INCLUDE(total_amount,payment_method). Guard IF NOT EXISTS/OBJECT_ID giúp migration an toàn khi chạy lại thủ công trên schema tương ứng; Flyway vẫn quản lý checksum, không sửa các migration cũ. `JobMonitor` giữ 100 lần đã kết thúc mỗi job; RUNNING dở dang giữ nguyên để chẩn đoán. Lịch sử batch/delivery/receipt chưa có retention tự xóa để không làm mất idempotency; cần kế hoạch lưu trữ khi quy mô tăng.
+
+Nội dung/thông báo Unicode; không lưu secret/kết quả exception thô trong telemetry. Hàng đợi snapshot người nhận và nội dung; khóa batch bảo vệ nhiều worker; receipt và notification commit nguyên tử. V20 không thêm payment gateway hoặc dữ liệu mẫu catalog.
+
+Áp dụng **sau V19**, chỉ bằng Flyway theo [runbook](migrations.md): sao lưu và kiểm khôi phục, thử bản sao, dừng backend cũ, triển khai backend/frontend tương thích với ddl-auto=validate. Xem xét nội dung hai mẫu nhắc trước khi bật APP_REMINDERS_ENABLED. Không chạy reset/seed hay sửa checksum. Đã kiểm chứng schema mới/nâng cấp legacy/Hibernate validate trên SQL Server test riêng; chưa áp migration lên database thật. Các truy vấn đối soát tài khoản, giỏ, pet giữ chỗ và voucher ở [admin guide](admin-guide.md#kiểm-tra-dữ-liệu-trước-vận-hành-chỉ-đọc-tự-chạy-khi-cần) giữ nguyên, chưa tự chạy trên DB chính.
