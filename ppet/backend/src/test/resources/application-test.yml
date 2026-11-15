@@ -16,6 +16,10 @@ spring:
       enabled: false
 
 app:
+  notifications:
+    enabled: false
+  reminders:
+    enabled: false
   jwt:
     secret: test-only-${random.value}${random.value}${random.value}${random.value}
     expiration-ms: 3600000
