@@ -19,7 +19,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
-/** Uses a real servlet ASYNC dispatch; MockMvc's mock principal hides JWT redispatch bugs. */
+/** Exercises CSV download and auditing over real HTTP with JWT authentication. */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 class AdminCsvHttpTest {
@@ -27,7 +27,7 @@ class AdminCsvHttpTest {
     @Autowired EntityManager em;
     @Autowired PlatformTransactionManager manager;
     @Autowired JwtTokenProvider tokens;
-    @Test void jwtCsvDownloadCompletesAndAuditsOnceAcrossAsyncDispatch() throws Exception {
+    @Test void jwtCsvDownloadCompletesAndAuditsOnce() throws Exception {
         var tx = new TransactionTemplate(manager);
         User user = tx.execute(status -> {
             var role = em.createQuery("select r from Role r where r.name=:name", Role.class)

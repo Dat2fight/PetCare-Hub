@@ -5,7 +5,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.*;
-import org.springframework.web.servlet.mvc.method.annotation.StreamingResponseBody;
 import java.time.LocalDate;
 @RestController @RequestMapping("/api/v1/admin") @RequiredArgsConstructor
 public class AdminInsightsController {
@@ -24,9 +23,11 @@ public class AdminInsightsController {
     @GetMapping("/reports/rankings") @PreAuthorize("@perm.has('REPORT_VIEW')") public Object rankings(@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,@RequestParam @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to){
         return insights.rankings(new ReportPeriod(from,to));
     }
-    @GetMapping("/reports/export") @PreAuthorize("@perm.has('REPORT_VIEW')") public ResponseEntity<StreamingResponseBody> export(@RequestParam String kind,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to,@RequestParam(required=false) String keyword){
+    @GetMapping("/reports/export") @PreAuthorize("@perm.has('REPORT_VIEW')") public ResponseEntity<byte[]> export(@RequestParam String kind,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate from,@RequestParam(required=false) @DateTimeFormat(iso=DateTimeFormat.ISO.DATE) LocalDate to,@RequestParam(required=false) String keyword) throws java.io.IOException {
         var result=exports.export(kind,from,to,keyword);
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename(result.filename()).build().toString()).contentType(MediaType.parseMediaType("text/csv;charset=UTF-8")).body(result.body());
+        var csv = new java.io.ByteArrayOutputStream();
+        result.body().writeTo(csv);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header(HttpHeaders.CONTENT_DISPOSITION,ContentDisposition.attachment().filename(result.filename()).build().toString()).contentType(MediaType.parseMediaType("text/csv;charset=UTF-8")).body(csv.toByteArray());
     }
     @GetMapping("/system/status") @PreAuthorize("@perm.has('SYSTEM_MANAGE')") public Object system(){
         return system.status();

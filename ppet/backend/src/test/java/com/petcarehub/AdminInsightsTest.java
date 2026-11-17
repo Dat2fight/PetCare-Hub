@@ -138,8 +138,8 @@ class AdminInsightsTest  {
         product.setName("=SUM(1,2)");
         em.flush();
         long before=audit.count();
-        var pending=mvc.perform(get("/api/v1/admin/reports/export?kind=inventory").with(as(admin))).andExpect(request().asyncStarted()).andReturn();
-        var response=mvc.perform(asyncDispatch(pending)).andExpect(status().isOk()).andReturn().getResponse();
+        var response=mvc.perform(get("/api/v1/admin/reports/export?kind=inventory").with(as(admin)))
+                .andExpect(status().isOk()).andReturn().getResponse();
         assertEquals(before+1,audit.count());
         String csv=response.getContentAsString(java.nio.charset.StandardCharsets.UTF_8);
         assertTrue(csv.startsWith("\uFEFF"));
