@@ -1,42 +1,35 @@
 package com.petcarehub.strategy.matching;
+
 import com.petcarehub.entity.Pet;
 import com.petcarehub.entity.PetMatchingQuiz;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import java.math.BigDecimal;
 
-@Component
+@Component @Order(1)
 public class LivingEnvironmentStrategy implements PetMatchingStrategy {
     @Override
     public double calculateMatchScore(PetMatchingQuiz quiz, Pet pet, StringBuilder explanation) {
-        double score = 0;
-        BigDecimal petSize = pet.getWeight();
-        
-        if (quiz.getLivingEnvironment() != null && quiz.getLivingEnvironment().equalsIgnoreCase("APARTMENT")) {
-            if (petSize != null && petSize.compareTo(new BigDecimal("20")) > 0) {
-                explanation.append("Thú cưng lớn có thể không phù hợp căn hộ. ");
-                score += 5.0;
-            } else {
-                explanation.append("Căn hộ phù hợp với kích thước thú cưng. ");
-                score += 20.0;
-            }
-        } else {
-            explanation.append("Nhà riêng có không gian phù hợp. ");
-            score += 20.0;
+        int score = 0;
+        if ("HOUSE".equals(quiz.getLivingEnvironment())) {
+            explanation.append("Không gian: bạn chọn nhà riêng, không yêu cầu bé phù hợp căn hộ (20/20 điểm).\n");
+            score += 20;
+        } else if ("APARTMENT".equals(quiz.getLivingEnvironment()) && Boolean.TRUE.equals(pet.getSuitableForApartment())) {
+            explanation.append("Không gian: hồ sơ bé ghi phù hợp sống trong căn hộ (20/20 điểm).\n");
+            score += 20;
         }
-        
-        if (Boolean.TRUE.equals(quiz.getHasChildren())) {
-            String petTemperament = pet.getDescription();
-            if (petTemperament != null && petTemperament.toLowerCase().contains("friendly")) {
-                explanation.append("Thú cưng thân thiện phù hợp gia đình có trẻ nhỏ. ");
-                score += 20.0;
-            } else {
-                explanation.append("Chưa rõ tính cách khi ở cùng trẻ nhỏ. ");
-                score += 10.0;
-            }
-        } else {
-            score += 20.0;
+        else if ("APARTMENT".equals(quiz.getLivingEnvironment()) && Boolean.FALSE.equals(pet.getSuitableForApartment())) {
+            explanation.append("Không gian: hồ sơ bé ghi không phù hợp căn hộ bạn chọn (0/20 điểm).\n");
         }
-        
+        if (Boolean.FALSE.equals(quiz.getHasChildren())) {
+            explanation.append("Gia đình: bạn không có trẻ nhỏ, không yêu cầu tiêu chí này (20/20 điểm).\n");
+            score += 20;
+        } else if (Boolean.TRUE.equals(quiz.getHasChildren()) && Boolean.TRUE.equals(pet.getGoodWithChildren())) {
+            explanation.append("Gia đình: hồ sơ bé ghi phù hợp với trẻ nhỏ (20/20 điểm).\n");
+            score += 20;
+        }
+        else if (Boolean.TRUE.equals(quiz.getHasChildren()) && Boolean.FALSE.equals(pet.getGoodWithChildren())) {
+            explanation.append("Gia đình: hồ sơ bé ghi không phù hợp với trẻ nhỏ trong gia đình bạn (0/20 điểm).\n");
+        }
         return score;
     }
 }

@@ -1,6 +1,5 @@
 package com.petcarehub.service.impl;
 
-import com.petcarehub.dto.pet.PetDTO;
 import com.petcarehub.dto.matching.MatchResultDTO;
 import com.petcarehub.dto.matching.QuizSubmitRequest;
 import com.petcarehub.entity.Pet;
@@ -12,13 +11,12 @@ import com.petcarehub.repository.PetRepository;
 import com.petcarehub.repository.UserRepository;
 import com.petcarehub.service.PetMatchingService;
 import com.petcarehub.strategy.matching.PetMatchingStrategy;
-import org.springframework.beans.BeanUtils;
+import com.petcarehub.strategy.matching.MatchingProfile;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class PetMatchingServiceImpl implements PetMatchingService {
@@ -55,6 +53,7 @@ public class PetMatchingServiceImpl implements PetMatchingService {
         List<ScoredPet> scored = new ArrayList<>();
 
         for (Pet pet : availablePets) {
+            if (!MatchingProfile.complete(pet) || pet.getReservedOrder() != null) continue;
             double totalScore = 0;
             StringBuilder explanation = new StringBuilder();
 
@@ -62,8 +61,11 @@ public class PetMatchingServiceImpl implements PetMatchingService {
                 totalScore += strategy.calculateMatchScore(quiz, pet, explanation);
             }
 
-            scored.add(new ScoredPet(pet, totalScore, explanation.toString()));
+            scored.add(new ScoredPet(pet, totalScore, explanation.toString(), MatchingProfile.unmetCriteria(quiz, pet)));
         }
+        // Only relax lifestyle requirements when no fully eligible pet exists anywhere in the catalog.
+        boolean fallback = !scored.isEmpty() && scored.stream().noneMatch(item -> item.unmetCriteria().isEmpty());
+        if (!fallback) scored.removeIf(item -> !item.unmetCriteria().isEmpty());
         // Stable ties make stored ranks and the returned top ten reproducible.
         scored.sort(Comparator.comparingDouble(ScoredPet::score).reversed().thenComparing(s -> s.pet().getId()));
         quiz = quizRepository.save(quiz);
@@ -71,16 +73,17 @@ public class PetMatchingServiceImpl implements PetMatchingService {
         List<MatchResultDTO> results = new ArrayList<>();
         for (int i = 0; i < scored.size(); i++) {
             ScoredPet item = scored.get(i);
+            String explanation = (fallback ? "Gợi ý gần nhất, chưa đáp ứng đầy đủ điều kiện của bạn.\n" : "") + item.explanation();
             PetMatchingResult result = new PetMatchingResult();
             result.setQuiz(quiz); result.setPet(item.pet()); result.setOverallScore((int) item.score());
-            result.setExplanation(item.explanation()); result.setRank(i + 1);
+            result.setExplanation(explanation); result.setRank(i + 1);
             persisted.add(result);
-            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.dto.pet.PublicPetDTO.from(com.petcarehub.mapper.PetMapper.toDTO(item.pet(), clock)), item.score(), item.explanation()));
+            if (i < 10) results.add(new MatchResultDTO(com.petcarehub.dto.pet.PublicPetDTO.from(com.petcarehub.mapper.PetMapper.toDTO(item.pet(), clock)), item.score(), explanation, fallback, item.unmetCriteria()));
         }
         resultRepository.saveAll(persisted);
         return results;
     }
-    private record ScoredPet(Pet pet, double score, String explanation) {}
+    private record ScoredPet(Pet pet, double score, String explanation, List<String> unmetCriteria) {}
 }
 
 

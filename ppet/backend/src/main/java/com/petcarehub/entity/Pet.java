@@ -49,6 +49,19 @@ public class Pet extends BaseEntity {
     @Column(precision = 5, scale = 2)
     private BigDecimal weight;
 
+    // Nullable means not assessed; never infer these from age, breed or description.
+    @Column(name = "activity_level", length = 10)
+    private String activityLevel;
+
+    @Column(name = "suitable_for_apartment")
+    private Boolean suitableForApartment;
+
+    @Column(name = "good_with_children")
+    private Boolean goodWithChildren;
+
+    @Column(name = "minimum_daily_care_hours", precision = 4, scale = 2)
+    private BigDecimal minimumDailyCareHours;
+
     @Column(nullable = false, precision = 18, scale = 2)
     private BigDecimal price;
 

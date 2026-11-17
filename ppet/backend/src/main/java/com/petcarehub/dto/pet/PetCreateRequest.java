@@ -34,6 +34,11 @@ public class PetCreateRequest {
     private String description;
     
     private String imageUrl;
+
+    private String activityLevel;
+    private Boolean suitableForApartment;
+    private Boolean goodWithChildren;
+    private java.math.BigDecimal minimumDailyCareHours;
     
     @jakarta.validation.constraints.DecimalMin(value="0", message="Giá không được âm")
     private java.math.BigDecimal price;

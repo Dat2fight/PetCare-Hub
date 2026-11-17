@@ -1,31 +1,23 @@
 package com.petcarehub.strategy.matching;
+
 import com.petcarehub.entity.Pet;
 import com.petcarehub.entity.PetMatchingQuiz;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import java.time.LocalDate;
-import java.time.Period;
+import java.util.List;
 
-@Component
-@lombok.RequiredArgsConstructor
+@Component @Order(2)
 public class ActivityLevelStrategy implements PetMatchingStrategy {
-    private final java.time.Clock clock;
-
     @Override
     public double calculateMatchScore(PetMatchingQuiz quiz, Pet pet, StringBuilder explanation) {
-        String desiredActivity = quiz.getActivityLevel();
-        if (desiredActivity == null) return 0.0;
-        
-        int age = pet.getDateOfBirth() != null ? Period.between(pet.getDateOfBirth(), LocalDate.now(clock)).getYears() : 2;
-        
-        if ("HIGH".equalsIgnoreCase(desiredActivity) && age < 3) {
-            explanation.append("Mức vận động cao phù hợp với thú cưng trẻ, năng động. ");
-            return 30.0;
-        } else if ("LOW".equalsIgnoreCase(desiredActivity) && age > 5) {
-            explanation.append("Mức vận động thấp phù hợp với thú cưng lớn tuổi, điềm tĩnh. ");
-            return 30.0;
-        }
-        
-        explanation.append("Mức vận động tương đối phù hợp. ");
-        return 15.0;
+        var levels = List.of("LOW", "MEDIUM", "HIGH");
+        if (quiz.getActivityLevel() == null || pet.getActivityLevel() == null) return 0;
+        int desired = levels.indexOf(quiz.getActivityLevel()), actual = levels.indexOf(pet.getActivityLevel());
+        if (desired < 0 || actual < 0) return 0;
+        int points = 30 - 15 * Math.abs(desired - actual);
+        explanation.append("Vận động: hồ sơ bé ghi mức ").append(MatchingProfile.activityLabel(pet.getActivityLevel()))
+                .append(", bạn chọn mức ").append(MatchingProfile.activityLabel(quiz.getActivityLevel()))
+                .append(" (").append(points).append("/30 điểm).\n");
+        return points;
     }
 }

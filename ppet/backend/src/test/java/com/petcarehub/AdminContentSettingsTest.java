@@ -123,7 +123,8 @@ class AdminContentSettingsTest  {
         write("DELETE","/content/{id}","/content/"+id,Map.of("reason","Cleanup"));
     }
     @Test void publicationFiltersUnavailableFeaturedItemsAndKeepsOnlyTwentyRevisions()throws Exception{
-        var body=new LinkedHashMap<String,Object>(Map.of("slug","home","kind","PAGE","title","Trang chủ","body","Chào mừng","configuration",Map.of("productIds",List.of(product.getId()))));
+        var salePet=save(Pet.builder().name("Featured pup").price(BigDecimal.TEN).species(pet.getSpecies()).availabilityStatus(AvailabilityStatus.AVAILABLE).build());
+        var body=new LinkedHashMap<String,Object>(Map.of("slug","home","kind","PAGE","title","Trang chủ","body","Chào mừng","configuration",Map.of("productIds",List.of(product.getId()),"petIds",List.of(salePet.getId()))));
         long id=write("POST","/content","/content",body).get("id").asLong();
         for(int i=0;i<22;i++){
             body.put("title","Phiên bản "+i);
@@ -132,9 +133,14 @@ class AdminContentSettingsTest  {
         assertEquals(20,getJson("/content/"+id+"/revisions").get("totalElements").asInt());
         write("POST","/content/{id}/publish","/content/"+id+"/publish",Map.of());
         mvc.perform(get("/api/v1/content/featured")).andExpect(jsonPath("$.products.length()").value(1));
+        mvc.perform(get("/api/v1/content/featured")).andExpect(jsonPath("$.pets[0].speciesName").value(pet.getSpecies().getName()));
+        salePet.setPrice(new BigDecimal("12345"));
+        em.flush();
+        mvc.perform(get("/api/v1/content/featured")).andExpect(jsonPath("$.pets[0].price").value(12345));
+        salePet.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
         product.setActive(false);
         em.flush();
-        mvc.perform(get("/api/v1/content/featured")).andExpect(jsonPath("$.products.length()").value(0));
+        mvc.perform(get("/api/v1/content/featured")).andExpect(jsonPath("$.products.length()").value(0)).andExpect(jsonPath("$.pets.length()").value(0));
     }
     @Test void settingsChangeCheckoutAndCancellationWithoutRepricingExistingOrders()throws Exception{
         BigDecimal oldTotal=order.getTotalAmount();

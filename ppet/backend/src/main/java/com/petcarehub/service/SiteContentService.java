@@ -175,13 +175,17 @@ public class SiteContentService {
             config.get(key).forEach(n->ids.add(n.longValue()));
             List<Map<String,Object>> items=new ArrayList<>();
             if(!ids.isEmpty()){
-                String hql=key.equals("productIds")?"select p.id,p.name,p.imageUrl,p.price from Product p where p.id in :ids and p.active=true":"select p.id,p.name,p.imageUrl,p.price from Pet p where p.id in :ids and p.owner is null and p.availabilityStatus=com.petcarehub.enums.AvailabilityStatus.AVAILABLE";
+                String hql=key.equals("productIds")?"select p.id,p.name,p.imageUrl,p.price from Product p where p.id in :ids and p.active=true":"select p.id,p.name,p.imageUrl,p.price,s.name,b.name from Pet p join p.species s left join p.breed b where p.id in :ids and p.owner is null and p.availabilityStatus=com.petcarehub.enums.AvailabilityStatus.AVAILABLE";
                 for(var r:em.createQuery(hql,Object[].class).setParameter("ids",ids).setMaxResults(12).getResultList()){
                     Map<String,Object> item=new HashMap<>();
                     item.put("id",r[0]);
                     item.put("name",r[1]);
                     item.put("imageUrl",r[2]);
                     item.put("price",r[3]);
+                    if(key.equals("petIds")) {
+                        item.put("speciesName",r[4]);
+                        item.put("breedName",r[5]);
+                    }
                     items.add(item);
                 }
                 items.sort(Comparator.comparingInt(item->ids.indexOf(item.get("id"))));

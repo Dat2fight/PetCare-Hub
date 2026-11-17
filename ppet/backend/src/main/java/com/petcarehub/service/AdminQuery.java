@@ -9,12 +9,21 @@ import java.util.*;
 public class AdminQuery {
     private final EntityManager em;
     public Page<Map<String,Object>> page(String from,String columns,String names,String where,Map<String,Object> parameters,Pageable pageable,Map<String,String> sorts) {
-        var order=new ArrayList<String>();
-        for(var s:pageable.getSort()) { if(!sorts.containsKey(s.getProperty())) throw new BadRequestException("Cột sắp xếp không hợp lệ"); order.add(sorts.get(s.getProperty())+(s.isAscending()?" asc":" desc")); }
-        order.add("o.id desc"); int size=Math.min(pageable.getPageSize(),100);
+        // SQL Server rejects repeated ORDER BY columns, including the ID tie-breaker.
+        var order = new LinkedHashMap<String, String>();
+        for (var sort : pageable.getSort()) {
+            String column = sorts.get(sort.getProperty());
+            if (column == null) throw new BadRequestException("Cột sắp xếp không hợp lệ");
+            order.putIfAbsent(column, sort.isAscending() ? " asc" : " desc");
+        }
+        order.putIfAbsent("o.id", " desc");
+        String orderBy = order.entrySet().stream()
+                .map(entry -> entry.getKey() + entry.getValue())
+                .collect(java.util.stream.Collectors.joining(","));
+        int size=Math.min(pageable.getPageSize(),100);
         if(pageable.getOffset()>Integer.MAX_VALUE) throw new BadRequestException("Trang vượt giới hạn");
         // All query fragments and sort mappings are server constants. Every client value is bound.
-        var query=em.createQuery("select "+columns+" from "+from+" where "+where+" order by "+String.join(",",order),Object[].class);
+        var query=em.createQuery("select "+columns+" from "+from+" where "+where+" order by "+orderBy,Object[].class);
         var count=em.createQuery("select count(o) from "+from+" where "+where,Long.class);
         parameters.forEach((key,value)->{query.setParameter(key,value);count.setParameter(key,value);});
         String[] fields=names.split(",");

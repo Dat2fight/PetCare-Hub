@@ -24,6 +24,10 @@ public class PetDTO {
     private Long ownerId;
     private String description;
     private String imageUrl;
+    private String activityLevel;
+    private Boolean suitableForApartment;
+    private Boolean goodWithChildren;
+    private java.math.BigDecimal minimumDailyCareHours;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

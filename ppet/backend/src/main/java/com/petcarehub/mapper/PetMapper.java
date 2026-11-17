@@ -21,6 +21,10 @@ public final class PetMapper {
         // NEEDS DECISION: prices are public only for unowned pets offered for sale.
         dto.setPrice(pet.getOwner() == null && (pet.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE || pet.getAvailabilityStatus() == AvailabilityStatus.PENDING) ? pet.getPrice() : null);
         dto.setDescription(pet.getDescription()); dto.setImageUrl(pet.getImageUrl());
+        dto.setActivityLevel(pet.getActivityLevel());
+        dto.setSuitableForApartment(pet.getSuitableForApartment());
+        dto.setGoodWithChildren(pet.getGoodWithChildren());
+        dto.setMinimumDailyCareHours(pet.getMinimumDailyCareHours());
         dto.setCreatedAt(pet.getCreatedAt()); dto.setUpdatedAt(pet.getUpdatedAt());
         return dto;
     }

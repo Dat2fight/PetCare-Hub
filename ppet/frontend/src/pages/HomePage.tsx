@@ -12,15 +12,23 @@ import { ProductImage } from '../components/common/ProductImage';
 import { FiHeart } from 'react-icons/fi';
 import { MdPets } from 'react-icons/md';
 
+type FeaturedPet = Pick<PublicPetDTO, 'id' | 'name' | 'imageUrl' | 'price' | 'speciesName' | 'breedName'>;
+type FeaturedProduct = Pick<Product, 'id' | 'name' | 'imageUrl' | 'price'>;
+
 export const HomePage: React.FC = () => {
   const contentHome=useResource<PublishedContent>('/content/home');
-  const curated=useResource<{pets?:PublicPetDTO[];products?:Product[]}>('/content/featured');
-  const defaultFeatured=useResource<{content:PublicPetDTO[]}>('/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc');
-  const featured={...defaultFeatured,...(curated.data?.pets ? {data:{content:curated.data.pets},error:undefined} : {})};
+  const curated=useResource<{pets?:FeaturedPet[];products?:FeaturedProduct[]}>('/content/featured');
+  const defaultFeatured=useResource<{content:PublicPetDTO[]}>(curated.data && curated.data.pets === undefined ? '/pets?size=5&availabilityStatus=AVAILABLE&sort=id,desc' : null);
+  const featured = !curated.data ? {data: undefined, error: curated.error, retry: curated.retry} : curated.data.pets !== undefined
+    ? {data: {content: curated.data.pets}, retry: curated.retry, error: undefined}
+    : defaultFeatured;
   const hearts=useWishlistStatus('PET',featured.data?.content.map(p=>p.id) ?? []);
   const services = useResource<Service[]>('/services');
-  const defaultProducts = useResource<{items: Product[]; bestSelling: boolean}>('/home/products');
-  const products={...defaultProducts,...(curated.data?.products ? {data:{items:curated.data.products,bestSelling:false},error:undefined} : {})};
+  const defaultProducts = useResource<{items: Product[]; bestSelling: boolean}>(curated.data && curated.data.products === undefined ? '/home/products' : null);
+  const products = !curated.data ? {data: undefined, error: curated.error, retry: curated.retry}
+    : curated.data.products !== undefined
+      ? {data: {items: curated.data.products, bestSelling: false}, retry: curated.retry, error: undefined}
+      : defaultProducts;
   const reviews = useResource<{id: number; displayName: string; rating: number; comment: string}[]>('/home/reviews');
   const categories = useResource<ProductCategory[]>('/categories');
   return (
@@ -143,7 +151,7 @@ export const HomePage: React.FC = () => {
           <p>{service.durationMinutes} phút · {service.price.toLocaleString('vi-VN')} ₫</p>
         </Link>)}
       </HomeSection>
-      <HomeSection title={products.data?.bestSelling ? 'Sản phẩm bán chạy' : 'Sản phẩm mới'} resource={products} empty={products.data?.items.length === 0}>
+      <HomeSection title={curated.data?.products !== undefined ? 'Sản phẩm nổi bật' : products.data?.bestSelling ? 'Sản phẩm bán chạy' : 'Sản phẩm mới'} resource={products} empty={products.data?.items.length === 0}>
         {products.data?.items.map(product => <Link key={product.id} to={'/products/'+product.id} className="rounded-xl bg-white p-5">
           <ProductImage src={product.imageUrl} alt={product.name} width={320} height={240} className="aspect-[4/3] w-full object-contain" />
           <h3 className="font-bold">{product.name}</h3><p>{product.price.toLocaleString('vi-VN')} ₫</p>

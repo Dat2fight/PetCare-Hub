@@ -40,9 +40,9 @@ class PetAuditTest {
     }
 
     @Test void matchingStrategiesUseKnownAnswers() {
-        Pet pet = Pet.builder().dateOfBirth(LocalDate.now().minusYears(1)).weight(BigDecimal.valueOf(5)).description("friendly").build();
+        Pet pet = Pet.builder().activityLevel("HIGH").suitableForApartment(true).goodWithChildren(true).minimumDailyCareHours(BigDecimal.valueOf(4)).build();
         PetMatchingQuiz quiz = PetMatchingQuiz.builder().activityLevel("HIGH").dailyCareHours(BigDecimal.valueOf(4)).livingEnvironment("APARTMENT").hasChildren(true).build();
-        assertEquals(30, new com.petcarehub.strategy.matching.ActivityLevelStrategy(java.time.Clock.systemDefaultZone()).calculateMatchScore(quiz, pet, new StringBuilder()));
+        assertEquals(30, new com.petcarehub.strategy.matching.ActivityLevelStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
         assertEquals(30, new com.petcarehub.strategy.matching.CareTimeStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
         assertEquals(40, new com.petcarehub.strategy.matching.LivingEnvironmentStrategy().calculateMatchScore(quiz, pet, new StringBuilder()));
     }

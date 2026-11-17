@@ -110,6 +110,8 @@ public class PetServiceImpl implements PetService {
 
         Pet pet = new Pet();
         pet.setName(request.getName());
+        com.petcarehub.strategy.matching.MatchingProfile.apply(pet, request.getActivityLevel(),
+                request.getSuitableForApartment(), request.getGoodWithChildren(), request.getMinimumDailyCareHours());
         pet.setSpecies(species);
         if (breed != null && !breed.getSpecies().getId().equals(species.getId())) throw new com.petcarehub.exception.BadRequestException("Giống không thuộc loài đã chọn");
         pet.setBreed(breed);
@@ -147,6 +149,8 @@ public class PetServiceImpl implements PetService {
         }
 
         pet.setName(request.getName());
+        com.petcarehub.strategy.matching.MatchingProfile.apply(pet, request.getActivityLevel(),
+                request.getSuitableForApartment(), request.getGoodWithChildren(), request.getMinimumDailyCareHours());
         pet.setSpecies(species);
         if (breed != null && !breed.getSpecies().getId().equals(species.getId())) throw new com.petcarehub.exception.BadRequestException("Giống không thuộc loài đã chọn");
         pet.setBreed(breed);

@@ -12,5 +12,7 @@ public class MatchResultDTO {
     private PublicPetDTO pet;
     private double score;
     private String explanation;
+    private boolean fallback;
+    private java.util.List<String> unmetCriteria;
 }
 

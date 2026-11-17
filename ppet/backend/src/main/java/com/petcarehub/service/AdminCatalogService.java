@@ -36,7 +36,7 @@ public class AdminCatalogService  {
             case "categories"->new View(ProductCategory.class,"ProductCategory o left join o.parentCategory p","o.id,o.name,o.description,p.id,o.displayOrder","id,name,description,parentId,displayOrder","1=1","o.name",Map.of("id","o.id","name","o.name","displayOrder","o.displayOrder"));
             case "species"->new View(Species.class,"Species o","o.id,o.name,o.description","id,name,description","1=1","o.name",Map.of("id","o.id","name","o.name"));
             case "breeds"->new View(Breed.class,"Breed o join o.species s","o.id,o.name,o.description,s.id,s.name","id,name,description,speciesId,speciesName","1=1","o.name",Map.of("id","o.id","name","o.name"));
-            case "pets"->new View(Pet.class,"Pet o join o.species s left join o.breed b left join o.reservedOrder r left join r.customer u","o.id,o.name,o.description,o.price,o.imageUrl,s.id,b.id,o.dateOfBirth,o.healthStatus,o.availabilityStatus,r.id,r.orderNumber,r.expiresAt,u.id","id,name,description,price,imageUrl,speciesId,breedId,birthDate,healthStatus,availabilityStatus,orderId,orderNumber,expiresAt,customerId","o.owner is null","o.name",Map.of("id","o.id","name","o.name","price","o.price"));
+            case "pets"->new View(Pet.class,"Pet o join o.species s left join o.breed b left join o.reservedOrder r left join r.customer u","o.id,o.name,o.description,o.price,o.imageUrl,s.id,b.id,o.dateOfBirth,o.healthStatus,o.availabilityStatus,r.id,r.orderNumber,r.expiresAt,u.id,o.activityLevel,o.suitableForApartment,o.goodWithChildren,o.minimumDailyCareHours","id,name,description,price,imageUrl,speciesId,breedId,birthDate,healthStatus,availabilityStatus,orderId,orderNumber,expiresAt,customerId,activityLevel,suitableForApartment,goodWithChildren,minimumDailyCareHours","o.owner is null","o.name",Map.of("id","o.id","name","o.name","price","o.price"));
             case "services"->new View(ServiceEntity.class,"ServiceEntity o","o.id,o.name,o.description,o.price,o.durationMinutes,o.serviceType,o.active","id,name,description,price,durationMinutes,serviceType,active","1=1","o.name",Map.of("id","o.id","name","o.name","price","o.price"));
             case "promotions"->new View(Promotion.class,"Promotion o","o.id,o.code,o.description,o.discountType,o.discountValue,o.minOrderAmount,o.maxUses,o.maxUsesPerCustomer,o.currentUses,o.startDate,o.endDate,o.active","id,code,description,discountType,discountValue,minOrderAmount,maxUses,maxUsesPerCustomer,currentUses,startDate,endDate,active","1=1","o.code",Map.of("id","o.id","code","o.code"));
             case "packages"->new View(CarePackage.class,"CarePackage o","o.id,o.name,o.description,o.price,o.durationMonths,o.includesGrooming,o.includesCheckup,o.includesVaccination,o.active","id,name,description,price,durationMonths,includesGrooming,includesCheckup,includesVaccination,active","1=1","o.name",Map.of("id","o.id","name","o.name","price","o.price"));
@@ -165,7 +165,12 @@ public class AdminCatalogService  {
                 return b.getId();
             }
             case "pets": {
-                in.keys("name,description,price,imageUrl,speciesId,breedId,birthDate,healthStatus,availabilityStatus");
+                in.keys("name,description,price,imageUrl,speciesId,breedId,birthDate,healthStatus,availabilityStatus,activityLevel,suitableForApartment,goodWithChildren,minimumDailyCareHours");
+                in.text("activityLevel",10,false);
+                in.bool("suitableForApartment",false); // Validate JSON types; null remains unknown in DTO.
+                in.bool("goodWithChildren",false);
+                if(in.json().hasNonNull("minimumDailyCareHours") && !in.json().get("minimumDailyCareHours").isNumber())
+                    throw CatalogInput.bad("minimumDailyCareHours: phải là số");
                 if(id!=null)editablePet(em.find(Pet.class,id,LockModeType.PESSIMISTIC_WRITE));
                 var date=in.date("birthDate",false);
                 if(date!=null&&date.isAfter(LocalDate.now(clock)))throw CatalogInput.bad("Ngày sinh trong tương lai");

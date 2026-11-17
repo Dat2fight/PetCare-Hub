@@ -47,7 +47,23 @@ class FlywayMigrationTest {
                 "--app.bootstrap.enabled=false", "--app.order-expiry.interval-ms=3600000")) {
             assertTrue(context.isActive());
             var flyway = context.getBean(Flyway.class);
-            assertEquals("21", flyway.info().current().getVersion().toString());
+            assertEquals("22", flyway.info().current().getVersion().toString());
+            var query = context.getBean(com.petcarehub.service.AdminQuery.class);
+            var transaction = new org.springframework.transaction.support.TransactionTemplate(
+                    context.getBean(org.springframework.transaction.PlatformTransactionManager.class));
+            transaction.executeWithoutResult(status -> {
+                for (var sort : List.of(
+                        org.springframework.data.domain.Sort.by("id").descending(),
+                        org.springframework.data.domain.Sort.by("id").ascending(),
+                        org.springframework.data.domain.Sort.by("name").ascending(),
+                        org.springframework.data.domain.Sort.by("id").ascending()
+                                .and(org.springframework.data.domain.Sort.by("id").descending()))) {
+                    var page = query.page("Pet o", "o.id,o.name", "id,name", "o.owner is null",
+                            java.util.Map.of(), org.springframework.data.domain.PageRequest.of(0,20,sort),
+                            java.util.Map.of("id","o.id","name","o.name"));
+                    assertEquals(0, page.getTotalElements());
+                }
+            });
             var emf = context.getBean(EntityManagerFactory.class);
             try (var em = emf.createEntityManager()) {
                 em.getTransaction().begin();
@@ -101,7 +117,7 @@ class FlywayMigrationTest {
             // Refuse nonempty databases until an operator explicitly onboards them.
             assertThrows(FlywayException.class, flyway::migrate);
             flyway.baseline();
-            assertEquals(20, flyway.migrate().migrationsExecuted);
+            assertEquals(21, flyway.migrate().migrationsExecuted);
             assertEquals(before, snapshot(statement));
             assertEquals(0, count(statement, "SELECT @@TRANCOUNT"));
             assertEquals(0, count(statement, "SELECT COUNT(*) FROM dbo.orders WHERE paid_at IS NOT NULL OR delivered_at IS NOT NULL"));
@@ -119,7 +135,7 @@ class FlywayMigrationTest {
         for (String[] entry : manifest()) {
             Files.write(directory.resolve(entry[1]), resource("db/migration/" + entry[1]));
         }
-        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql", "V18__admin_operations.sql", "V19__admin_catalog.sql", "V20__admin_insights.sql", "V21__admin_content_settings_returns.sql"))
+        for (String added : List.of("V16__admin_accounts.sql", "V17__admin_audit_log.sql", "V18__admin_operations.sql", "V19__admin_catalog.sql", "V20__admin_insights.sql", "V21__admin_content_settings_returns.sql", "V22__pet_matching_profiles.sql"))
             Files.write(directory.resolve(added), resource("db/migration/" + added));
         String last = "V15__unicode_descriptions.sql";
         Files.write(directory.resolve(last), resource("db/migration/" + last));
@@ -139,6 +155,24 @@ class FlywayMigrationTest {
             assertThrows(SQLException.class,() -> statement.execute("DELETE FROM dbo.admin_audit_log"));
             assertEquals(1,count(statement,"SELECT COUNT(*) FROM dbo.admin_audit_log WHERE action='TEST'"));
             assertEquals(1,count(statement,"SELECT COUNT(*) FROM sys.columns WHERE object_id=OBJECT_ID('dbo.appointments') AND name='staff_id' AND is_nullable=1"));
+        }
+    }
+
+    @Test void matchingMigrationLeavesLegacyTraitsUnknownAndEnforcesBounds() throws Exception {
+        String url = newDatabase();
+        Flyway.configure().dataSource(url, sql.username(), sql.password()).defaultSchema("dbo")
+                .locations("classpath:db/migration").target("21").load().migrate();
+        try (var connection = connect(url); var statement = connection.createStatement()) {
+            statement.execute("INSERT INTO dbo.species(name) VALUES(N'Matching species')");
+            statement.execute("INSERT INTO dbo.pets(name,species_id,price,description) SELECT N'Bé cũ',id,100,N'friendly' FROM dbo.species");
+            flyway(url).migrate();
+            assertEquals(1, count(statement, "SELECT COUNT(*) FROM dbo.pets WHERE activity_level IS NULL AND suitable_for_apartment IS NULL AND good_with_children IS NULL AND minimum_daily_care_hours IS NULL"));
+            statement.execute("UPDATE dbo.pets SET activity_level='HIGH',suitable_for_apartment=1,good_with_children=0,minimum_daily_care_hours=1.50");
+            assertEquals(1, count(statement, "SELECT COUNT(*) FROM dbo.pets WHERE activity_level='HIGH' AND suitable_for_apartment=1 AND good_with_children=0 AND minimum_daily_care_hours=1.50"));
+            assertThrows(SQLException.class, () -> statement.execute("UPDATE dbo.pets SET activity_level='GUESS'"));
+            for (String value : List.of("-1", "0", "24.01"))
+                assertThrows(SQLException.class, () -> statement.execute("UPDATE dbo.pets SET minimum_daily_care_hours=" + value));
+            assertEquals(0, flyway(url).migrate().migrationsExecuted);
         }
     }
 

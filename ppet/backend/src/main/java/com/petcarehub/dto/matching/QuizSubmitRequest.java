@@ -5,11 +5,13 @@ import lombok.Data;
 @Data
 public class QuizSubmitRequest {
     @jakarta.validation.constraints.NotBlank(message="Môi trường sống là bắt buộc")
+    @jakarta.validation.constraints.Pattern(regexp="APARTMENT|HOUSE", message="Môi trường sống không hợp lệ")
     private String livingEnvironment;
     private String houseSize;
     @jakarta.validation.constraints.NotNull(message="Vui lòng trả lời về trẻ nhỏ")
     private Boolean presenceOfChildren;
     @jakarta.validation.constraints.NotBlank(message="Mức hoạt động là bắt buộc")
+    @jakarta.validation.constraints.Pattern(regexp="LOW|MEDIUM|HIGH", message="Mức vận động không hợp lệ")
     private String activityLevel;
     @jakarta.validation.constraints.NotNull(message="Thời gian chăm sóc là bắt buộc")
     @jakarta.validation.constraints.Min(value=0, message="Số giờ không được âm")

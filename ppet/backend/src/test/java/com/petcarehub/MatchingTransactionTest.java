@@ -35,7 +35,9 @@ class MatchingTransactionTest {
         String n=UUID.randomUUID().toString();customer=users.save(User.builder().username(n).email(n+"@example.test").passwordHash("unused").firstName("A").lastName("B").build());
         var kind=species.save(Species.builder().name(n).build());
         for(int i=0;i<12;i++) pets.save(Pet.builder().name("Pet "+i).species(kind).price(BigDecimal.TEN)
-                .dateOfBirth(LocalDate.now().minusYears(i%2==0?8:1)).weight(BigDecimal.TEN).description("friendly").build());
+                .dateOfBirth(LocalDate.now().minusYears(i%2==0?8:1)).weight(BigDecimal.TEN).description("friendly")
+                .activityLevel(i%2==0?"LOW":"HIGH").suitableForApartment(true).goodWithChildren(true)
+                .minimumDailyCareHours(BigDecimal.valueOf(2)).build());
         request=new QuizSubmitRequest();request.setActivityLevel("HIGH");request.setAvailableCareTime(4);
         request.setHouseSize("SMALL");request.setLivingEnvironment("APARTMENT");request.setPresenceOfChildren(true);
     }
